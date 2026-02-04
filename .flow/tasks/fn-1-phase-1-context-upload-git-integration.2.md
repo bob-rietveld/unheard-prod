@@ -58,7 +58,8 @@ Use EXISTING Convex projects table for project management. Add Git init command 
 
 ## Key Context
 
-- **Convex Integration**: Use existing projects table (userId now valid with @convex-dev/auth from Task 1)
+<!-- Updated by plan-sync: fn-1.1 used Clerk auth (clerkUserId: v.string()) not @convex-dev/auth -->
+- **Convex Integration**: Use existing projects table (clerkUserId now available via Clerk from Task 1 - use `useUser()` hook to get `user.id`)
 - **.gitattributes location**: Created in PROJECT repo during git init (NOT repo root)
 - **LFS rules**: PDF and Excel only (CSV excluded to avoid LFS overhead for small files)
 - **LFS detection**: Use `Command::new("git-lfs").arg("version")` to check availability
