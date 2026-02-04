@@ -42,6 +42,8 @@ specta-typescript = "=0.0.9"
 git2 = "0.20.4"
 csv = "1.4.0"
 lopdf = "0.36.0"
+# Note: calamine 0.26 does not have xlsb feature
+# Excel Binary Format (.xlsb) support is not available in this version
 calamine = "0.26"
 tauri-plugin-clerk = "0.1.0"
 tauri-plugin-http = "2.5.7"

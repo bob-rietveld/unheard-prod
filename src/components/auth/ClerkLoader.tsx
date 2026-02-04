@@ -13,10 +13,28 @@ const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
 
 export function ClerkLoader() {
   const [clerk, setClerk] = React.useState<Clerk | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    initClerk().then(setClerk)
+    initClerk()
+      .then(setClerk)
+      .catch((err) => {
+        console.error('Failed to initialize Clerk:', err)
+        setError(err?.message || 'Failed to initialize authentication')
+      })
   }, [])
+
+  if (error) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-4">
+        <p className="text-destructive font-semibold">Authentication Error</p>
+        <p className="text-muted-foreground text-sm">{error}</p>
+        <p className="text-muted-foreground text-xs">
+          Check console for details and verify VITE_CLERK_PUBLISHABLE_KEY is set
+        </p>
+      </div>
+    )
+  }
 
   if (!clerk) {
     return (
