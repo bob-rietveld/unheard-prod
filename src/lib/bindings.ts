@@ -173,6 +173,20 @@ async detectGitLfs() : Promise<Result<boolean, string>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Upload a context file to the project.
+ * 
+ * Parses the file (CSV/PDF/Excel), copies it to the project's context directory,
+ * and commits it to Git. Sends progress updates via channel.
+ */
+async uploadContextFile(path: string, projectId: string, onProgress: TAURI_CHANNEL<UploadProgress>) : Promise<Result<ContextFileRecord, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("upload_context_file", { path, projectId, onProgress }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -202,6 +216,58 @@ quick_pane_shortcut: string | null;
  */
 language: string | null }
 /**
+ * Record of an uploaded context file with parsed metadata.
+ */
+export type ContextFileRecord = { 
+/**
+ * Original filename as uploaded
+ */
+originalFilename: string; 
+/**
+ * Sanitized filename stored in project (slugified)
+ */
+storedFilename: string; 
+/**
+ * File type: "csv", "pdf", or "excel"
+ */
+fileType: string; 
+/**
+ * Detected data type based on content analysis (e.g., "customer_data")
+ */
+detectedType: string | null; 
+/**
+ * Number of rows (for CSV/Excel, excluding header)
+ */
+rows: number | null; 
+/**
+ * Column names (for CSV/Excel)
+ */
+columns: string[] | null; 
+/**
+ * Data preview for CSV/Excel (first 10 rows, max 500 chars)
+ */
+preview: string | null; 
+/**
+ * Number of pages (for PDF)
+ */
+pages: number | null; 
+/**
+ * Text preview for PDF (max 500 chars)
+ */
+textPreview: string | null; 
+/**
+ * File size in bytes
+ */
+sizeBytes: number; 
+/**
+ * Relative path in project (e.g., "context/file-2.csv")
+ */
+relativeFilePath: string; 
+/**
+ * Whether file exceeds LFS threshold (>10MB)
+ */
+isLfs: boolean }
+/**
  * Result of Git initialization.
  */
 export type GitInitResult = { success: boolean; path: string; lfsAvailable: boolean; commitHash: string | null }
@@ -230,6 +296,31 @@ export type RecoveryError =
  * JSON serialization/deserialization error
  */
 { type: "ParseError"; message: string }
+export type TAURI_CHANNEL<TSend> = null
+/**
+ * Progress updates during file upload.
+ */
+export type UploadProgress = 
+/**
+ * Parsing file content
+ */
+{ type: "Parsing"; percent: number } | 
+/**
+ * Copying file to project
+ */
+{ type: "Copying"; percent: number } | 
+/**
+ * Committing to Git
+ */
+{ type: "Committing"; percent: number } | 
+/**
+ * Upload complete with file record
+ */
+{ type: "Complete"; record: ContextFileRecord } | 
+/**
+ * Error occurred
+ */
+{ type: "Error"; message: string }
 
 /** tauri-specta globals **/
 

@@ -120,3 +120,53 @@ pub fn validate_theme(theme: &str) -> Result<(), String> {
         _ => Err("Invalid theme: must be 'light', 'dark', or 'system'".to_string()),
     }
 }
+
+// ============================================================================
+// Context File Upload
+// ============================================================================
+
+/// Record of an uploaded context file with parsed metadata.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ContextFileRecord {
+    /// Original filename as uploaded
+    pub original_filename: String,
+    /// Sanitized filename stored in project (slugified)
+    pub stored_filename: String,
+    /// File type: "csv", "pdf", or "excel"
+    pub file_type: String,
+    /// Detected data type based on content analysis (e.g., "customer_data")
+    pub detected_type: Option<String>,
+    /// Number of rows (for CSV/Excel, excluding header)
+    pub rows: Option<u32>,
+    /// Column names (for CSV/Excel)
+    pub columns: Option<Vec<String>>,
+    /// Data preview for CSV/Excel (first 10 rows, max 500 chars)
+    pub preview: Option<String>,
+    /// Number of pages (for PDF)
+    pub pages: Option<u32>,
+    /// Text preview for PDF (max 500 chars)
+    pub text_preview: Option<String>,
+    /// File size in bytes
+    pub size_bytes: u64,
+    /// Relative path in project (e.g., "context/file-2.csv")
+    pub relative_file_path: String,
+    /// Whether file exceeds LFS threshold (>10MB)
+    pub is_lfs: bool,
+}
+
+/// Progress updates during file upload.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(tag = "type")]
+pub enum UploadProgress {
+    /// Parsing file content
+    Parsing { percent: u8 },
+    /// Copying file to project
+    Copying { percent: u8 },
+    /// Committing to Git
+    Committing { percent: u8 },
+    /// Upload complete with file record
+    Complete { record: ContextFileRecord },
+    /// Error occurred
+    Error { message: String },
+}

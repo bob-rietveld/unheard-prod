@@ -6174,6 +6174,7 @@ dependencies = [
  "tauri-plugin-window-state",
  "tauri-specta",
  "tempfile",
+ "tokio",
 ]
 
 [[package]]
