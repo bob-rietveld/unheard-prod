@@ -90,10 +90,12 @@ pub fn run() {
     // because clerk uses it for session persistence via with_tauri_store()
     app_builder = app_builder.plugin(tauri_plugin_store::Builder::default().build());
 
-    // Clerk publishable key is provided by the JS-side ClerkProvider
-    // The Rust-side plugin needs a placeholder key for initialization
-    // The actual auth is handled entirely on the frontend
-    let clerk_key = "pk_placeholder_for_tauri_plugin".to_string();
+    // Get Clerk publishable key from compile-time environment variable
+    // This is injected by Vite during build via .env.local
+    let clerk_key =
+        option_env!("VITE_CLERK_PUBLISHABLE_KEY").unwrap_or("pk_development_placeholder");
+
+    log::debug!("Initializing Clerk plugin with key: {}", &clerk_key[..15]);
 
     app_builder
         .plugin(tauri_plugin_http::init())

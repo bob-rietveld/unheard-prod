@@ -25,15 +25,23 @@ function ConvexAuthProvider({ children }: { children: React.ReactNode }) {
 export function ClerkLoader() {
   const [clerk, setClerk] = React.useState<Clerk | null>(null)
   const [error, setError] = React.useState<string | null>(null)
+  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string
 
   React.useEffect(() => {
+    if (!publishableKey || publishableKey === 'pk_test_placeholder') {
+      setError('VITE_CLERK_PUBLISHABLE_KEY is not configured')
+      return
+    }
+
+    // Initialize Clerk - the plugin gets the key from Rust side
+    // but we override it with the JS-side ClerkProvider publishableKey prop
     initClerk()
       .then(setClerk)
       .catch((err) => {
         console.error('Failed to initialize Clerk:', err)
         setError(err?.message || 'Failed to initialize authentication')
       })
-  }, [])
+  }, [publishableKey])
 
   if (error) {
     return (
@@ -56,10 +64,7 @@ export function ClerkLoader() {
   }
 
   return (
-    <ClerkProvider
-      publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string}
-      Clerk={clerk}
-    >
+    <ClerkProvider publishableKey={publishableKey} Clerk={clerk}>
       <ConvexAuthProvider>
         <QueryClientProvider client={queryClient}>
           <SignedIn>
