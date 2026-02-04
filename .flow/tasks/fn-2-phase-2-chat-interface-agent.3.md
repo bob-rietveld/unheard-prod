@@ -1,10 +1,12 @@
 # fn-2-phase-2-chat-interface-agent.3 Chat UI components (messages, input, bubbles)
 
 ## Description
+
 Build chat UI components with streaming message rendering and input handling.
 
 **Size:** M
 **Files:**
+
 - `src/components/chat/ChatInterface.tsx` (new)
 - `src/components/chat/ChatMessages.tsx` (new)
 - `src/components/chat/ChatInput.tsx` (new)
@@ -14,6 +16,7 @@ Build chat UI components with streaming message rendering and input handling.
 ## Approach
 
 **Component Structure**:
+
 ```
 ChatInterface (container)
 ├── ChatMessages (scroll area with message list)
@@ -22,17 +25,20 @@ ChatInterface (container)
 ```
 
 **Reuse shadcn/ui primitives**:
+
 - `ScrollArea` from `src/components/ui/scroll-area.tsx`
 - `Card` from `src/components/ui/card.tsx` (for message bubbles)
 - `Textarea` from `src/components/ui/textarea.tsx`
 - `Button` from `src/components/ui/button.tsx`
 
 **Streaming Rendering** (from practice-scout):
+
 - Use `useEffect` to subscribe to streaming channel events
 - Accumulate tokens in local state or directly update useChatStore
 - Auto-scroll to bottom on new messages (with "scroll to bottom" button if user scrolled up)
 
 **State Connection** (CRITICAL):
+
 ```typescript
 // GOOD - selector pattern
 const messages = useChatStore(state => state.messages)
@@ -45,16 +51,19 @@ const { messages, isStreaming } = useChatStore()
 ## Key Context
 
 **Auto-scroll Pattern** (from github-scout):
+
 - Track scroll position with `useRef`
 - Only auto-scroll if user is near bottom (<100px from bottom)
 - Show "New messages ↓" button if user scrolled up
 
 **Keyboard Shortcuts**:
+
 - Enter: Send message (if not shift+enter)
 - Shift+Enter: New line
 - Escape: Clear input (if empty) or stop streaming (if streaming)
 
 **Accessibility** (from practice-scout):
+
 - Add `aria-live="polite"` to message container
 - Role="log" for message list
 - Focus management: Focus input after send
@@ -64,7 +73,9 @@ const { messages, isStreaming } = useChatStore()
 - State pattern: `docs/developer/state-management.md`
 - UI patterns: `docs/developer/ui-patterns.md`
 - Task 1: Types from `src/types/chat.ts`
+
 ## Acceptance
+
 - [ ] ChatInterface component renders with message list and input
 - [ ] ChatMessages displays messages from useChatStore
 - [ ] ChatBubble styles: user messages (right-aligned, blue), assistant (left-aligned, gray)
@@ -84,10 +95,13 @@ const { messages, isStreaming } = useChatStore()
 - [ ] ast-grep passes (Zustand selectors, no destructuring)
 - [ ] Documentation: Update `docs/developer/ui-patterns.md` with chat component patterns
 - [ ] Documentation: Create `docs/developer/chat-system.md` (new)
+
 ## Done summary
+
 TBD
 
 ## Evidence
+
 - Commits:
 - Tests:
 - PRs:

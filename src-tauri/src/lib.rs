@@ -27,7 +27,11 @@ pub fn run() {
             .join("..")
             .join(".env.local");
         if let Err(e) = dotenvy::from_path(&env_path) {
-            log::warn!("Could not load .env.local from {}: {}", env_path.display(), e);
+            log::warn!(
+                "Could not load .env.local from {}: {}",
+                env_path.display(),
+                e
+            );
         }
     }
 

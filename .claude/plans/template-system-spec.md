@@ -23,8 +23,8 @@ The template system is the **core innovation** of Unheard V2. It solves the fund
 # Template Metadata
 id: investor-pitch-evaluation
 version: 1.0
-name: "Investor Pitch Evaluation"
-description: "Test investor interest in your pitch with 10 realistic VC/angel personas"
+name: 'Investor Pitch Evaluation'
+description: 'Test investor interest in your pitch with 10 realistic VC/angel personas'
 category: investors
 author: unheard-official
 tags: [fundraising, seed, series-a, angels, vcs]
@@ -32,25 +32,25 @@ created_at: 2026-02-04T00:00:00Z
 updated_at: 2026-02-04T00:00:00Z
 
 # Icon for UI
-icon: "💰"
+icon: '💰'
 
 # Configuration Flow (questions to ask user)
 configurationFlow:
   - id: stage
-    question: "What funding stage are you at?"
+    question: 'What funding stage are you at?'
     type: select
     required: true
     options:
       - value: pre-seed
-        label: "Pre-seed ($100K-$500K)"
+        label: 'Pre-seed ($100K-$500K)'
       - value: seed
-        label: "Seed ($500K-$2M)"
+        label: 'Seed ($500K-$2M)'
       - value: series-a
-        label: "Series A ($2M-$10M)"
+        label: 'Series A ($2M-$10M)'
     default: seed
 
   - id: funding_target
-    question: "How much are you raising?"
+    question: 'How much are you raising?'
     type: number
     required: true
     unit: USD
@@ -59,10 +59,10 @@ configurationFlow:
     default: 2000000
 
   - id: industry
-    question: "What industry are you in?"
+    question: 'What industry are you in?'
     type: text
     required: true
-    placeholder: "e.g., developer tools, fintech, healthcare"
+    placeholder: 'e.g., developer tools, fintech, healthcare'
 
   - id: current_mrr
     question: "What's your current MRR?"
@@ -72,7 +72,7 @@ configurationFlow:
     min: 0
 
   - id: pitch_summary
-    question: "Summarize your pitch (2-3 sentences)"
+    question: 'Summarize your pitch (2-3 sentences)'
     type: textarea
     required: true
     placeholder: "We're building X to solve Y. We have Z traction..."
@@ -89,54 +89,54 @@ contextRequirements:
 
 # Persona Generation Config
 personaGeneration:
-  type: standard  # standard | fromContext | custom
+  type: standard # standard | fromContext | custom
   count: 10
 
   # Persona archetypes to generate
   archetypes:
     - id: seed_vc_partner
-      name: "Seed VC Partner"
+      name: 'Seed VC Partner'
       count: 3
-      description: "Partner at seed-stage VC fund ($50M-$200M)"
+      description: 'Partner at seed-stage VC fund ($50M-$200M)'
       characteristics:
-        - "Invests in 10-15 companies per year"
-        - "Looks for 100x potential"
-        - "Cares about team, market, and traction"
-        - "Risk-tolerant but data-driven"
+        - 'Invests in 10-15 companies per year'
+        - 'Looks for 100x potential'
+        - 'Cares about team, market, and traction'
+        - 'Risk-tolerant but data-driven'
 
     - id: angel_investor
-      name: "Angel Investor"
+      name: 'Angel Investor'
       count: 3
-      description: "Successful founder turned angel investor"
+      description: 'Successful founder turned angel investor'
       characteristics:
-        - "Writes $25K-$100K checks"
-        - "Hands-on, provides mentorship"
-        - "Invests in 5-10 companies per year"
-        - "Pattern-matches to own experience"
+        - 'Writes $25K-$100K checks'
+        - 'Hands-on, provides mentorship'
+        - 'Invests in 5-10 companies per year'
+        - 'Pattern-matches to own experience'
 
     - id: series_a_vc_principal
-      name: "Series A VC Principal"
+      name: 'Series A VC Principal'
       count: 2
-      description: "Principal at growth-stage VC fund"
+      description: 'Principal at growth-stage VC fund'
       characteristics:
-        - "Looking for proven product-market fit"
-        - "Needs $1M+ ARR typically"
-        - "Focus on unit economics"
-        - "More conservative than seed VCs"
+        - 'Looking for proven product-market fit'
+        - 'Needs $1M+ ARR typically'
+        - 'Focus on unit economics'
+        - 'More conservative than seed VCs'
 
     - id: corporate_vc
-      name: "Corporate VC"
+      name: 'Corporate VC'
       count: 2
-      description: "Corporate venture arm investor"
+      description: 'Corporate venture arm investor'
       characteristics:
-        - "Strategic fit is critical"
-        - "Slower decision process"
-        - "Can provide distribution/partnerships"
-        - "Risk-averse, needs board approval"
+        - 'Strategic fit is critical'
+        - 'Slower decision process'
+        - 'Can provide distribution/partnerships'
+        - 'Risk-averse, needs board approval'
 
 # Experiment Configuration
 experiment:
-  type: focus_group  # focus_group | survey | debate | scenario
+  type: focus_group # focus_group | survey | debate | scenario
 
   # Stimulus template (variables filled from config)
   stimulusTemplate: |
@@ -161,96 +161,96 @@ experiment:
   # Round configuration
   rounds:
     - id: initial_reaction
-      name: "Initial Reaction"
-      instructions: "Give your gut reaction based on the pitch"
+      name: 'Initial Reaction'
+      instructions: 'Give your gut reaction based on the pitch'
 
     - id: deep_dive
-      name: "Due Diligence Questions"
+      name: 'Due Diligence Questions'
       instructions: "After hearing the founders' answers, what's your final decision?"
       dependsOn: initial_reaction
 
 # Execution Configuration
 execution:
   parallelization: true
-  provider: modal  # modal | openai | anthropic
-  model: qwen2.5:32b  # For Modal
+  provider: modal # modal | openai | anthropic
+  model: qwen2.5:32b # For Modal
   temperature: 0.7
   max_tokens: 500
-  timeout: 60  # seconds
+  timeout: 60 # seconds
 
 # Analysis Configuration
 analysis:
   # What metrics to calculate
   metrics:
     - id: investment_rate
-      name: "Investment Interest Rate"
-      description: "% of investors interested or investing"
+      name: 'Investment Interest Rate'
+      description: '% of investors interested or investing'
       calculation: "COUNT(decision IN ['INTERESTED', 'INVEST']) / TOTAL"
 
     - id: pass_rate
-      name: "Pass Rate"
+      name: 'Pass Rate'
       calculation: "COUNT(decision = 'PASS') / TOTAL"
 
     - id: avg_sentiment
-      name: "Average Sentiment"
-      calculation: "AVG(sentiment_score)"
+      name: 'Average Sentiment'
+      calculation: 'AVG(sentiment_score)'
 
   # What insights to extract
   insights:
     - id: top_concerns
-      name: "Top Concerns"
-      description: "Most frequently mentioned concerns"
-      extraction: "keyword_extraction"
+      name: 'Top Concerns'
+      description: 'Most frequently mentioned concerns'
+      extraction: 'keyword_extraction'
       limit: 5
 
     - id: investor_type_breakdown
-      name: "Interest by Investor Type"
-      description: "Which investor types are most interested"
+      name: 'Interest by Investor Type'
+      description: 'Which investor types are most interested'
       groupBy: archetype
 
     - id: key_questions
-      name: "Common Questions"
-      description: "Questions investors would ask"
-      extraction: "question_extraction"
+      name: 'Common Questions'
+      description: 'Questions investors would ask'
+      extraction: 'question_extraction'
       limit: 10
 
 # Visualization Configuration
 visualization:
   - type: gauge
-    title: "Investment Interest"
+    title: 'Investment Interest'
     metric: investment_rate
     ranges:
       - min: 0
         max: 30
         color: red
-        label: "Low Interest"
+        label: 'Low Interest'
       - min: 30
         max: 60
         color: yellow
-        label: "Moderate Interest"
+        label: 'Moderate Interest'
       - min: 60
         max: 100
         color: green
-        label: "High Interest"
+        label: 'High Interest'
 
   - type: bar_chart
-    title: "Interest by Investor Type"
+    title: 'Interest by Investor Type'
     metric: investor_type_breakdown
 
   - type: word_cloud
-    title: "Top Concerns"
+    title: 'Top Concerns'
     metric: top_concerns
 
 # Follow-up Suggestions
 followUpSuggestions:
-  - condition: "investment_rate < 30"
-    suggestion: "Consider testing a different pitch angle or market positioning"
+  - condition: 'investment_rate < 30'
+    suggestion: 'Consider testing a different pitch angle or market positioning'
 
   - condition: "top_concerns contains 'market size'"
     suggestion: "Run follow-up: 'Market Size Validation' template"
 
-  - condition: "series_a_vc_principal.pass_rate > 70"
-    suggestion: "You may be too early for Series A investors. Focus on seed/angels."
+  - condition: 'series_a_vc_principal.pass_rate > 70'
+    suggestion: 'You may be too early for Series A investors. Focus on seed/angels.'
 
 # Export Configuration
 export:
@@ -268,12 +268,14 @@ export:
 **Purpose**: Test investor interest across different investor types
 
 **Use Cases**:
+
 - Should I raise from VCs or angels?
 - Is my pitch resonating?
 - What are the top concerns?
 - Which investor type is most interested?
 
 **Configuration Questions**:
+
 1. Funding stage (pre-seed, seed, series A)
 2. Funding target ($)
 3. Industry
@@ -283,6 +285,7 @@ export:
 **Personas**: 10 investors (3 seed VCs, 3 angels, 2 series A VCs, 2 corporate VCs)
 
 **Output**:
+
 - Investment interest rate
 - Breakdown by investor type
 - Top concerns
@@ -295,12 +298,14 @@ export:
 **Purpose**: Test pricing with target customers
 
 **Use Cases**:
+
 - Should we charge $50/mo or $100/mo?
 - Freemium vs paid-only?
 - Usage-based vs flat pricing?
 - What price point maximizes revenue?
 
 **Configuration Questions**:
+
 1. Product description
 2. Target customer type (SMB, mid-market, enterprise)
 3. Pricing options to test (2-4 options)
@@ -310,6 +315,7 @@ export:
 **Personas**: 15 customers (generated from uploaded customer data or standard archetypes)
 
 **Output**:
+
 - Willingness to pay breakdown
 - Price sensitivity analysis
 - Preferred pricing model
@@ -322,12 +328,14 @@ export:
 **Purpose**: Prioritize features based on customer demand
 
 **Use Cases**:
+
 - Which feature should we build next?
 - What do customers care about most?
 - Should we build X or Y first?
 - Is this feature worth 3 months of eng time?
 
 **Configuration Questions**:
+
 1. Product overview
 2. Features to evaluate (3-10 features)
 3. Current roadmap context
@@ -336,6 +344,7 @@ export:
 **Personas**: 20 customers (from context data)
 
 **Output**:
+
 - Feature priority ranking
 - Expected adoption by feature
 - "Must-have" vs "nice-to-have"
@@ -348,12 +357,14 @@ export:
 **Purpose**: Evaluate if a hire is right for the company
 
 **Use Cases**:
+
 - Should I hire this senior engineer?
 - Technical co-founder vs first eng hire?
 - Build internal team vs outsource?
 - What's the hiring bar for this role?
 
 **Configuration Questions**:
+
 1. Role description
 2. Candidate background (optional)
 3. Team context
@@ -363,6 +374,7 @@ export:
 **Personas**: 8 stakeholders (team members, board members, advisors)
 
 **Output**:
+
 - Hire/no-hire sentiment
 - Top concerns
 - Key questions to ask candidate
@@ -375,12 +387,14 @@ export:
 **Purpose**: Decide on processes, tools, or operational changes
 
 **Use Cases**:
+
 - Should we switch to Slack from email?
 - Remote-first vs office?
 - Build internal tools vs buy?
 - Outsource customer support?
 
 **Configuration Questions**:
+
 1. Decision description
 2. Options to evaluate (2-5 options)
 3. Team size and structure
@@ -389,6 +403,7 @@ export:
 **Personas**: 10 team members (various roles)
 
 **Output**:
+
 - Preferred option by role
 - Implementation concerns
 - Change management needs
@@ -405,7 +420,7 @@ export:
 const template = await convex.mutation(api.templates.create, {
   ...templateData,
   status: 'official',
-  author: 'unheard-team'
+  author: 'unheard-team',
 })
 
 // User-created templates (fork existing)
@@ -415,9 +430,9 @@ const customTemplate = await convex.mutation(api.templates.fork, {
     name: 'Investor Pitch - Healthcare Focus',
     personaGeneration: {
       ...existing,
-      archetypes: addHealthcareVCs(existing.archetypes)
-    }
-  }
+      archetypes: addHealthcareVCs(existing.archetypes),
+    },
+  },
 })
 ```
 
@@ -450,7 +465,11 @@ const validated = validateConfig(config, template)
 
 ```typescript
 // Generate experiment config from template
-const experimentConfig = await generateExperimentConfig(template, config, context)
+const experimentConfig = await generateExperimentConfig(
+  template,
+  config,
+  context
+)
 
 // Execute on Modal
 const results = await modal.invoke('experiment-runner', experimentConfig)
@@ -468,8 +487,8 @@ await convex.mutation(api.templates.recordUsage, {
   experimentId,
   feedback: {
     helpful: true,
-    suggestions: "Add more technical investor personas"
-  }
+    suggestions: 'Add more technical investor personas',
+  },
 })
 
 // Template versioning
@@ -477,10 +496,10 @@ await convex.mutation(api.templates.updateVersion, {
   templateId,
   changes: {
     personaGeneration: {
-      archetypes: [...existing, technicalInvestor]
-    }
+      archetypes: [...existing, technicalInvestor],
+    },
   },
-  version: '1.1.0'
+  version: '1.1.0',
 })
 ```
 
@@ -547,7 +566,7 @@ export default defineSchema({
 ```tsx
 function TemplateSelector({ onSelect }) {
   const templates = useQuery(api.templates.list, {
-    category: selectedCategory
+    category: selectedCategory,
   })
 
   return (
@@ -596,12 +615,14 @@ function TemplateConfiguration({ template, onComplete }) {
 
   return (
     <div className="space-y-6">
-      <Progress value={(currentStep / template.configurationFlow.length) * 100} />
+      <Progress
+        value={(currentStep / template.configurationFlow.length) * 100}
+      />
 
       <ConfigurationStep
         step={step}
         value={config[step.id]}
-        onChange={(value) => {
+        onChange={value => {
           setConfig({ ...config, [step.id]: value })
         }}
       />
@@ -616,13 +637,9 @@ function TemplateConfiguration({ template, onComplete }) {
         </Button>
 
         {currentStep === template.configurationFlow.length - 1 ? (
-          <Button onClick={() => onComplete(config)}>
-            Run Experiment
-          </Button>
+          <Button onClick={() => onComplete(config)}>Run Experiment</Button>
         ) : (
-          <Button onClick={() => setCurrentStep(currentStep + 1)}>
-            Next
-          </Button>
+          <Button onClick={() => setCurrentStep(currentStep + 1)}>Next</Button>
         )}
       </div>
     </div>
@@ -644,14 +661,14 @@ await convex.mutation(api.templates.publish, {
   templateId,
   status: 'community',
   pricing: {
-    type: 'free' // or 'paid'
-  }
+    type: 'free', // or 'paid'
+  },
 })
 
 // Install community template
 await convex.mutation(api.templates.install, {
   templateId: 'community-saas-pricing-v2',
-  userId
+  userId,
 })
 ```
 
@@ -694,24 +711,28 @@ interface TemplateAnalytics {
 ## Implementation Checklist
 
 ### Phase 1: Core Templates (Week 3)
+
 - [ ] Template data structure (Convex schema)
 - [ ] 3 official templates (Investors, Pricing, Hiring)
 - [ ] Template selector UI
 - [ ] Template configuration wizard
 
 ### Phase 2: Execution (Week 4-6)
+
 - [ ] Template → experiment config generator
 - [ ] Variable substitution
 - [ ] Persona generation from template
 - [ ] Results analysis per template
 
 ### Phase 3: Customization (Week 7)
+
 - [ ] Fork template feature
 - [ ] Custom template editor
 - [ ] Save user templates
 - [ ] Template versioning
 
 ### Phase 4: Marketplace (Post-MVP)
+
 - [ ] Community templates
 - [ ] Template ratings/reviews
 - [ ] Template analytics

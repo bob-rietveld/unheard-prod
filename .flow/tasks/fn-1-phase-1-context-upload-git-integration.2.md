@@ -1,6 +1,7 @@
 # fn-1-phase-1-context-upload-git-integration.2 Minimal project creation & selection
 
 ## Description
+
 Use EXISTING Convex projects table for project management. Add Git init command with LFS detection. Creates `.gitattributes` in PROJECT repo for large files only.
 
 **Size:** M
@@ -11,17 +12,20 @@ Use EXISTING Convex projects table for project management. Add Git init command 
 **Use Existing Schema**: Repo has `projects` table with userId in Convex (auth added in Task 1) - use it directly
 
 **Zustand Store**: Create `src/store/project-store.ts` following pattern at `src/store/ui-store.ts`:
+
 - `currentProject: Project | null`
 - `setCurrentProject(project: Project)`
 - Load from Convex query via TanStack Query
 - Use selector pattern (not destructuring)
 
 **Tauri Commands**: Add `src-tauri/src/commands/projects.rs` following pattern at `src-tauri/src/commands/preferences.rs:41`:
+
 - `#[tauri::command]` + `#[specta::specta]` annotations
 - `initialize_git(path: PathBuf) -> Result<GitInitResult, String>`
 - `detect_git_lfs() -> Result<bool, String>` - Check for `git-lfs` binary
 
 **Git Initialization Flow** (creates .gitattributes in PROJECT repo):
+
 1. `Repository::init(path)`
 2. Create directories: `context/`, `decisions/`, `experiments/`
 3. **Create `.gitattributes` in project root** with LFS rules for large files only:
@@ -34,17 +38,20 @@ Use EXISTING Convex projects table for project management. Add Git init command 
 5. Initial commit with README
 
 **Command Registration** (critical per Codex review):
+
 - Add modules to `src-tauri/src/commands/mod.rs`
 - **MUST** register in `src-tauri/src/bindings.rs` collect_commands! macro
 - Run `cargo test export_bindings -- --ignored` to generate TS types
 
 **React UI**: Use shadcn Dialog from `src/components/ui/dialog.tsx`:
+
 - Project selector dropdown (loads from Convex projects query)
 - Name input validation (required, max 50 chars)
 - Location picker using `@tauri-apps/plugin-dialog`
 - LFS status indicator after Git initialization
 
 **Service Layer**: Create `src/services/projects.ts` with TanStack Query:
+
 - `useCurrentProject()` query from Convex
 - `useCreateProject()` mutation (Convex + Git init)
 - Follow wrapper pattern from `src/services/convex-wrapper.ts`
@@ -59,6 +66,7 @@ Use EXISTING Convex projects table for project management. Add Git init command 
 - **Git initialization**: Use git2 `Repository::init()` per github-scout findings
 
 ## Acceptance
+
 - [ ] project-store loads from EXISTING Convex projects table
 - [ ] initialize_git command creates directories + .gitattributes IN PROJECT REPO
 - [ ] .gitattributes has LFS rules for PDF and Excel only (NOT CSV)
@@ -70,9 +78,11 @@ Use EXISTING Convex projects table for project management. Add Git init command 
 - [ ] Initial commit created successfully
 
 ## Done summary
+
 TBD
 
 ## Evidence
+
 - Commits:
 - Tests:
 - PRs:

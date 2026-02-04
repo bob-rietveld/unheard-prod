@@ -10,6 +10,7 @@ Enable users to upload company context files (CSV, PDF, Excel) via drag-and-drop
 ## Scope
 
 ### In Scope
+
 - File upload UI using Tauri file-drop events (CSV, PDF, Excel support)
 - Rust commands for file parsing (CSV/PDF/Excel metadata extraction)
 - Context library UI for browsing uploaded files
@@ -21,6 +22,7 @@ Enable users to upload company context files (CSV, PDF, Excel) via drag-and-drop
 - Clerk authentication integration via tauri-plugin-clerk
 
 ### Out of Scope
+
 - Full OAuth flows (Clerk limitation in Tauri - Phase 2)
 - File deletion UI (covered in Phase 5)
 - Advanced PDF features (OCR, annotations)
@@ -33,6 +35,7 @@ Enable users to upload company context files (CSV, PDF, Excel) via drag-and-drop
 Follow vertical slice strategy: complete working feature end-to-end before moving to next phase.
 
 **Architecture Pattern**:
+
 ```
 User authenticated via Clerk (tauri-plugin-clerk)
   ↓ Clerk session stored in Tauri storage
@@ -57,6 +60,7 @@ React ContextLibrary refreshes → Display file card
 ```
 
 **Key Technical Decisions**:
+
 1. **Tauri file-drop events** - window.onFileDrop for reliable paths
 2. **Files stored locally** in `{project_path}/context/`
 3. **Git LFS configured** via `.gitattributes` in PROJECT repo (PDF, Excel only)
@@ -69,6 +73,7 @@ React ContextLibrary refreshes → Display file card
 10. **LFS files**: PDF and Excel only (CSV excluded to avoid LFS overhead)
 
 **Dependencies Resolution**:
+
 - Day 0: Rust crates (git2, csv, lopdf, calamine with xlsb, tauri-plugin-clerk, tauri-plugin-http, tauri-plugin-store)
 - Day 0: npm install @clerk/clerk-react tauri-plugin-clerk
 - Day 0: Set up Clerk app and get publishable key
@@ -87,7 +92,7 @@ cd src-tauri && cargo add git2 csv lopdf "calamine@0.26" --features xlsb tauri-p
 npm install @clerk/clerk-react tauri-plugin-clerk
 
 # Project git init creates .gitattributes (Task 2)
-# Format: 
+# Format:
 #   context/**/*.pdf filter=lfs diff=lfs merge=lfs -text
 #   context/**/*.xlsx filter=lfs diff=lfs merge=lfs -text
 
@@ -127,17 +132,18 @@ npm run tauri:dev
 ## Data Model Changes
 
 **Convex Schema** (with Clerk user ID):
+
 ```typescript
 // convex/schema.ts
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { defineSchema, defineTable } from 'convex/server'
+import { v } from 'convex/values'
 
 export default defineSchema({
   contextFiles: defineTable({
-    clerkUserId: v.string(),  // Clerk user ID from frontend
-    projectId: v.id('projects'),  // Use EXISTING projects table
+    clerkUserId: v.string(), // Clerk user ID from frontend
+    projectId: v.id('projects'), // Use EXISTING projects table
     originalFilename: v.string(),
-    storedFilename: v.string(),  // Slugified, dash-separated for duplicates
+    storedFilename: v.string(), // Slugified, dash-separated for duplicates
     fileType: v.string(),
     detectedType: v.optional(v.string()),
     rows: v.optional(v.number()),
@@ -157,18 +163,19 @@ export default defineSchema({
   })
     .index('by_user', ['clerkUserId'])
     .index('by_project', ['projectId']),
-});
+})
 ```
 
 **Convex Mutation** (accepts clerkUserId from frontend):
+
 ```typescript
 // convex/contexts.ts
-import { mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { mutation } from './_generated/server'
+import { v } from 'convex/values'
 
 export const create = mutation({
   args: {
-    clerkUserId: v.string(),  // From frontend via Clerk
+    clerkUserId: v.string(), // From frontend via Clerk
     projectId: v.id('projects'),
     originalFilename: v.string(),
     storedFilename: v.string(),
@@ -183,15 +190,20 @@ export const create = mutation({
     relativeFilePath: v.string(),
     isLFS: v.boolean(),
     uploadedAt: v.number(),
-    syncStatus: v.union(v.literal('synced'), v.literal('pending'), v.literal('error')),
+    syncStatus: v.union(
+      v.literal('synced'),
+      v.literal('pending'),
+      v.literal('error')
+    ),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("contextFiles", args);
+    return await ctx.db.insert('contextFiles', args)
   },
-});
+})
 ```
 
 **Clerk Setup** (tauri-plugin-clerk):
+
 ```typescript
 // src/main.tsx
 import { ClerkProvider } from '@clerk/clerk-react';
@@ -201,7 +213,7 @@ const clerkPromise = initClerk();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ClerkProvider 
+    <ClerkProvider
       publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
       Clerk={clerkPromise}
     >
@@ -213,12 +225,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 ## Risks & Mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| **LFS not installed** | Detect on project init; warn user; continue without LFS |
-| **Filename sanitization** | Preserve originalFilename; sanitize storedFilename with dashes |
-| **UI freeze** | Mandatory spawn_blocking + Channels |
-| **Convex failures** | Retry queue with localStorage |
+| Risk                       | Mitigation                                                                 |
+| -------------------------- | -------------------------------------------------------------------------- |
+| **LFS not installed**      | Detect on project init; warn user; continue without LFS                    |
+| **Filename sanitization**  | Preserve originalFilename; sanitize storedFilename with dashes             |
+| **UI freeze**              | Mandatory spawn_blocking + Channels                                        |
+| **Convex failures**        | Retry queue with localStorage                                              |
 | **Clerk OAuth limitation** | Use email/password for Phase 1; OAuth in Phase 2 after Clerk plugin update |
 
 ## References

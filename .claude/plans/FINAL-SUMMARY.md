@@ -23,18 +23,18 @@
 
 ## 📊 Complete Feature Matrix
 
-| Feature           | Description                                                      |
-| ----------------- | ---------------------------------------------------------------- |
-| **Context Upload** | Upload CSV, PDF, docs → Always available to agent              |
-| **Chat Interface** | Claude Desktop-style conversation for decision-making          |
-| **Templates**      | 3 core templates: Investors, Product, Operations                |
-| **Personas**       | Generate realistic personas from company data                   |
-| **Experiments**    | Run parallel simulations with multiple personas                 |
-| **Cloud Execution**| Modal/Daytona for 10+ concurrent persona responses              |
-| **Results Viz**    | Charts, sentiment analysis, insights extraction                 |
-| **Git Versioning** | Every decision and experiment committed to Git                  |
-| **GitHub Sync**    | Collaborate with team via GitHub                                |
-| **Follow-up**      | Ask questions, iterate on results                               |
+| Feature             | Description                                           |
+| ------------------- | ----------------------------------------------------- |
+| **Context Upload**  | Upload CSV, PDF, docs → Always available to agent     |
+| **Chat Interface**  | Claude Desktop-style conversation for decision-making |
+| **Templates**       | 3 core templates: Investors, Product, Operations      |
+| **Personas**        | Generate realistic personas from company data         |
+| **Experiments**     | Run parallel simulations with multiple personas       |
+| **Cloud Execution** | Modal/Daytona for 10+ concurrent persona responses    |
+| **Results Viz**     | Charts, sentiment analysis, insights extraction       |
+| **Git Versioning**  | Every decision and experiment committed to Git        |
+| **GitHub Sync**     | Collaborate with team via GitHub                      |
+| **Follow-up**       | Ask questions, iterate on results                     |
 
 ---
 
@@ -125,14 +125,14 @@
 
 ### Performance Metrics
 
-| Metric                 | Traditional Approach       | Unheard V2           | Improvement |
-| ---------------------- | -------------------------- | -------------------- | ----------- |
-| Time to first insight  | 40 minutes (manual setup)  | 2 minutes (chat)     | **20x**     |
-| Configuration time     | 30 minutes (parameter hell)| 2 min (conversation) | **15x**     |
-| Experiment execution   | 10 min (sequential)        | 30 sec (parallel)    | **20x**     |
-| Persona quality        | Made-up (unreliable)       | Real data-grounded   | **∞**       |
-| Collaboration overhead | Email, docs, Slack         | Git/GitHub (native)  | **10x**     |
-| Decision history       | Scattered documents        | Full Git history     | **∞**       |
+| Metric                 | Traditional Approach        | Unheard V2           | Improvement |
+| ---------------------- | --------------------------- | -------------------- | ----------- |
+| Time to first insight  | 40 minutes (manual setup)   | 2 minutes (chat)     | **20x**     |
+| Configuration time     | 30 minutes (parameter hell) | 2 min (conversation) | **15x**     |
+| Experiment execution   | 10 min (sequential)         | 30 sec (parallel)    | **20x**     |
+| Persona quality        | Made-up (unreliable)        | Real data-grounded   | **∞**       |
+| Collaboration overhead | Email, docs, Slack          | Git/GitHub (native)  | **10x**     |
+| Decision history       | Scattered documents         | Full Git history     | **∞**       |
 
 ---
 
@@ -141,6 +141,7 @@
 ### **Problem: Founders Face Complex Decisions**
 
 **Before**:
+
 - 40 minutes to set up experiment (parameter hell)
 - 10 minutes to run (sequential LLM calls)
 - Synthetic personas (unreliable)
@@ -150,6 +151,7 @@
 - Hard to collaborate with co-founders/advisors
 
 **After (Unheard V2)**:
+
 - 2 minutes conversational setup (AI agent guides)
 - 30 seconds to run (parallelized)
 - Real personas (from actual company data)
@@ -167,21 +169,25 @@
 ### **Target Market: Founders & Startup Teams**
 
 **TAM**:
+
 - 5.4M startups globally
 - 50M small businesses in US alone
 - Average 2-3 co-founders per startup
 
 **Target Segments**:
+
 - Pre-seed/seed founders (fundraising decisions)
 - Product founders (roadmap, pricing, features)
 - Growth-stage founders (operations, hiring, strategy)
 
 **Pricing**:
+
 - Solo Founder: $49/month
 - Team (2-5): $149/month
 - Enterprise (5+): $299/month
 
 **Differentiators**:
+
 1. Template-driven (no parameter hell)
 2. Conversational UI (Claude Desktop UX)
 3. Context-grounded personas (not made-up)
@@ -224,6 +230,7 @@ Context:        CSV/PDF parsers, RAG with embeddings
 ```
 
 **Key Decisions**:
+
 - ✅ Tauri v2 (15MB vs 200MB Electron)
 - ✅ Claude SDK locally (instant chat)
 - ✅ Modal for cloud execution (parallel)
@@ -262,18 +269,21 @@ Phase 5: Iteration (Week 8)
 ### **Immediate (This Week)**
 
 **Day 1**: Foundation setup (already done!)
+
 ```bash
 # Tauri + Convex working ✅
 # Phase 1 Convex integration complete ✅
 ```
 
 **Day 2-5**: Build context upload UI
+
 - Drag-and-drop file upload
 - CSV/PDF parsing (Rust)
 - Context library view
 - Git auto-commit
 
 **Week 2**: Complete Phase 1
+
 - Context storage in Convex
 - Display parsed context
 - Auto-commit to Git
@@ -307,6 +317,7 @@ Phase 5: Iteration (Week 8)
 ### **1. Why Tauri vs Electron?**
 
 **Tauri Wins**:
+
 - ✅ 15MB bundle (vs 200MB)
 - ✅ 80MB memory (vs 400MB)
 - ✅ Rust security (memory-safe)
@@ -314,12 +325,14 @@ Phase 5: Iteration (Week 8)
 - ✅ Already invested (foundation built)
 
 **Trade-offs**:
+
 - ❌ Rust learning curve → Mitigated by AI assistance
 - ❌ Smaller ecosystem → Mitigated by active community
 
 ### **2. Why Local Agent + Cloud Execution?**
 
 **Hybrid Architecture**:
+
 - ✅ Chat needs instant responses (<200ms) → Local Claude SDK
 - ✅ Experiments need parallelization → Cloud Modal
 - ✅ Privacy (context stays local until sent to cloud)
@@ -328,6 +341,7 @@ Phase 5: Iteration (Week 8)
 ### **3. Why Git/GitHub Integration?**
 
 **Version Control for Decisions**:
+
 - ✅ Natural versioning (every decision is a commit)
 - ✅ Collaboration (GitHub's UX for comments)
 - ✅ Branching (try scenarios without losing work)
@@ -338,6 +352,7 @@ Phase 5: Iteration (Week 8)
 ### **4. Why Template-Driven?**
 
 **Solve Parameter Hell**:
+
 - ✅ Founders don't know what to configure
 - ✅ Templates encode best practices
 - ✅ 2-minute setup vs 30-minute manual
@@ -360,6 +375,7 @@ Phase 5: Iteration (Week 8)
 8. ✅ FINAL-SUMMARY.md (This document)
 
 **Plus**:
+
 - ✅ enhanced-assistant-spec.md (Claude SDK agent)
 - ✅ context-pipeline-implementation.md (Context system)
 - ✅ dataset-extraction-spec.md (Extraction system)
@@ -369,6 +385,7 @@ Phase 5: Iteration (Week 8)
 ## 🎯 Success Criteria
 
 ### **Phase 1 Complete When**:
+
 - [ ] User can upload CSV/PDF
 - [ ] Context displays in library
 - [ ] Files stored in Convex
@@ -376,6 +393,7 @@ Phase 5: Iteration (Week 8)
 - [ ] **Demo: Upload → View → Git commit**
 
 ### **Phase 2 Complete When**:
+
 - [ ] Chat interface works
 - [ ] Agent understands decision intent
 - [ ] Template selection works
@@ -383,6 +401,7 @@ Phase 5: Iteration (Week 8)
 - [ ] **Demo: Chat → Template → Decision log**
 
 ### **Phase 3 Complete When**:
+
 - [ ] Personas generated from context
 - [ ] Experiments run on Modal
 - [ ] 10+ personas execute in parallel
@@ -390,6 +409,7 @@ Phase 5: Iteration (Week 8)
 - [ ] **Demo: Experiment → 10 personas → 30 seconds**
 
 ### **Phase 4 Complete When**:
+
 - [ ] Results visualized clearly
 - [ ] Sentiment analysis works
 - [ ] Insights extracted
@@ -397,6 +417,7 @@ Phase 5: Iteration (Week 8)
 - [ ] **Demo: Results → Charts → Export**
 
 ### **Phase 5 Complete When**:
+
 - [ ] Follow-up questions work
 - [ ] Team collaboration via GitHub
 - [ ] Template customization
@@ -410,6 +431,7 @@ Phase 5: Iteration (Week 8)
 ### **Development Costs (8 weeks)**
 
 Assuming 1 developer:
+
 ```
 Salary: $150K/year = $2,885/week
 8 weeks × $2,885 = $23,080 total labor
@@ -424,6 +446,7 @@ Total: ~$23,300
 ```
 
 Assuming 2 developers (parallel, 5 weeks):
+
 ```
 2 × $2,885/week × 5 weeks = $28,850
 Services: ~$300
@@ -453,6 +476,7 @@ Year 1 (200 customers):
 ## ✅ What's Confirmed
 
 ### **Architecture**
+
 ✅ Tauri v2 (Rust + React)
 ✅ Claude SDK locally (instant chat)
 ✅ Modal for cloud execution (parallel)
@@ -461,12 +485,14 @@ Year 1 (200 customers):
 ✅ Convex for cloud backend (real-time sync)
 
 ### **Strategy**
+
 ✅ 8-week timeline (5 phases)
 ✅ Vertical slices (always working software)
 ✅ Demo every 2 weeks
 ✅ Start with Phase 1 (context upload)
 
 ### **Phases**
+
 ✅ Phase 1: Context Upload (Weeks 1-2)
 ✅ Phase 2: Chat + Agent (Weeks 3-4)
 ✅ Phase 3: Cloud Execution (Weeks 5-6)
@@ -496,15 +522,15 @@ Year 1 (200 customers):
 
 ## 📊 Final Metrics Summary
 
-| Metric                      | Current (Manual) | After Unheard V2   | Improvement     |
-| --------------------------- | ---------------- | ------------------ | --------------- |
-| Time to first insight       | 40 min           | 2 min              | **20x faster**  |
-| Experiment execution        | 10 min           | 30 sec             | **20x faster**  |
-| Configuration complexity    | 30 min setup     | 2 min conversation | **15x easier**  |
-| Persona reliability         | Made-up          | Data-grounded      | **∞ better**    |
-| Decision history            | Scattered        | Full Git log       | **∞ better**    |
-| Team collaboration          | Email/Slack      | GitHub native      | **10x better**  |
-| Cost per experiment         | $0.50            | $0.05              | **10x cheaper** |
+| Metric                   | Current (Manual) | After Unheard V2   | Improvement     |
+| ------------------------ | ---------------- | ------------------ | --------------- |
+| Time to first insight    | 40 min           | 2 min              | **20x faster**  |
+| Experiment execution     | 10 min           | 30 sec             | **20x faster**  |
+| Configuration complexity | 30 min setup     | 2 min conversation | **15x easier**  |
+| Persona reliability      | Made-up          | Data-grounded      | **∞ better**    |
+| Decision history         | Scattered        | Full Git log       | **∞ better**    |
+| Team collaboration       | Email/Slack      | GitHub native      | **10x better**  |
+| Cost per experiment      | $0.50            | $0.05              | **10x cheaper** |
 
 ---
 
@@ -519,6 +545,7 @@ Year 1 (200 customers):
 **Time to build**: START NOW! 🛠️
 
 The planning is **done**. You have:
+
 - 8-week roadmap with daily tasks
 - Complete architecture decisions documented
 - Template system fully specified

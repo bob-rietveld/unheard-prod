@@ -88,19 +88,19 @@ User reopens app → Session restored from store
 Example:
 
 ```typescript
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 
 function MyComponent() {
-  const createContext = useMutation(api.contexts.create);
+  const createContext = useMutation(api.contexts.create)
 
   const handleUpload = async (file: File) => {
     // clerkUserId is automatically derived server-side from auth context
     await createContext({
       projectId: selectedProjectId,
       // ... other fields (NO clerkUserId)
-    });
-  };
+    })
+  }
 }
 ```
 

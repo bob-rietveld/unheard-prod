@@ -1,6 +1,7 @@
 # fn-1-phase-1-context-upload-git-integration.3 Rust file parsing commands (CSV, PDF, Excel)
 
 ## Description
+
 Implement upload_context_file command with spawn_blocking, Channels, and ContextFileRecord return.
 
 **Size:** M
@@ -9,6 +10,7 @@ Implement upload_context_file command with spawn_blocking, Channels, and Context
 ## Approach
 
 **ContextFileRecord Type**: Add to `src-tauri/src/types.rs`:
+
 ```rust
 #[derive(Type)]
 pub struct ContextFileRecord {
@@ -38,6 +40,7 @@ pub enum UploadProgress {
 ```
 
 **Command with Channel**: Create `src-tauri/src/commands/context.rs`:
+
 ```rust
 #[tauri::command]
 #[specta::specta]
@@ -58,21 +61,25 @@ pub async fn upload_context_file(
 ```
 
 **CSV Parsing**: Use csv crate with `.flexible(true)`:
+
 - Extract headers as `Vec<String>`
 - Count rows with `.records().count()`
 - First 10 rows for preview
 - Detect type from column names heuristic
 
 **PDF Parsing**: Use lopdf with stability handling:
+
 - Wrap in `catch_unwind(AssertUnwindSafe(...))` per practice-scout
 - Extract page count + first 500 chars
 - Return empty text if extraction fails (image-based PDF)
 
 **Excel Parsing**: Use calamine `open_workbook_auto`:
+
 - First sheet only
 - Similar metadata to CSV (rows, columns)
 
 **Filename Sanitization**:
+
 - Create `sanitize_filename()` helper
 - Preserve originalFilename separately
 - Slugify for storedFilename (lowercase, hyphens, no spaces/parens)
@@ -84,7 +91,9 @@ pub async fn upload_context_file(
 - **Error handling**: catch_unwind for lopdf stability, descriptive errors
 - **Command registration**: Update bindings.rs AND mod.rs
 - **Modern Rust**: Use `format!("{variable}")` not `format!("{}", variable)`
+
 ## Acceptance
+
 - [ ] ContextFileRecord struct defined
 - [ ] UploadProgress enum with Parsing/Copying/Committing/Complete/Error
 - [ ] upload_context_file uses Channel parameter
@@ -96,10 +105,13 @@ pub async fn upload_context_file(
 - [ ] Registered in bindings.rs
 - [ ] TypeScript bindings updated
 - [ ] Tests cover all parsers
+
 ## Done summary
+
 TBD
 
 ## Evidence
+
 - Commits:
 - Tests:
 - PRs:

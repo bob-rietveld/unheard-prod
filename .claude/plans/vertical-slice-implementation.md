@@ -29,6 +29,7 @@ Week 6: Cloud execution works end-to-end ✓
 ```
 
 **Benefits**:
+
 - Demo progress every 2 weeks
 - Get user feedback early
 - Can ship anytime (not locked into full timeline)
@@ -159,8 +160,12 @@ function ContextCard({ doc }: { doc: ContextDocument }) {
         </p>
       </CardContent>
       <CardFooter>
-        <Button variant="ghost" size="sm">View</Button>
-        <Button variant="ghost" size="sm">Delete</Button>
+        <Button variant="ghost" size="sm">
+          View
+        </Button>
+        <Button variant="ghost" size="sm">
+          Delete
+        </Button>
       </CardFooter>
     </Card>
   )
@@ -244,6 +249,7 @@ pub fn auto_commit(repo_path: &Path, message: &str) -> Result<()> {
 #### **Implementation Checklist**
 
 **Week 1**:
+
 - [ ] Tauri file dialog command
 - [ ] CSV parser (Rust)
 - [ ] PDF parser (Rust)
@@ -252,6 +258,7 @@ pub fn auto_commit(repo_path: &Path, message: &str) -> Result<()> {
 - [ ] Basic UI (upload button + empty state)
 
 **Week 2**:
+
 - [ ] Context library UI (grid of cards)
 - [ ] Context card component
 - [ ] Table preview dialog
@@ -368,10 +375,13 @@ function ChatInterface() {
 
     const response = await chat(input, messages)
 
-    setMessages(prev => [...prev, {
-      role: 'assistant',
-      content: response.content[0].text,
-    }])
+    setMessages(prev => [
+      ...prev,
+      {
+        role: 'assistant',
+        content: response.content[0].text,
+      },
+    ])
     setIsStreaming(false)
   }
 
@@ -419,7 +429,12 @@ const TEMPLATES = [
     category: 'investors',
     description: 'Evaluate which investors to approach',
     variables: [
-      { key: 'stage', label: 'Funding stage', type: 'select', options: ['pre-seed', 'seed', 'series-a'] },
+      {
+        key: 'stage',
+        label: 'Funding stage',
+        type: 'select',
+        options: ['pre-seed', 'seed', 'series-a'],
+      },
       { key: 'target', label: 'Funding target ($)', type: 'number' },
       { key: 'vertical', label: 'Industry vertical', type: 'text' },
     ],
@@ -435,7 +450,12 @@ const TEMPLATES = [
     variables: [
       { key: 'product', label: 'Product name', type: 'text' },
       { key: 'pricePoint', label: 'Price point ($)', type: 'number' },
-      { key: 'model', label: 'Pricing model', type: 'select', options: ['saas', 'usage-based', 'tiered'] },
+      {
+        key: 'model',
+        label: 'Pricing model',
+        type: 'select',
+        options: ['saas', 'usage-based', 'tiered'],
+      },
     ],
     config: {
       // Full experiment configuration
@@ -469,6 +489,7 @@ const TEMPLATES = [
 ## Context
 
 We're a B2B SaaS company with:
+
 - $50K MRR
 - 30 paying customers
 - 2 co-founders
@@ -529,6 +550,7 @@ Context: B2B_Customers.csv, metrics.pdf
 #### **Implementation Checklist**
 
 **Week 3**:
+
 - [ ] Claude SDK integration
 - [ ] System prompt (1000+ words)
 - [ ] Chat UI (Claude Desktop style)
@@ -537,6 +559,7 @@ Context: B2B_Customers.csv, metrics.pdf
 - [ ] Template library (3 templates)
 
 **Week 4**:
+
 - [ ] Template search tool
 - [ ] Template customization UI
 - [ ] Decision log generation
@@ -697,13 +720,15 @@ function ExperimentProgress({ experimentId }: { experimentId: string }) {
 
   useEffect(() => {
     // Listen for real-time results
-    const unlisten = listen('experiment:result', (event) => {
+    const unlisten = listen('experiment:result', event => {
       const result = event.payload as PersonaResult
       setResults(prev => [...prev, result])
       setProgress(prev => ({ ...prev, completed: prev.completed + 1 }))
     })
 
-    return () => { unlisten() }
+    return () => {
+      unlisten()
+    }
   }, [experimentId])
 
   return (
@@ -712,7 +737,7 @@ function ExperimentProgress({ experimentId }: { experimentId: string }) {
         <CardTitle>Experiment Running</CardTitle>
       </CardHeader>
       <CardContent>
-        <Progress value={progress.completed / progress.total * 100} />
+        <Progress value={(progress.completed / progress.total) * 100} />
         <p className="text-sm text-muted-foreground mt-2">
           {progress.completed} / {progress.total} personas responded
         </p>
@@ -752,6 +777,7 @@ function ExperimentProgress({ experimentId }: { experimentId: string }) {
 #### **Implementation Checklist**
 
 **Week 5**:
+
 - [ ] Modal account setup
 - [ ] Persona generator (Python + Modal)
 - [ ] Experiment runner (async parallel execution)
@@ -759,6 +785,7 @@ function ExperimentProgress({ experimentId }: { experimentId: string }) {
 - [ ] Real-time event system (Tauri events)
 
 **Week 6**:
+
 - [ ] Progress UI (real-time updates)
 - [ ] Error handling and retries
 - [ ] Cost tracking
@@ -784,20 +811,21 @@ function ResultsDashboard({ experimentId }: { experimentId: string }) {
   const { data: experiment } = useExperiment(experimentId)
   const { data: results } = useExperimentResults(experimentId)
 
-  const sentimentBreakdown = useMemo(() =>
-    calculateSentimentDistribution(results), [results]
+  const sentimentBreakdown = useMemo(
+    () => calculateSentimentDistribution(results),
+    [results]
   )
 
-  const insights = useMemo(() =>
-    extractInsights(results), [results]
-  )
+  const insights = useMemo(() => extractInsights(results), [results])
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold">{experiment.name}</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
+          <Button variant="outline" onClick={exportPDF}>
+            Export PDF
+          </Button>
           <Button onClick={pushToGitHub}>Push to GitHub</Button>
         </div>
       </div>
@@ -879,7 +907,9 @@ function SentimentChart({ data }: { data: SentimentData }) {
 ```typescript
 // AI-powered insight extraction
 async function extractInsights(results: PersonaResult[]) {
-  const client = new Anthropic({ apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY })
+  const client = new Anthropic({
+    apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+  })
 
   const prompt = `
   Analyze these experiment results and extract 3-5 key insights:
@@ -952,6 +982,7 @@ async fn push_to_github(experiment_id: String) -> Result<(), String> {
 #### **Implementation Checklist**
 
 **Week 7**:
+
 - [ ] Results dashboard UI
 - [ ] Sentiment analysis visualization
 - [ ] AI insight extraction
@@ -1146,6 +1177,7 @@ function CollaborationView({ experimentId }: { experimentId: string }) {
 #### **Implementation Checklist**
 
 **Week 8**:
+
 - [ ] Follow-up chat integration
 - [ ] Experiment comparison view
 - [ ] Template customization UI
@@ -1196,6 +1228,7 @@ function CollaborationView({ experimentId }: { experimentId: string }) {
 ## Success Criteria
 
 ### **Phase 1 Complete When**:
+
 - [ ] User can upload CSV/PDF
 - [ ] Context displays in library
 - [ ] Files stored in Convex
@@ -1203,6 +1236,7 @@ function CollaborationView({ experimentId }: { experimentId: string }) {
 - [ ] **Demo: Upload → View → Git commit** ✓
 
 ### **Phase 2 Complete When**:
+
 - [ ] Chat interface works
 - [ ] Agent understands decision intent
 - [ ] Template selection works
@@ -1210,6 +1244,7 @@ function CollaborationView({ experimentId }: { experimentId: string }) {
 - [ ] **Demo: Chat → Template → Decision log** ✓
 
 ### **Phase 3 Complete When**:
+
 - [ ] Personas generated from context
 - [ ] Experiments run on Modal
 - [ ] 10+ personas execute in parallel
@@ -1217,6 +1252,7 @@ function CollaborationView({ experimentId }: { experimentId: string }) {
 - [ ] **Demo: Experiment → 10 personas → 30 seconds** ✓
 
 ### **Phase 4 Complete When**:
+
 - [ ] Results visualized clearly
 - [ ] Sentiment analysis works
 - [ ] Insights extracted
@@ -1224,6 +1260,7 @@ function CollaborationView({ experimentId }: { experimentId: string }) {
 - [ ] **Demo: Results → Charts → Export** ✓
 
 ### **Phase 5 Complete When**:
+
 - [ ] Follow-up questions work
 - [ ] Team collaboration via GitHub
 - [ ] Template customization

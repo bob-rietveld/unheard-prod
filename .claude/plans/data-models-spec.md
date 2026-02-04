@@ -25,6 +25,7 @@
 ### 1.1 Storage Strategy
 
 **Convex (Cloud)**:
+
 - User authentication
 - Context documents (metadata + raw data)
 - Templates (official + user-created)
@@ -33,6 +34,7 @@
 - Real-time collaboration data
 
 **Git/GitHub (Versioned Storage)**:
+
 - Decision logs (Markdown)
 - Experiment results (YAML + JSON)
 - Context files (CSV, PDF - actual files)
@@ -40,6 +42,7 @@
 - All decision-making artifacts
 
 **Modal (Cloud Execution)**:
+
 - Experiment runtime (ephemeral)
 - Persona generation (stateless)
 - Results aggregation (passed back to Tauri)
@@ -93,7 +96,11 @@ export default defineSchema({
     // User preferences
     preferences: v.optional(
       v.object({
-        theme: v.union(v.literal('light'), v.literal('dark'), v.literal('system')),
+        theme: v.union(
+          v.literal('light'),
+          v.literal('dark'),
+          v.literal('system')
+        ),
         defaultPersonaCount: v.number(),
         preferredModel: v.string(),
       })
@@ -393,6 +400,7 @@ company-decisions/  (Git repo root)
 ## Context
 
 We're a B2B SaaS company building developer tools with:
+
 - **MRR**: $50,000
 - **Customers**: 30 paying customers
 - **Team**: 2 co-founders
@@ -406,26 +414,32 @@ Should we raise a $2M seed round or continue bootstrapping?
 ## Options
 
 ### Option 1: Seed Funding ($2M)
+
 **Pros**:
+
 - Accelerate growth (hire 5-person team)
 - Expand marketing reach
 - Build enterprise features faster
 - Longer runway (24+ months)
 
 **Cons**:
+
 - 20-25% dilution
 - Investor pressure for growth
 - Board meetings and reporting overhead
 - Potential loss of control
 
 ### Option 2: Bootstrap
+
 **Pros**:
+
 - Full control and ownership
 - Profitability focus
 - No investor pressure
 - Sustainable growth
 
 **Cons**:
+
 - Slower growth
 - Resource constraints
 - Competitors may outpace us
@@ -440,9 +454,10 @@ Should we raise a $2M seed round or continue bootstrapping?
 
 ## Results
 
-*(Filled after experiment completes)*
+_(Filled after experiment completes)_
 
 ### Sentiment Breakdown
+
 - **Positive**: 60% (6/10)
 - **Neutral**: 30% (3/10)
 - **Negative**: 10% (1/10)
@@ -466,10 +481,11 @@ See detailed results: `experiments/exp-001-investor-pitch/summary.md`
 
 ## Decision
 
-*(To be made after reviewing all insights)*
+_(To be made after reviewing all insights)_
 
 **Status**: Under consideration
 **Next Steps**:
+
 1. Talk to 3-5 VCs to validate market interest
 2. Model financial scenarios (seed vs bootstrap)
 3. Discuss with co-founder and advisors
@@ -483,6 +499,7 @@ See detailed results: `experiments/exp-001-investor-pitch/summary.md`
 ---
 
 **Experiment History**:
+
 - [exp-001: Initial investor pitch (2026-02-04)](../experiments/exp-001-investor-pitch/)
 - [exp-002: Higher funding target test (2026-02-05)](../experiments/exp-002-higher-target/)
 ```
@@ -493,7 +510,7 @@ See detailed results: `experiments/exp-001-investor-pitch/summary.md`
 # experiments/exp-001-investor-pitch/config.yaml
 
 experimentId: exp-001
-name: "Investor Pitch Evaluation"
+name: 'Investor Pitch Evaluation'
 createdAt: 2026-02-04T10:30:00Z
 status: completed
 
@@ -505,7 +522,7 @@ template:
 # Variables customized
 variables:
   fundingStage: seed
-  fundingTarget: 2000000  # $2M
+  fundingTarget: 2000000 # $2M
   companyStage: early-revenue
   vertical: developer-tools
 
@@ -559,7 +576,7 @@ execution:
 # Results summary
 results:
   totalResponses: 10
-  avgSentiment: 0.45  # Slightly positive
+  avgSentiment: 0.45 # Slightly positive
   sentimentBreakdown:
     positive: 6
     neutral: 3
@@ -646,8 +663,8 @@ results:
 # templates/custom-investor-eval.yaml
 
 templateId: custom-investor-eval-v1
-name: "Strategic Investor Evaluation"
-description: "Evaluate strategic investors (corporate VCs, strategic partners)"
+name: 'Strategic Investor Evaluation'
+description: 'Evaluate strategic investors (corporate VCs, strategic partners)'
 category: investors
 version: 1.0.0
 
@@ -659,21 +676,21 @@ basedOn:
 # Customizations
 variables:
   - key: fundingStage
-    label: "Funding Stage"
+    label: 'Funding Stage'
     type: select
-    options: ["pre-seed", "seed", "series-a"]
+    options: ['pre-seed', 'seed', 'series-a']
     required: true
 
   - key: fundingTarget
-    label: "Funding Target ($)"
+    label: 'Funding Target ($)'
     type: number
     required: true
 
   - key: strategic
-    label: "Looking for strategic value?"
+    label: 'Looking for strategic value?'
     type: select
-    options: ["yes", "no", "open"]
-    defaultValue: "yes"
+    options: ['yes', 'no', 'open']
+    defaultValue: 'yes'
 
 # Persona configuration
 personaConfig:
@@ -681,13 +698,13 @@ personaConfig:
   types:
     - type: corporate_vc
       count: 4
-      description: "Corporate VCs from relevant industry"
+      description: 'Corporate VCs from relevant industry'
     - type: strategic_partner
       count: 4
-      description: "Potential strategic partners"
+      description: 'Potential strategic partners'
     - type: traditional_vc
       count: 4
-      description: "Traditional VCs for comparison"
+      description: 'Traditional VCs for comparison'
 
 # Stimulus template
 stimulusTemplate: |
@@ -716,15 +733,15 @@ stimulusTemplate: |
 # .unheard/config.yaml
 
 projectId: unheard-proj-001
-projectName: "My Company Decisions"
+projectName: 'My Company Decisions'
 createdAt: 2026-02-04T10:00:00Z
 
 # Git integration
 git:
-  repoUrl: "https://github.com/myusername/company-decisions"
+  repoUrl: 'https://github.com/myusername/company-decisions'
   branch: main
   autoCommit: true
-  commitPrefix: "[unheard]"
+  commitPrefix: '[unheard]'
 
 # Default settings
 defaults:
@@ -771,7 +788,12 @@ export interface ContextDocument {
 
   filename: string
   fileType: 'csv' | 'pdf' | 'xlsx' | 'txt' | 'md'
-  contentType: 'customer_data' | 'investor_data' | 'product_data' | 'metrics' | 'general'
+  contentType:
+    | 'customer_data'
+    | 'investor_data'
+    | 'product_data'
+    | 'metrics'
+    | 'general'
 
   schema?: ColumnSchema[]
   rowCount: number
@@ -1085,12 +1107,14 @@ Template._id             → templates/custom-investor-eval.yaml
 ### 6.1 Critical Indexes
 
 **For User Data**:
+
 ```typescript
 .index("by_user", ["userId"])           // All user's data
 .index("by_email", ["email"])           // Login
 ```
 
 **For Templates**:
+
 ```typescript
 .index("by_category", ["category"])     // Browse by category
 .index("by_official", ["isOfficial"])   // Official vs custom
@@ -1098,6 +1122,7 @@ Template._id             → templates/custom-investor-eval.yaml
 ```
 
 **For Experiments**:
+
 ```typescript
 .index("by_user", ["userId"])           // User's experiments
 .index("by_status", ["status"])         // Running, completed
@@ -1105,6 +1130,7 @@ Template._id             → templates/custom-investor-eval.yaml
 ```
 
 **For Context Documents**:
+
 ```typescript
 .index("by_user", ["userId"])           // User's context
 .index("by_content_type", ["contentType"]) // Filter by type
@@ -1113,6 +1139,7 @@ Template._id             → templates/custom-investor-eval.yaml
 ### 6.2 Query Patterns
 
 **Get user's recent experiments**:
+
 ```typescript
 const experiments = await ctx.db
   .query('experiments')
@@ -1122,6 +1149,7 @@ const experiments = await ctx.db
 ```
 
 **Get official templates by category**:
+
 ```typescript
 const templates = await ctx.db
   .query('experimentTemplates')
@@ -1131,6 +1159,7 @@ const templates = await ctx.db
 ```
 
 **Get running experiments**:
+
 ```typescript
 const running = await ctx.db
   .query('experiments')
@@ -1176,7 +1205,7 @@ const running = await ctx.db
 import { mutation } from './_generated/server'
 
 export const seedOfficialTemplates = mutation({
-  handler: async (ctx) => {
+  handler: async ctx => {
     const systemUser = await ctx.db
       .query('users')
       .filter(q => q.eq(q.field('email'), 'system@unheard.ai'))
@@ -1254,6 +1283,7 @@ This data model design enables:
    - Results streaming back to Tauri
 
 **Key Features**:
+
 - Git-based collaboration (GitHub workflows)
 - Template-driven approach (best practices)
 - Context-grounded personas (from real data)
@@ -1261,6 +1291,7 @@ This data model design enables:
 - Real-time updates (Convex subscriptions)
 
 **Next Steps**:
+
 1. Implement Convex schema (Week 1-2)
 2. Implement Git file operations (Week 1-2)
 3. Build template system (Week 3-4)

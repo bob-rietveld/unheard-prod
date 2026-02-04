@@ -37,7 +37,7 @@ export function ClerkLoader() {
     // but we override it with the JS-side ClerkProvider publishableKey prop
     initClerk()
       .then(setClerk)
-      .catch((err) => {
+      .catch(err => {
         console.error('Failed to initialize Clerk:', err)
         setError(err?.message || 'Failed to initialize authentication')
       })
@@ -70,7 +70,9 @@ export function ClerkLoader() {
         <QueryClientProvider client={queryClient}>
           <SignedIn>
             <App />
-            {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+            {import.meta.env.DEV && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
           </SignedIn>
           <SignedOut>
             <SignInPage />

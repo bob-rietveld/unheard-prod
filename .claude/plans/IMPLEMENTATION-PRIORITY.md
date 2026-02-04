@@ -296,12 +296,12 @@ export const uploadContextFile = mutation({
 
 export const listContextFiles = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async ctx => {
     const userId = await getUserId(ctx)
 
     return await ctx.db
       .query('contextFiles')
-      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .withIndex('by_user', q => q.eq('userId', userId))
       .collect()
   },
 })
@@ -374,11 +374,7 @@ export function ChatInterface() {
       {/* Chat Area */}
       <div className="flex-1 flex flex-col">
         <ChatMessages messages={messages} />
-        <ChatInput
-          value={input}
-          onChange={setInput}
-          onSend={sendMessage}
-        />
+        <ChatInput value={input} onChange={setInput} onSend={sendMessage} />
       </div>
     </div>
   )
@@ -396,19 +392,13 @@ const anthropic = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
 })
 
-export async function* chatStream(
-  content: string,
-  history: Message[]
-) {
+export async function* chatStream(content: string, history: Message[]) {
   const stream = await anthropic.messages.stream({
     model: 'claude-3-5-sonnet-20241022',
     max_tokens: 4096,
     temperature: 0.7,
     system: SYSTEM_PROMPT,
-    messages: [
-      ...history,
-      { role: 'user', content }
-    ],
+    messages: [...history, { role: 'user', content }],
   })
 
   for await (const chunk of stream) {
@@ -450,9 +440,10 @@ export async function selectTemplate(
   const response = await anthropic.messages.create({
     model: 'claude-3-5-sonnet-20241022',
     max_tokens: 1024,
-    messages: [{
-      role: 'user',
-      content: `Based on this conversation, which template best fits?
+    messages: [
+      {
+        role: 'user',
+        content: `Based on this conversation, which template best fits?
 
 User: "${userInput}"
 
@@ -463,8 +454,9 @@ Templates:
 4. hiring-decision - For hiring decisions
 5. operations-decision - For operational decisions
 
-Respond with just the template ID or "none" if unclear.`
-    }],
+Respond with just the template ID or "none" if unclear.`,
+      },
+    ],
   })
 
   const templateId = response.content[0].text.trim()
@@ -558,9 +550,13 @@ ${config.context || 'No context provided'}
 
 ## Configuration
 
-${Object.entries(config).map(([key, value]) => `
+${Object.entries(config)
+  .map(
+    ([key, value]) => `
 - **${key}**: ${value}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Experiments Run
 
@@ -584,10 +580,7 @@ ${Object.entries(config).map(([key, value]) => `
   const projectPath = useStore.getState().currentProjectPath
   const filePath = `decisions/${date}-${slug(config.decision_title)}.md`
 
-  await commands.writeFile(
-    path.join(projectPath, filePath),
-    markdown
-  )
+  await commands.writeFile(path.join(projectPath, filePath), markdown)
 
   // Auto-commit
   await commands.gitAutoCommit(
@@ -801,7 +794,7 @@ export async function runExperiment(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${MODAL_TOKEN}`,
+      Authorization: `Bearer ${MODAL_TOKEN}`,
     },
     body: JSON.stringify({
       personas,
@@ -828,7 +821,7 @@ export function ExperimentProgress({ experimentId }) {
 
   useEffect(() => {
     // Subscribe to progress events
-    const unsubscribe = listen('experiment-progress', (event) => {
+    const unsubscribe = listen('experiment-progress', event => {
       if (event.experimentId === experimentId) {
         setProgress(prev => ({
           ...prev,
@@ -845,9 +838,7 @@ export function ExperimentProgress({ experimentId }) {
     <div className="space-y-4">
       <div>
         <h3>Running Experiment</h3>
-        <Progress
-          value={(progress.completed / progress.total) * 100}
-        />
+        <Progress value={(progress.completed / progress.total) * 100} />
         <p className="text-sm text-muted-foreground mt-2">
           {progress.completed} of {progress.total} personas complete
         </p>
@@ -907,10 +898,7 @@ export async function saveExperimentResults(
   // Auto-commit
   await commands.gitAutoCommit(
     projectPath,
-    [
-      `${expDir}/results.json`,
-      `${expDir}/summary.md`,
-    ],
+    [`${expDir}/results.json`, `${expDir}/summary.md`],
     `Complete experiment: ${results.name}`
   )
 }
@@ -1022,18 +1010,23 @@ export async function extractInsights(
   const response = await anthropic.messages.create({
     model: 'claude-3-5-sonnet-20241022',
     max_tokens: 2048,
-    messages: [{
-      role: 'user',
-      content: `Analyze these experiment results and extract key insights:
+    messages: [
+      {
+        role: 'user',
+        content: `Analyze these experiment results and extract key insights:
 
 Experiment: ${results.name}
 Personas: ${results.responses.length}
 
 Responses:
-${results.responses.map(r => `
+${results.responses
+  .map(
+    r => `
 ${r.persona_name}: ${r.response}
 Sentiment: ${r.sentiment}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 Extract:
 1. Top 5 concerns (keywords/themes)
@@ -1042,8 +1035,9 @@ Extract:
 4. Patterns by persona type
 5. Actionable recommendations
 
-Format as JSON.`
-    }],
+Format as JSON.`,
+      },
+    ],
   })
 
   return JSON.parse(response.content[0].text)
@@ -1127,9 +1121,10 @@ export async function suggestFollowUp(
   const response = await anthropic.messages.create({
     model: 'claude-3-5-sonnet-20241022',
     max_tokens: 1024,
-    messages: [{
-      role: 'user',
-      content: `Based on these experiment results, what follow-up experiments would help?
+    messages: [
+      {
+        role: 'user',
+        content: `Based on these experiment results, what follow-up experiments would help?
 
 Results summary:
 ${JSON.stringify(experimentResults.summary, null, 2)}
@@ -1137,8 +1132,9 @@ ${JSON.stringify(experimentResults.summary, null, 2)}
 Top concerns:
 ${experimentResults.insights.top_concerns.join(', ')}
 
-Suggest 2-3 follow-up experiments that would address the concerns or test variations.`
-    }],
+Suggest 2-3 follow-up experiments that would address the concerns or test variations.`,
+      },
+    ],
   })
 
   return parseFollowUpSuggestions(response.content[0].text)
@@ -1155,12 +1151,15 @@ export async function inviteTeamMember(email: string) {
   const repoUrl = useStore.getState().githubRepoUrl
 
   // Add collaborator via GitHub API
-  await fetch(`https://api.github.com/repos/${owner}/${repo}/collaborators/${username}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `token ${githubToken}`,
-    },
-  })
+  await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/collaborators/${username}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${githubToken}`,
+      },
+    }
+  )
 
   // Send email with instructions
   await sendEmail(email, {
@@ -1250,21 +1249,21 @@ TOTAL TIME: 10 minutes
 
 ### Technical Metrics
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Chat response time | <200ms | - |
-| Experiment execution | <60s (10 personas) | - |
-| Bundle size | <20MB | 15MB ✅ |
-| Memory usage | <150MB | 80MB ✅ |
+| Metric               | Target             | Current |
+| -------------------- | ------------------ | ------- |
+| Chat response time   | <200ms             | -       |
+| Experiment execution | <60s (10 personas) | -       |
+| Bundle size          | <20MB              | 15MB ✅ |
+| Memory usage         | <150MB             | 80MB ✅ |
 
 ### User Metrics
 
-| Metric | Target |
-|--------|--------|
-| Time to first experiment | <5 min |
-| Setup time (with template) | <2 min |
-| Template usage rate | >70% |
-| Git commit rate | >20 per project |
+| Metric                     | Target          |
+| -------------------------- | --------------- |
+| Time to first experiment   | <5 min          |
+| Setup time (with template) | <2 min          |
+| Template usage rate        | >70%            |
+| Git commit rate            | >20 per project |
 
 ---
 

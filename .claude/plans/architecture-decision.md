@@ -17,6 +17,7 @@ After thorough analysis, we've chosen a **hybrid local+cloud architecture** usin
 - **Git/GitHub** (version control & collaboration)
 
 This provides the best balance of:
+
 - ✅ Responsive UX (local agent)
 - ✅ Powerful execution (cloud parallelization)
 - ✅ Data ownership (Git-based)
@@ -29,16 +30,16 @@ This provides the best balance of:
 
 ### Options Considered
 
-| Factor            | **Tauri** ✅             | Electron           |
-| ----------------- | ------------------------ | ------------------ |
-| **Bundle size**   | 15MB                     | 200MB              |
-| **Memory**        | 80MB                     | 400MB              |
-| **Security**      | Rust (memory-safe)       | Node.js (less safe) |
-| **Performance**   | Native                   | Good               |
-| **Development**   | Rust + Web               | JavaScript only    |
-| **Maturity**      | v2.0 (stable)            | Very mature        |
-| **Ecosystem**     | Growing                  | Huge               |
-| **Node.js access**| Via Rust bridge          | Native             |
+| Factor             | **Tauri** ✅       | Electron            |
+| ------------------ | ------------------ | ------------------- |
+| **Bundle size**    | 15MB               | 200MB               |
+| **Memory**         | 80MB               | 400MB               |
+| **Security**       | Rust (memory-safe) | Node.js (less safe) |
+| **Performance**    | Native             | Good                |
+| **Development**    | Rust + Web         | JavaScript only     |
+| **Maturity**       | v2.0 (stable)      | Very mature         |
+| **Ecosystem**      | Growing            | Huge                |
+| **Node.js access** | Via Rust bridge    | Native              |
 
 ### Decision: **Tauri** ✅
 
@@ -70,14 +71,14 @@ This provides the best balance of:
 
 ### Options Considered
 
-| Factor              | **Claude SDK (Local)** ✅ | Cloud Only       | Hybrid (Both)    |
-| ------------------- | ------------------------- | ---------------- | ---------------- |
-| **Response time**   | <200ms                    | 500-1000ms       | <200ms (local)   |
-| **Offline**         | Yes (chat only)           | No               | Partial          |
-| **Cost**            | Pay per use               | Pay per use      | Both             |
-| **Complexity**      | Medium                    | Low              | High             |
-| **Scalability**     | Limited                   | Unlimited        | Best of both     |
-| **Data privacy**    | High (local)              | Medium (cloud)   | High (local)     |
+| Factor            | **Claude SDK (Local)** ✅ | Cloud Only     | Hybrid (Both)  |
+| ----------------- | ------------------------- | -------------- | -------------- |
+| **Response time** | <200ms                    | 500-1000ms     | <200ms (local) |
+| **Offline**       | Yes (chat only)           | No             | Partial        |
+| **Cost**          | Pay per use               | Pay per use    | Both           |
+| **Complexity**    | Medium                    | Low            | High           |
+| **Scalability**   | Limited                   | Unlimited      | Best of both   |
+| **Data privacy**  | High (local)              | Medium (cloud) | High (local)   |
 
 ### Decision: **Hybrid - Claude SDK Local + Cloud Execution** ✅
 
@@ -132,15 +133,15 @@ This provides the best balance of:
 
 ### Options Considered
 
-| Factor            | **Convex** ✅      | Supabase         | Firebase       |
-| ----------------- | ------------------ | ---------------- | -------------- |
-| **Real-time**     | Built-in           | Built-in         | Built-in       |
-| **TypeScript**    | Native             | Good             | Good           |
-| **Dev experience**| Excellent          | Good             | Good           |
-| **Queries**       | JS functions       | SQL              | NoSQL          |
-| **Pricing**       | Free tier generous | Free tier good   | Free tier good |
-| **Actions**       | Built-in (Node.js) | Edge functions   | Cloud functions|
-| **Already setup** | YES ✅             | No               | No             |
+| Factor             | **Convex** ✅      | Supabase       | Firebase        |
+| ------------------ | ------------------ | -------------- | --------------- |
+| **Real-time**      | Built-in           | Built-in       | Built-in        |
+| **TypeScript**     | Native             | Good           | Good            |
+| **Dev experience** | Excellent          | Good           | Good            |
+| **Queries**        | JS functions       | SQL            | NoSQL           |
+| **Pricing**        | Free tier generous | Free tier good | Free tier good  |
+| **Actions**        | Built-in (Node.js) | Edge functions | Cloud functions |
+| **Already setup**  | YES ✅             | No             | No              |
 
 ### Decision: **Convex** ✅
 
@@ -167,15 +168,15 @@ This provides the best balance of:
 
 ### Options Considered for Cloud Execution
 
-| Factor         | **Modal** ✅         | AWS Lambda     | Daytona        |
-| -------------- | -------------------- | -------------- | -------------- |
-| **Python**     | Native               | Yes            | Yes            |
-| **Concurrency**| 100s                 | 1000s          | Configurable   |
-| **Cost**       | Pay-per-second       | Pay-per-invoke | GPU-optimized  |
-| **Cold start** | <1s                  | <1s            | Varies         |
-| **GPU**        | Easy                 | Complex        | Native         |
-| **Dev exp**    | Excellent            | Good           | Good           |
-| **OSS models** | Easy (containers)    | Harder         | Native         |
+| Factor          | **Modal** ✅      | AWS Lambda     | Daytona       |
+| --------------- | ----------------- | -------------- | ------------- |
+| **Python**      | Native            | Yes            | Yes           |
+| **Concurrency** | 100s              | 1000s          | Configurable  |
+| **Cost**        | Pay-per-second    | Pay-per-invoke | GPU-optimized |
+| **Cold start**  | <1s               | <1s            | Varies        |
+| **GPU**         | Easy              | Complex        | Native        |
+| **Dev exp**     | Excellent         | Good           | Good          |
+| **OSS models**  | Easy (containers) | Harder         | Native        |
 
 ### Decision: **Modal Primary, Daytona Optional** ✅
 
@@ -218,16 +219,16 @@ async def execute_persona(persona_config, stimulus):
 
 ### Options Considered for Decision Logging
 
-| Factor            | **Git/GitHub** ✅    | Convex Only     | S3/Cloud       |
-| ----------------- | -------------------- | --------------- | -------------- |
-| **Version control**| Native              | Manual          | Manual         |
-| **Collaboration** | Native (PRs, issues) | Custom          | Custom         |
-| **Diffs**         | Native               | Manual          | Manual         |
-| **Branching**     | Native               | No              | No             |
-| **Sharing**       | Read-only URLs       | Custom          | Pre-signed URLs|
-| **Offline**       | Full support         | No              | No             |
-| **Export**        | Native (flat files)  | API             | Downloads      |
-| **Ecosystem**     | Huge (GitHub Actions, etc.) | N/A    | Limited        |
+| Factor              | **Git/GitHub** ✅           | Convex Only | S3/Cloud        |
+| ------------------- | --------------------------- | ----------- | --------------- |
+| **Version control** | Native                      | Manual      | Manual          |
+| **Collaboration**   | Native (PRs, issues)        | Custom      | Custom          |
+| **Diffs**           | Native                      | Manual      | Manual          |
+| **Branching**       | Native                      | No          | No              |
+| **Sharing**         | Read-only URLs              | Custom      | Pre-signed URLs |
+| **Offline**         | Full support                | No          | No              |
+| **Export**          | Native (flat files)         | API         | Downloads       |
+| **Ecosystem**       | Huge (GitHub Actions, etc.) | N/A         | Limited         |
 
 ### Decision: **Git (local) + GitHub (remote)** ✅
 
@@ -283,13 +284,13 @@ company-decisions/
 
 ### Options Considered
 
-| Factor            | **Template-Driven** ✅ | Fully Flexible | Hybrid        |
-| ----------------- | ---------------------- | -------------- | ------------- |
-| **Onboarding**    | Fast (select template) | Slow (learn)   | Medium        |
-| **Customization** | Medium                 | Full           | Full          |
-| **Best practices**| Encoded                | User learns    | Encoded       |
-| **Reusability**   | High                   | Low            | High          |
-| **Complexity**    | Low (hidden)           | High (visible) | Medium        |
+| Factor             | **Template-Driven** ✅ | Fully Flexible | Hybrid  |
+| ------------------ | ---------------------- | -------------- | ------- |
+| **Onboarding**     | Fast (select template) | Slow (learn)   | Medium  |
+| **Customization**  | Medium                 | Full           | Full    |
+| **Best practices** | Encoded                | User learns    | Encoded |
+| **Reusability**    | High                   | Low            | High    |
+| **Complexity**     | Low (hidden)           | High (visible) | Medium  |
 
 ### Decision: **Template-Driven with Customization** ✅
 
@@ -313,12 +314,12 @@ company-decisions/
 
 ```yaml
 id: investor-pitch-test
-name: "Investor Pitch Evaluation"
+name: 'Investor Pitch Evaluation'
 category: investors
 
 # What questions to ask
 configurationFlow:
-  - question: "What stage are you at?"
+  - question: 'What stage are you at?'
     options: [pre-seed, seed, series-a]
   - question: "What's your funding target?"
     type: number
@@ -351,13 +352,13 @@ experiment:
 
 ### Options Considered
 
-| Factor            | **Claude Desktop Style** ✅ | Custom Design  | Notion-like  |
-| ----------------- | --------------------------- | -------------- | ------------ |
-| **Familiarity**   | High (users know Claude)    | Low (learn)    | Medium       |
-| **Chat UX**       | Excellent                   | Build from scratch | Not chat-first |
-| **Development**   | Fast (copy patterns)        | Slow (design)  | Medium       |
-| **Context sidebar**| Natural                    | Custom         | Natural      |
-| **Streaming**     | Built-in pattern            | Build          | Not typical  |
+| Factor              | **Claude Desktop Style** ✅ | Custom Design      | Notion-like    |
+| ------------------- | --------------------------- | ------------------ | -------------- |
+| **Familiarity**     | High (users know Claude)    | Low (learn)        | Medium         |
+| **Chat UX**         | Excellent                   | Build from scratch | Not chat-first |
+| **Development**     | Fast (copy patterns)        | Slow (design)      | Medium         |
+| **Context sidebar** | Natural                     | Custom             | Natural        |
+| **Streaming**       | Built-in pattern            | Build              | Not typical    |
 
 ### Decision: **Claude Desktop Style** ✅
 

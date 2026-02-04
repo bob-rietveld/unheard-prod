@@ -3,9 +3,7 @@
   "claim_note": "",
   "claimed_at": null,
   "created_at": "2026-02-04T14:56:24.225159Z",
-  "depends_on": [
-    "fn-2-phase-2-chat-interface-agent.2"
-  ],
+  "depends_on": ["fn-2-phase-2-chat-interface-agent.2"],
   "epic": "fn-2-phase-2-chat-interface-agent",
   "id": "fn-2-phase-2-chat-interface-agent.4",
   "priority": null,

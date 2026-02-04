@@ -4,6 +4,7 @@ Implement template library in Convex and agent logic for intent classification a
 
 **Size:** M
 **Files:**
+
 - `convex/schema.ts` (update)
 - `convex/templates.ts` (new - queries/mutations)
 - `convex/seed-templates.ts` (new - seed function)
@@ -14,11 +15,13 @@ Implement template library in Convex and agent logic for intent classification a
 ## Approach
 
 **Template Storage**:
+
 - Convex table `experimentTemplates` with fields: name, slug, category, description, yamlContent, version, isPublished
 - 3 seed templates: investor-evaluation, pricing-strategy, product-roadmap
 - YAML format from `.claude/plans/template-system-spec.md:489-538`
 
 **Template Query Pattern** (CRITICAL - follow existing pattern):
+
 ```typescript
 // src/services/templates.ts
 export const templateKeys = {
@@ -40,11 +43,13 @@ export function useTemplates() {
 **Note**: Use `useConvex()` hook for query calls (not direct Convex client import). This matches existing project pattern for real-time subscriptions.
 
 **Intent Classification**:
+
 - Analyze user message for keywords (fundraising, pricing, roadmap)
 - Simple keyword matching for MVP (no ML)
 - Return 1-2 template suggestions with confidence scores
 
 **System Prompt**:
+
 - Modular prompt: role definition + available templates + guidelines
 - Templates injected dynamically from Convex query
 - Prompt located in `src/lib/agent/system-prompts.ts`
@@ -52,16 +57,19 @@ export function useTemplates() {
 ## Key Context
 
 **Convex Real-time**:
+
 - `useQuery` with `convex.query()` auto-subscribes to updates
 - No manual invalidation needed (Convex pushes changes)
 - Pass `"skip"` to conditionally skip query (not conditional hook calls)
 
 **Template Seeding**:
+
 - Run via `npx convex run seed:templates` after deployment
 - Idempotent: Check if templates exist before inserting
 - Log seeded template IDs
 
 **Existing Convex Pattern**:
+
 - Follow `src/services/preferences.ts:1-64` for TanStack Query wrapper
 - Use `useConvex()` hook inside `queryFn`
 

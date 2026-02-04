@@ -6,9 +6,7 @@
   "default_impl": null,
   "default_review": null,
   "default_sync": null,
-  "depends_on_epics": [
-    "fn-1-phase-1-context-upload-git-integration"
-  ],
+  "depends_on_epics": ["fn-1-phase-1-context-upload-git-integration"],
   "id": "fn-2-phase-2-chat-interface-agent",
   "next_task": 1,
   "plan_review_status": "unknown",

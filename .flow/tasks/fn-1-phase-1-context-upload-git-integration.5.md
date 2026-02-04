@@ -1,6 +1,7 @@
 # fn-1-phase-1-context-upload-git-integration.5 Git auto-commit implementation
 
 ## Description
+
 Git auto-commit with LFS tracking for files >10MB via .gitattributes.
 
 **Size:** M
@@ -9,6 +10,7 @@ Git auto-commit with LFS tracking for files >10MB via .gitattributes.
 ## Approach
 
 **Git Commands**: Create `src-tauri/src/commands/git.rs` following github-scout pattern (simeg/eureka):
+
 ```rust
 #[tauri::command]
 #[specta::specta]
@@ -20,6 +22,7 @@ pub fn git_auto_commit(
 ```
 
 **Git Auto-Commit Flow** (per git-integration-spec.md):
+
 1. Open repository with `Repository::open()`
 2. Get index with `repo.index()`
 3. Add files with `index.add_path()` for each file
@@ -30,17 +33,20 @@ pub fn git_auto_commit(
 8. Return commit ID
 
 **Commit Message Format**:
+
 - Single file: "Add context: {filename}"
 - Multiple files: "Add context files: {file1}, {file2}, ..."
 - Follow format from git-integration-spec.md
 
 **LFS Integration**:
+
 - LFS tracking handled via `.gitattributes` rules (created in Task 2)
 - Files >10MB automatically tracked by Git LFS via pattern rules
 - No explicit `git lfs track` needed in commit flow
 - Git honors .gitattributes automatically during add/commit
 
 **GitStatus Type**: Add to `src-tauri/src/types.rs`:
+
 ```rust
 pub struct GitStatus {
     pub uncommitted_changes: usize,
@@ -57,6 +63,7 @@ pub struct GitStatus {
 - **LFS tracking**: Automatic via .gitattributes, no manual track command
 
 ## Acceptance
+
 - [ ] git_auto_commit command implemented
 - [ ] LFS tracking via .gitattributes (files >10MB auto-tracked)
 - [ ] index.write called before write_tree
@@ -67,9 +74,11 @@ pub struct GitStatus {
 - [ ] Tests cover LFS and non-LFS commits
 
 ## Done summary
+
 TBD
 
 ## Evidence
+
 - Commits:
 - Tests:
 - PRs:

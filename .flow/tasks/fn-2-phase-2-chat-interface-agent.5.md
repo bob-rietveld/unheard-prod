@@ -1,10 +1,12 @@
 # fn-2-phase-2-chat-interface-agent.5 Template configuration wizard UI
 
 ## Description
+
 Build configuration wizard UI that guides users through template questions with validation.
 
 **Size:** M
 **Files:**
+
 - `src/components/chat/ConfigWizard.tsx` (new)
 - `src/components/chat/ConfigQuestion.tsx` (new)
 - `src/lib/config-validator.ts` (new)
@@ -13,6 +15,7 @@ Build configuration wizard UI that guides users through template questions with 
 ## Approach
 
 **Wizard Flow**:
+
 1. Agent suggests template → User confirms
 2. Wizard fetches template YAML → parses questions
 3. Display question 1 → User answers → Validate
@@ -20,6 +23,7 @@ Build configuration wizard UI that guides users through template questions with 
 5. Generate config object → Update useChatStore.configAnswers
 
 **Question Types** (from template spec):
+
 - `text`: Free-form input (with optional regex validation)
 - `select`: Dropdown or radio buttons
 - `multiselect`: Checkboxes
@@ -27,36 +31,40 @@ Build configuration wizard UI that guides users through template questions with 
 - `boolean`: Yes/No toggle
 
 **Validation Pattern**:
+
 - Client-side validation before proceeding
 - Show error message inline (below input)
 - Disable "Next" button until valid
 - Agent can ask clarifying questions if answer is ambiguous
 
 **State Management**:
+
 - Use `useChatStore.configAnswers` to persist answers
 - Use `useChatStore.currentTemplateId` to track active template
 
 ## Key Context
 
 **YAML Question Format** (from template spec):
+
 ```yaml
 configuration_flow:
   - id: stage
     type: select
-    question: "What funding stage are you at?"
-    options: ["Seed", "Series A", "Series B"]
+    question: 'What funding stage are you at?'
+    options: ['Seed', 'Series A', 'Series B']
     required: true
 
   - id: amount
     type: text
-    question: "How much are you raising?"
+    question: 'How much are you raising?'
     validation:
       pattern: "^\\$[0-9]+(M|K)$"
-      message: "Enter amount like $2M or $500K"
+      message: 'Enter amount like $2M or $500K'
     required: true
 ```
 
 **Conditional Questions** (future, not MVP):
+
 - Questions can have `depends_on` field
 - Skip if dependency not met
 - Not implemented in Phase 2 (all questions linear)
@@ -67,7 +75,9 @@ configuration_flow:
 - State: `src/store/chat-store.ts` (Task 1)
 - UI: `src/components/chat/ChatInterface.tsx` (Task 3)
 - Templates: `src/services/templates.ts` (Task 4)
+
 ## Acceptance
+
 - [ ] ConfigWizard component displays current question
 - [ ] Wizard fetches template from Convex by ID
 - [ ] YAML parser extracts configuration_flow array
@@ -88,10 +98,13 @@ configuration_flow:
 - [ ] Test: All answered triggers completion
 - [ ] ast-grep passes
 - [ ] Documentation: Update `docs/developer/ui-patterns.md` with wizard pattern
+
 ## Done summary
+
 TBD
 
 ## Evidence
+
 - Commits:
 - Tests:
 - PRs:

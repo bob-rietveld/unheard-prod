@@ -4,6 +4,7 @@ Implement Tauri command that calls Claude API via Rust reqwest with SSE streamin
 
 **Size:** M
 **Files:**
+
 - `src-tauri/src/commands/chat.rs` (new)
 - `src-tauri/src/bindings.rs` (register command)
 - `src-tauri/Cargo.toml` (add dependencies)
@@ -12,11 +13,13 @@ Implement Tauri command that calls Claude API via Rust reqwest with SSE streamin
 ## Approach
 
 **Tauri Streaming Pattern**:
+
 - Use `tauri::ipc::Channel` for token streaming (no UI freeze)
 - Spawn blocking task for async HTTP calls
 - Emit progress events: `{type: 'token', content: string}`, `{type: 'done'}`, `{type: 'error', message: string}`
 
 **Rust Dependencies**:
+
 ```toml
 reqwest = { version = "0.12", features = ["json", "stream"] }
 tokio-stream = "0.1"
@@ -25,11 +28,13 @@ eventsource-stream = "0.2"
 ```
 
 **API Key Strategy**:
+
 - Read from environment variable `ANTHROPIC_API_KEY`
 - Return clear error if missing: "ANTHROPIC_API_KEY not configured"
 - **NO frontend SDK** - all Claude API calls go through Rust
 
 **Command Registration** (CRITICAL):
+
 - Register command in `src-tauri/src/bindings.rs` using `tauri-specta`
 - Pattern: Add `chat` to module imports, then add commands to `collect_commands![]` macro
 - Run `cargo test export_bindings -- --ignored` to generate TypeScript bindings
@@ -39,6 +44,7 @@ eventsource-stream = "0.2"
 ## Key Context
 
 **Claude API Streaming**:
+
 - POST to `https://api.anthropic.com/v1/messages`
 - Headers: `anthropic-version: 2023-06-01`, `x-api-key`, `content-type: application/json`
 - Body: `{ model, max_tokens, messages, stream: true, system }`
@@ -46,12 +52,14 @@ eventsource-stream = "0.2"
 - Event format: `data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"token"}}`
 
 **SSE Parsing**:
+
 - Use `eventsource-stream` crate for reliable parsing
 - Parse each event line starting with `data: `
 - Extract `delta.text` from JSON events
 - Handle `message_stop` event to complete stream
 
 **Error Handling**:
+
 - 429 Rate Limit → return `RateLimitError` with retry-after
 - 500 Server Error → return `ApiError` with message
 - Timeout (60s) → return `TimeoutError`

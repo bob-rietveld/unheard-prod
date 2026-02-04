@@ -1,6 +1,7 @@
 # fn-1-phase-1-context-upload-git-integration.4 File upload UI with drag-and-drop
 
 ## Description
+
 File upload UI using Tauri window.onFileDrop events with Channel progress tracking.
 
 **Size:** M
@@ -9,23 +10,27 @@ File upload UI using Tauri window.onFileDrop events with Channel progress tracki
 ## Approach
 
 **Tauri File Drop** (NO react-dropzone - Codex critical fix):
+
 ```typescript
-import { getCurrentWindow } from '@tauri-apps/api/window';
-import { listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window'
+import { listen } from '@tauri-apps/api/event'
 
 useEffect(() => {
-  const unlisten = getCurrentWindow().onFileDrop((event) => {
+  const unlisten = getCurrentWindow().onFileDrop(event => {
     if (event.payload.type === 'drop') {
-      const paths: string[] = event.payload.paths;
-      handleFilePaths(paths);
+      const paths: string[] = event.payload.paths
+      handleFilePaths(paths)
     }
-  });
+  })
 
-  return () => { unlisten.then(fn => fn()); };
-}, []);
+  return () => {
+    unlisten.then(fn => fn())
+  }
+}, [])
 ```
 
 **Upload Flow**:
+
 1. Tauri event provides filesystem paths
 2. Filter by extension (.csv, .pdf, .xlsx)
 3. Invoke `commands.uploadContextFile(path, projectId)` with Channel
@@ -33,6 +38,7 @@ useEffect(() => {
 5. Update upload-store with status
 
 **ContextUploader Component**: Use shadcn Card from `src/components/ui/card.tsx`:
+
 - Drop zone visual (dashed border card)
 - File icon + text: "Drag files or click to upload"
 - List of supported formats (.csv, .pdf, .xlsx)
@@ -40,6 +46,7 @@ useEffect(() => {
 - Error messages from Rust
 
 **Upload State** (Zustand): Create `src/store/upload-store.ts`:
+
 ```typescript
 {
   [fileId]: {
@@ -52,6 +59,7 @@ useEffect(() => {
 ```
 
 **Service Layer**: Create `src/services/context.ts`:
+
 - `useUploadContext()` hook - Handles upload + progress streaming
 - Listen to Tauri Channel events
 - Update upload-store as progress arrives
@@ -67,7 +75,9 @@ useEffect(() => {
 - **Error toasts**: Use existing toast notification pattern
 - **i18n**: All strings from translation keys (not hardcoded English)
 - **State pattern**: Use Zustand selectors, not destructuring
+
 ## Acceptance
+
 - [ ] window.onFileDrop handler implemented
 - [ ] File paths received from event
 - [ ] upload_context_file invoked with Channel
@@ -77,10 +87,13 @@ useEffect(() => {
 - [ ] Error toasts for failures
 - [ ] 5 concurrent upload limit
 - [ ] Tauri capabilities configured for window events
+
 ## Done summary
+
 TBD
 
 ## Evidence
+
 - Commits:
 - Tests:
 - PRs:

@@ -90,11 +90,13 @@ We're at $50K MRR, growing 15% MoM. Need to decide whether to raise seed round o
 ## Key Insights
 
 From exp-001 (Investor Pitch):
+
 - ✅ 7/10 investors positive (strong interest)
 - ⚠️ Concern: Market size validation needed
 - ✅ Moat: Technical differentiation resonates
 
 From exp-002 (Growth Scenarios):
+
 - Seed: 10x growth in 18 months (high risk)
 - Bootstrap: 3x growth in 18 months (sustainable)
 - RBF: 5x growth in 18 months (moderate risk)
@@ -104,6 +106,7 @@ From exp-002 (Growth Scenarios):
 **Going with: Raise $2M seed**
 
 Rationale:
+
 - Strong investor interest (70% positive)
 - Market opportunity window is closing
 - Team ready to scale
@@ -135,7 +138,7 @@ Rationale:
 # exp-001-investor-pitch/config.yaml
 
 id: exp-001
-name: "Investor Pitch Test"
+name: 'Investor Pitch Test'
 template: investor-pitch-evaluation
 created_at: 2026-02-04T10:30:00Z
 created_by: alice@startup.com
@@ -200,26 +203,29 @@ results_summary:
 
 ## Results by Investor Type
 
-| Investor Type     | Count | Positive | Neutral | Negative |
-|-------------------|-------|----------|---------|----------|
-| Seed VC Partner   | 3     | 3 (100%) | 0       | 0        |
-| Angel Investor    | 3     | 2 (67%)  | 1 (33%) | 0        |
-| Series A VC       | 2     | 1 (50%)  | 1 (50%) | 0        |
-| Corporate VC      | 2     | 1 (50%)  | 0       | 1 (50%)  |
+| Investor Type   | Count | Positive | Neutral | Negative |
+| --------------- | ----- | -------- | ------- | -------- |
+| Seed VC Partner | 3     | 3 (100%) | 0       | 0        |
+| Angel Investor  | 3     | 2 (67%)  | 1 (33%) | 0        |
+| Series A VC     | 2     | 1 (50%)  | 1 (50%) | 0        |
+| Corporate VC    | 2     | 1 (50%)  | 0       | 1 (50%)  |
 
 ## Key Insights
 
 ### Top Concerns (mentioned by 3+ investors)
+
 1. **Market size validation** - Need stronger TAM data
 2. **Competition** - How we're different from existing tools
 3. **Go-to-market** - Customer acquisition strategy unclear
 
 ### Most Positive Feedback
+
 1. **Technical moat** - Proprietary decision simulation resonates
 2. **Founder background** - Ex-Google/YC credibility
 3. **Early traction** - $50K MRR impressive for stage
 
 ### Common Questions
+
 1. "What's your CAC and LTV?"
 2. "How do you plan to defend against big tech?"
 3. "What's the competitive landscape?"
@@ -228,11 +234,13 @@ results_summary:
 ## Detailed Responses
 
 ### Sarah Chen (Seed VC Partner) - ✅ INVEST
+
 > "Strong team with impressive early traction. The technical moat around decision simulation is defensible. My main concern is market size - need to validate this is a $1B+ opportunity. Would want to see stronger go-to-market strategy before investing."
 
 **Sentiment:** 0.85 (Very Positive)
 
 ### Mike Rodriguez (Angel Investor) - ✅ INTERESTED
+
 > "Love the founding team and the problem they're solving. As a former founder, I know how hard decision-making is. The traction is real. Would invest $50K if valuations are reasonable."
 
 **Sentiment:** 0.75 (Positive)
@@ -527,18 +535,20 @@ pub struct GitCommit {
 // src/services/git-auto-commit.ts
 
 const COMMIT_TRIGGERS = {
-  'decision.create': (data) => `Create decision: ${data.title}`,
-  'decision.update': (data) => `Update decision: ${data.title}`,
-  'decision.status_change': (data) => `Mark decision as ${data.status}: ${data.title}`,
+  'decision.create': data => `Create decision: ${data.title}`,
+  'decision.update': data => `Update decision: ${data.title}`,
+  'decision.status_change': data =>
+    `Mark decision as ${data.status}: ${data.title}`,
 
-  'experiment.create': (data) => `Create experiment: ${data.name}`,
-  'experiment.complete': (data) => `Complete experiment: ${data.name} (${data.duration}s)`,
+  'experiment.create': data => `Create experiment: ${data.name}`,
+  'experiment.complete': data =>
+    `Complete experiment: ${data.name} (${data.duration}s)`,
 
-  'context.upload': (data) => `Add context: ${data.filename}`,
-  'context.update': (data) => `Update context: ${data.filename}`,
+  'context.upload': data => `Add context: ${data.filename}`,
+  'context.update': data => `Update context: ${data.filename}`,
 
-  'template.create': (data) => `Create custom template: ${data.name}`,
-  'template.update': (data) => `Update template: ${data.name}`,
+  'template.create': data => `Create custom template: ${data.name}`,
+  'template.update': data => `Update template: ${data.name}`,
 }
 
 // Batching logic (commit after 5 seconds of inactivity)
@@ -563,9 +573,10 @@ class GitAutoCommit {
     if (this.queue.length === 0) return
 
     // Generate commit message
-    const message = this.queue.length === 1
-      ? COMMIT_TRIGGERS[this.queue[0].type](this.queue[0].data)
-      : `Batch update: ${this.queue.map(a => a.type).join(', ')}`
+    const message =
+      this.queue.length === 1
+        ? COMMIT_TRIGGERS[this.queue[0].type](this.queue[0].data)
+        : `Batch update: ${this.queue.map(a => a.type).join(', ')}`
 
     // Collect files to commit
     const files = this.queue.flatMap(a => a.files)
@@ -620,12 +631,15 @@ export async function connectGitHub() {
 
 async function listenForOAuthCallback(): Promise<string> {
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject(new Error('OAuth timeout'))
-    }, 5 * 60 * 1000) // 5 minutes
+    const timeout = setTimeout(
+      () => {
+        reject(new Error('OAuth timeout'))
+      },
+      5 * 60 * 1000
+    ) // 5 minutes
 
     // Listen for deep link callback
-    listen('oauth-callback', (event) => {
+    listen('oauth-callback', event => {
       clearTimeout(timeout)
       const token = event.payload.token
       resolve(token)
@@ -640,7 +654,7 @@ export async function createGitHubRepo(projectName: string) {
   const response = await fetch('https://api.github.com/user/repos', {
     method: 'POST',
     headers: {
-      'Authorization': `token ${token}`,
+      Authorization: `token ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -717,15 +731,11 @@ function GitStatus() {
   return (
     <div className="flex items-center gap-2 text-sm">
       {status.uncommittedChanges > 0 && (
-        <Badge variant="outline">
-          {status.uncommittedChanges} uncommitted
-        </Badge>
+        <Badge variant="outline">{status.uncommittedChanges} uncommitted</Badge>
       )}
 
       {status.unpushedCommits > 0 && (
-        <Badge variant="outline">
-          {status.unpushedCommits} unpushed
-        </Badge>
+        <Badge variant="outline">{status.unpushedCommits} unpushed</Badge>
       )}
 
       {status.synced && (
@@ -735,11 +745,7 @@ function GitStatus() {
         </Badge>
       )}
 
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={() => syncNow()}
-      >
+      <Button size="sm" variant="ghost" onClick={() => syncNow()}>
         <RefreshCw className="w-4 h-4" />
       </Button>
     </div>
@@ -767,11 +773,7 @@ function DecisionHistory({ decisionId }) {
               {commit.author} • {formatDate(commit.timestamp)}
             </p>
           </div>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => viewDiff(commit.id)}
-          >
+          <Button size="sm" variant="ghost" onClick={() => viewDiff(commit.id)}>
             View Changes
           </Button>
         </div>
@@ -786,18 +788,21 @@ function DecisionHistory({ decisionId }) {
 ## Benefits Summary
 
 ### For Solo Founders
+
 - ✅ Full decision history
 - ✅ Never lose work (Git backup)
 - ✅ Export = clone repo
 - ✅ Share with advisors easily
 
 ### For Teams
+
 - ✅ Real-time collaboration
 - ✅ See teammate's decisions
 - ✅ Review before finalizing
 - ✅ Conflict resolution
 
 ### For Advisors/Investors
+
 - ✅ Read-only access
 - ✅ Comment via GitHub
 - ✅ Track decision quality
@@ -808,24 +813,28 @@ function DecisionHistory({ decisionId }) {
 ## Implementation Checklist
 
 ### Week 1: Local Git
+
 - [ ] Git2 Rust integration
 - [ ] Init, commit, log commands
 - [ ] Auto-commit on actions
 - [ ] History view UI
 
 ### Week 2: GitHub OAuth
+
 - [ ] OAuth flow (deep link)
 - [ ] Token storage (keychain)
 - [ ] Create repo API
 - [ ] Push/pull commands
 
 ### Week 3: Collaboration
+
 - [ ] Clone existing projects
 - [ ] Conflict resolution UI
 - [ ] Team member management
 - [ ] Real-time status
 
 ### Week 4: Polish
+
 - [ ] Scenario branching
 - [ ] Comparison views
 - [ ] Export reports

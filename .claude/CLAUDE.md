@@ -55,5 +55,5 @@ Phase 5 (Week 8): Iteration & Polish → Team collaboration + follow-ups
 
 1. **Check current phase**: See plans/IMPLEMENTATION-PRIORITY.md for week/day tasks
 2. **Follow architecture**: Use patterns from @AGENTS.md
-3. **Reference specs**: plans/*.md files have detailed schemas and flows
+3. **Reference specs**: plans/\*.md files have detailed schemas and flows
 4. **Demo regularly**: Each phase has success criteria and demo scripts

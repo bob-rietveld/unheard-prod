@@ -1,6 +1,7 @@
 # fn-1-phase-1-context-upload-git-integration.7 Convex integration & error handling
 
 ## Description
+
 Convex integration with retry queue for failed mutations. Uses Clerk user ID from frontend.
 
 **Size:** M
@@ -9,65 +10,72 @@ Convex integration with retry queue for failed mutations. Uses Clerk user ID fro
 ## Approach
 
 **Full Upload Flow Integration**:
+
 1. User drops file → ContextUploader (Task 4)
 2. Validate file (type, size) → Show error if invalid
 3. Invoke `commands.uploadContextFile(path, projectId)` with Channel → Returns ContextFileRecord
 4. **Convex Mutation**: After Rust completes (file copied + committed):
+
    ```typescript
-   import { useUser } from '@clerk/clerk-react';
-   
-   const { user } = useUser();
-   const uploadMutation = useConvexMutation(api.contexts.create);
+   import { useUser } from '@clerk/clerk-react'
+
+   const { user } = useUser()
+   const uploadMutation = useConvexMutation(api.contexts.create)
 
    const convexRecord = {
-     clerkUserId: user!.id,  // Clerk user ID from hook
+     clerkUserId: user!.id, // Clerk user ID from hook
      projectId: currentProject.id,
-     ...rustRecord,  // ContextFileRecord from Rust
+     ...rustRecord, // ContextFileRecord from Rust
      uploadedAt: Date.now(),
      syncStatus: 'pending',
-   };
+   }
 
    try {
-     await uploadMutation(convexRecord);
+     await uploadMutation(convexRecord)
      // Mark synced in upload-store
    } catch (error) {
      // Add to retry queue
-     queueRetry(convexRecord);
+     queueRetry(convexRecord)
      // Show warning toast
    }
    ```
 
 **Error Handling Strategy**:
+
 - Parse failure → Toast error, don't proceed
 - Git commit failure → Log warning, continue (file still local)
 - Convex failure → Queue retry, mark unsynced badge
 - Duplicate file → Auto-rename with counter in Rust (dash format)
 
 **Duplicate Resolution** - Rust-side with dash format:
+
 - Check existing files in `{project}/context/` directory
 - Append `-N` before extension if duplicate
 - Logic: `file.csv` exists → `file-2.csv` (dash separator, NOT spaces)
 - All duplicate resolution happens in Rust during upload_context_file
 
 **Retry Queue** (localStorage persistence):
+
 ```typescript
-const retryQueue = useUploadStore(state => state.retryQueue);
+const retryQueue = useUploadStore(state => state.retryQueue)
 
 // Periodic retry (every 30s)
 useEffect(() => {
   const interval = setInterval(() => {
-    retryQueue.forEach(record => attemptRetry(record));
-  }, 30000);
-  return () => clearInterval(interval);
-}, []);
+    retryQueue.forEach(record => attemptRetry(record))
+  }, 30000)
+  return () => clearInterval(interval)
+}, [])
 ```
 
 **Network Resilience**:
+
 - Convex mutation failure doesn't block local operations
 - Queue failed mutations for retry
 - Show unsynced badge on files in error state
 
 **Testing Strategy**:
+
 - Unit tests for duplicate filename logic (in Rust)
 - Mock Tauri commands with `vi.fn()`
 - Test Convex failure + retry logic
@@ -85,6 +93,7 @@ useEffect(() => {
 - **Clerk user ID**: Get from useUser() hook, pass to Convex mutation
 
 ## Acceptance
+
 - [ ] Convex mutation accepts clerkUserId from frontend
 - [ ] Frontend gets clerkUserId via useUser() hook
 - [ ] Retry queue in localStorage
@@ -96,9 +105,11 @@ useEffect(() => {
 - [ ] Test coverage >80%
 
 ## Done summary
+
 TBD
 
 ## Evidence
+
 - Commits:
 - Tests:
 - PRs:
