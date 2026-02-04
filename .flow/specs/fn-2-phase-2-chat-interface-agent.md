@@ -71,7 +71,7 @@ Generate config object + decision summary
   ↓
 Create markdown file via Tauri command: create_decision_log(config)
   ↓ Rust: write to /decisions/, git commit (reuse Phase 1 git_auto_commit)
-Update Convex: mutation api.decisionLogs.create(decisionData)
+Update Convex: mutation api.decisions.updateWithLog(decisionData)
   ↓
 Agent: "Decision log created! View at decisions/2026-02-04-investor-evaluation.md"
 ```

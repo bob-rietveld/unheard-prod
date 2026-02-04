@@ -36,7 +36,7 @@ Follow existing Zustand pattern from `src/store/ui-store.ts:1-86`:
 ## References
 
 - Pattern: `src/store/ui-store.ts:1-86`
-- Testing: `src/store/ui-store.test.ts`
+- Testing pattern: follow `src/store/ui-store.test.ts` if it exists
 - Architecture: `docs/developer/state-management.md`
 ## Acceptance
 - [ ] `useChatStore` created with devtools middleware

@@ -21,9 +21,13 @@ pub fn run() {
     // In production, set environment variables via your deployment system
     #[cfg(debug_assertions)]
     {
-        // Try to load from project root (where .env.local is located)
-        if let Err(e) = dotenvy::from_filename("../.env.local") {
-            log::warn!("Could not load .env.local: {}", e);
+        use std::path::Path;
+        // CARGO_MANIFEST_DIR points to src-tauri, so ../.env.local is the project root
+        let env_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join(".env.local");
+        if let Err(e) = dotenvy::from_path(&env_path) {
+            log::warn!("Could not load .env.local from {}: {}", env_path.display(), e);
         }
     }
 
