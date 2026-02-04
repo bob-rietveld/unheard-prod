@@ -92,11 +92,8 @@ useEffect(() => {
 - [ ] Tauri capabilities configured for window events
 
 ## Done summary
-
-TBD
-
+Implemented file upload UI with Tauri drag-and-drop events, Channel-based progress tracking, and concurrent upload management with 5-file queue limit.
 ## Evidence
-
-- Commits:
-- Tests:
+- Commits: 18da1cb2b2048703e73167c324a8bf8dd2632b8e
+- Tests: npm run typecheck
 - PRs:

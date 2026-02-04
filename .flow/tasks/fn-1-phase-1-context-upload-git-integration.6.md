@@ -34,9 +34,10 @@ Context library UI to display uploaded files. NO delete UI (out of scope).
 - 2 columns tablet
 - 3 columns desktop
 
-**Convex Integration**: Extend `src/services/context.ts`:
+**Convex Integration**: Extend existing `src/services/context.ts`:
+<!-- Updated by plan-sync: fn-1.4 created context.ts with useUploadContext() hook and queueUploads() -->
 
-- `useContextFiles(projectId)` query
+- `useContextFiles(projectId)` query - add alongside existing `useUploadContext()`
 - Follow wrapper pattern from `src/services/convex-wrapper.ts`
 
 **NO Delete UI**: Out of scope per epic (Phase 1 is upload-only)

@@ -5,7 +5,8 @@
 Convex integration with retry queue for failed mutations. Uses Clerk user ID from frontend.
 
 **Size:** M
-**Files:** `src/services/context.ts`, `src/store/upload-store.ts`, `convex/contexts.ts`
+**Files:** `src/services/context.ts` (extend existing), `src/store/upload-store.ts` (extend existing), `convex/contexts.ts`
+<!-- Updated by plan-sync: fn-1.4 created context.ts with useUploadContext() hook and upload-store.ts with UploadFileState -->
 
 ## Approach
 
@@ -13,7 +14,8 @@ Convex integration with retry queue for failed mutations. Uses Clerk user ID fro
 
 1. User drops file → ContextUploader (Task 4)
 2. Validate file (type, size) → Show error if invalid
-3. Invoke `commands.uploadContextFile(path, projectId)` with Channel → Returns ContextFileRecord
+3. Invoke `commands.uploadContextFile(path, projectPath, channel)` with Channel → Returns ContextFileRecord
+<!-- Updated by plan-sync: fn-1.4 used projectPath (string) not projectId (Convex Id) -->
 4. **Convex Mutation**: After Rust completes (file copied + committed):
 
    ```typescript
@@ -84,6 +86,10 @@ useEffect(() => {
 
 ## Key Context
 
+<!-- Updated by plan-sync: fn-1.4 established these patterns in context.ts -->
+- **Existing hook**: `useUploadContext()` returns TanStack Query mutation - extend `onSuccess` to add Convex mutation
+- **Existing store**: `useUploadStore` has `addFile`, `updateFile`, `removeFile`, `clearCompleted` - add `retryQueue` state
+- **Existing queue**: `queueUploads(paths, projectPath, uploadFn)` handles concurrency - Convex retry is separate concern
 - **Zero data loss**: File saved locally even if Convex fails
 - **Retry persistence**: Queue survives app restarts (localStorage)
 - **Transactional boundaries**: Clear separation of copy/git/convex steps
