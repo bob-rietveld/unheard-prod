@@ -65,83 +65,43 @@ npm run tauri:dev
 
 ### Query Pattern
 
-Use `useConvexData` wrapper for queries (defined in `src/services/convex-wrapper.ts`):
-
-```typescript
-// convex/projects.ts
-import { query } from './_generated/server'
-import { v } from 'convex/values'
-
-export const list = query({
-  args: {},
-  handler: async ctx => {
-    const userId = await ctx.auth.getUserIdentity()
-    if (!userId) return []
-
-    return await ctx.db
-      .query('projects')
-      .withIndex('by_user', q => q.eq('userId', userId.subject))
-      .filter(q => q.eq(q.field('archived'), false))
-      .collect()
-  },
-})
-```
+Use Convex's `useQuery` hook directly with TanStack Query for caching:
 
 ```typescript
 // src/services/projects.ts
 import { api } from '@/convex/_generated/api'
-import { useConvexData } from './convex-wrapper'
-
-export const projectQueryKeys = {
-  all: ['projects'] as const,
-  lists: () => [...projectQueryKeys.all, 'list'] as const,
-}
+import { useQuery } from 'convex/react'
 
 export function useProjects() {
-  return useConvexData(projectQueryKeys.lists(), api.projects.list, {})
+  return useQuery(api.projects.list)
 }
 ```
 
 ### Mutation Pattern
 
-Use `useConvexMutation` wrapper for mutations:
-
-```typescript
-// convex/projects.ts
-import { mutation } from './_generated/server'
-import { v } from 'convex/values'
-
-export const create = mutation({
-  args: {
-    name: v.string(),
-    description: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const userId = await ctx.auth.getUserIdentity()
-    if (!userId) throw new Error('Not authenticated')
-
-    return await ctx.db.insert('projects', {
-      ...args,
-      userId: userId.subject,
-      archived: false,
-      createdAt: Date.now(),
-    })
-  },
-})
-```
+Use Convex's `useMutation` hook:
 
 ```typescript
 // src/services/projects.ts
-import { useConvexMutation } from './convex-wrapper'
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 import { toast } from 'sonner'
 
 export function useCreateProject() {
-  return useConvexMutation(api.projects.create, {
-    invalidateKeys: [projectQueryKeys.lists()],
-    onSuccess: () => {
-      toast.success('Project created')
+  const createProject = useMutation(api.projects.create)
+
+  return {
+    mutate: async (args: { name: string; description?: string }) => {
+      try {
+        const id = await createProject(args)
+        toast.success('Project created')
+        return id
+      } catch (error) {
+        toast.error('Failed to create project')
+        throw error
+      }
     },
-  })
+  }
 }
 ```
 
@@ -188,7 +148,66 @@ const { data: projects } = useProjects()
 
 ## Authentication
 
-Authentication will be added in Phase 2. For now, queries/mutations will work unauthenticated in development.
+Unheard uses **Clerk for authentication** with server-side JWT verification via `ConvexProviderWithClerk`.
+
+### Setup
+
+1. All tables use `clerkUserId: v.string()` instead of `userId: v.id('users')`
+2. `ClerkProvider` wraps the app with Clerk authentication
+3. `ConvexProviderWithClerk` passes Clerk auth tokens to Convex
+4. Mutations use `getCurrentUserClerkId(ctx)` to get authenticated user ID
+
+### Authenticated Queries
+
+```typescript
+// convex/projects.ts
+import { query } from './_generated/server'
+import { getCurrentUserClerkId } from './auth'
+
+export const list = query({
+  args: {},
+  handler: async ctx => {
+    const clerkUserId = await getCurrentUserClerkId(ctx)
+
+    return await ctx.db
+      .query('projects')
+      .withIndex('by_user', q => q.eq('clerkUserId', clerkUserId))
+      .filter(q => q.eq(q.field('archived'), false))
+      .collect()
+  },
+})
+```
+
+### Authenticated Mutations
+
+```typescript
+// convex/projects.ts
+import { mutation } from './_generated/server'
+import { v } from 'convex/values'
+import { getCurrentUserClerkId } from './auth'
+
+export const create = mutation({
+  args: {
+    name: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Server-side auth - client cannot spoof identity
+    const clerkUserId = await getCurrentUserClerkId(ctx)
+
+    return await ctx.db.insert('projects', {
+      ...args,
+      clerkUserId,
+      archived: false,
+      createdAt: Date.now(),
+    })
+  },
+})
+```
+
+**Important**: Never accept `clerkUserId` from client args - always derive it server-side from `getCurrentUserClerkId(ctx)` to prevent identity spoofing.
+
+See [clerk-setup.md](./clerk-setup.md) for detailed Clerk configuration.
 
 ## Schema Design
 
@@ -202,10 +221,10 @@ export default defineSchema({
   projects: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
-    userId: v.id('users'),
+    clerkUserId: v.string(), // Clerk user ID from JWT
     archived: v.boolean(),
     createdAt: v.number(),
-  }).index('by_user', ['userId']),
+  }).index('by_user', ['clerkUserId']),
 
   // Add more tables as needed
 })

@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
 import { ConvexReactClient } from 'convex/react'
-import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react'
+import { ClerkProvider, SignedIn, SignedOut, useAuth } from '@clerk/clerk-react'
 import { initClerk } from 'tauri-plugin-clerk'
 import type { Clerk } from '@clerk/clerk-js'
 import App from '@/App'
@@ -11,6 +11,16 @@ import { queryClient } from '@/lib/query-client'
 import { SignInPage } from './SignInPage'
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
+
+// Wrapper component to provide useAuth hook to ConvexProviderWithClerk
+function ConvexAuthProvider({ children }: { children: React.ReactNode }) {
+  return (
+    // eslint-disable-next-line react-compiler/react-compiler
+    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+      {children}
+    </ConvexProviderWithClerk>
+  )
+}
 
 export function ClerkLoader() {
   const [clerk, setClerk] = React.useState<Clerk | null>(null)
@@ -50,7 +60,7 @@ export function ClerkLoader() {
       publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string}
       Clerk={clerk}
     >
-      <ConvexProviderWithClerk client={convex}>
+      <ConvexAuthProvider>
         <QueryClientProvider client={queryClient}>
           <SignedIn>
             <App />
@@ -60,7 +70,7 @@ export function ClerkLoader() {
             <SignInPage />
           </SignedOut>
         </QueryClientProvider>
-      </ConvexProviderWithClerk>
+      </ConvexAuthProvider>
     </ClerkProvider>
   )
 }

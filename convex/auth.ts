@@ -10,11 +10,10 @@ export async function getCurrentUserClerkId(ctx: QueryCtx | MutationCtx): Promis
   if (!identity) {
     throw new Error('Unauthenticated: Must be signed in to perform this action')
   }
-  // Clerk identity tokenIdentifier format: "https://clerk-domain.clerk.accounts.dev|user_xxx"
-  // Extract the user ID after the pipe
-  const clerkUserId = identity.tokenIdentifier.split('|')[1]
+  // Use identity.subject which contains the Clerk user ID
+  const clerkUserId = identity.subject
   if (!clerkUserId) {
-    throw new Error('Invalid Clerk identity format')
+    throw new Error('Invalid identity: missing subject')
   }
   return clerkUserId
 }

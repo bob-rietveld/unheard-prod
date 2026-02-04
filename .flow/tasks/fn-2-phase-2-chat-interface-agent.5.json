@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-02-04T14:56:24.300160Z",
+  "depends_on": [
+    "fn-2-phase-2-chat-interface-agent.3",
+    "fn-2-phase-2-chat-interface-agent.4"
+  ],
+  "epic": "fn-2-phase-2-chat-interface-agent",
+  "id": "fn-2-phase-2-chat-interface-agent.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-2-phase-2-chat-interface-agent.5.md",
+  "status": "todo",
+  "title": "Template configuration wizard UI",
+  "updated_at": "2026-02-04T14:56:24.300260Z"
+}
