@@ -82,6 +82,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "convex": "^1.31.7",
+    "convex-helpers": "^0.1.111",
     "i18next": "^25.7.3",
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",

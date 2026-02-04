@@ -1,5 +1,4 @@
-import { v } from 'convex/values'
-import { mutation, query, MutationCtx, QueryCtx } from './_generated/server'
+import { MutationCtx, QueryCtx } from './_generated/server'
 
 /**
  * Get the current user's Clerk ID from the auth context.

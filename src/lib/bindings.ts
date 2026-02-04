@@ -142,6 +142,37 @@ async updateQuickPaneShortcut(shortcut: string | null) : Promise<Result<null, st
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Initialize a Git repository for a project with proper directory structure.
+ * 
+ * Creates the following structure:
+ * - context/ - for uploaded files
+ * - decisions/ - for decision records
+ * - experiments/ - for experiment results
+ * - .gitattributes - LFS rules for PDF and Excel files
+ * - README.md - initial project documentation
+ */
+async initializeGit(path: string) : Promise<Result<GitInitResult, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("initialize_git", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Detect if Git LFS is installed and available.
+ * 
+ * Returns true if `git-lfs version` command succeeds.
+ */
+async detectGitLfs() : Promise<Result<boolean, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("detect_git_lfs") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -170,6 +201,10 @@ quick_pane_shortcut: string | null;
  * If None, uses system locale detection
  */
 language: string | null }
+/**
+ * Result of Git initialization.
+ */
+export type GitInitResult = { success: boolean; path: string; lfsAvailable: boolean; commitHash: string | null }
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 /**
  * Error types for recovery operations (typed for frontend matching)
