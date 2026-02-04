@@ -115,8 +115,10 @@
   "context.upload.status.parsing": "Parsing...",
   "context.upload.status.copying": "Copying...",
   "context.upload.status.committing": "Committing...",
+  "context.upload.status.syncing": "Syncing to cloud...",
   "context.upload.status.complete": "Complete",
   "context.upload.status.error": "Error",
+  "context.upload.status.unsynced": "Unsynced",
   "context.upload.clearCompleted": "Clear completed",
   "context.upload.noProject": "No project selected. Please create or select a project first.",
 

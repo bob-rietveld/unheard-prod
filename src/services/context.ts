@@ -1,5 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
-import { useQuery as useConvexQuery } from 'convex/react'
+import {
+  useQuery as useConvexQuery,
+  useMutation as useConvexMutation,
+} from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
@@ -8,6 +11,7 @@ import type { UploadProgress } from '@/lib/bindings'
 import { useUploadStore } from '@/store/upload-store'
 import { Channel } from '@tauri-apps/api/core'
 import type { Id } from '../../convex/_generated/dataModel'
+import { useEffect } from 'react'
 
 // Supported file extensions
 const SUPPORTED_EXTENSIONS = ['.csv', '.pdf', '.xlsx', '.xls']
@@ -47,10 +51,13 @@ export function useContextFiles(projectId: Id<'projects'> | null | undefined) {
 /**
  * Hook to upload context files with progress tracking.
  * Handles file upload, progress updates via Tauri channels, and state management.
+ * After successful Rust upload, syncs metadata to Convex.
  */
-export function useUploadContext() {
+export function useUploadContext(projectId: Id<'projects'> | null) {
   const addFile = useUploadStore(state => state.addFile)
   const updateFile = useUploadStore(state => state.updateFile)
+  const addToRetryQueue = useUploadStore(state => state.addToRetryQueue)
+  const convexCreate = useConvexMutation(api.contexts.create)
 
   return useMutation({
     mutationFn: async ({
@@ -99,7 +106,8 @@ export function useUploadContext() {
             updateFile(uploadId, 'committing', progress.percent || 0)
             break
           case 'Complete':
-            updateFile(uploadId, 'complete', 100)
+            // Don't mark complete yet - need to sync to Convex first
+            updateFile(uploadId, 'syncing', 100)
             break
           case 'Error':
             updateFile(
@@ -124,9 +132,61 @@ export function useUploadContext() {
           throw new Error(result.error)
         }
 
-        logger.info('Context file uploaded successfully', {
+        logger.info('Context file uploaded successfully (local)', {
           filename: result.data.originalFilename,
         })
+
+        // Sync to Convex if project ID is available
+        if (projectId) {
+          try {
+            await convexCreate({
+              projectId,
+              originalFilename: result.data.originalFilename,
+              storedFilename: result.data.storedFilename,
+              fileType: result.data.fileType,
+              detectedType: result.data.detectedType,
+              rows: result.data.rows,
+              columns: result.data.columns,
+              preview: result.data.preview,
+              pages: result.data.pages,
+              textPreview: result.data.textPreview,
+              sizeBytes: result.data.sizeBytes,
+              relativeFilePath: result.data.relativeFilePath,
+              isLFS: result.data.isLFS,
+              uploadedAt: Date.now(),
+              syncStatus: 'synced',
+            })
+
+            logger.info('Context file synced to Convex', {
+              filename: result.data.originalFilename,
+            })
+
+            // Mark as complete after successful sync
+            updateFile(uploadId, 'complete', 100)
+          } catch (convexError) {
+            logger.error('Failed to sync to Convex, queuing for retry', {
+              error: convexError instanceof Error ? convexError.message : String(convexError),
+              filename: result.data.originalFilename,
+            })
+
+            // Add to retry queue
+            addToRetryQueue({
+              id: uploadId,
+              projectId,
+              record: result.data,
+              uploadedAt: Date.now(),
+            })
+
+            // Mark as unsynced but locally complete
+            updateFile(uploadId, 'unsynced', 100, 'Failed to sync to cloud')
+          }
+        } else {
+          // No project ID - mark complete anyway (local only)
+          updateFile(uploadId, 'complete', 100)
+          logger.warn('No project ID provided, file stored locally only', {
+            filename: result.data.originalFilename,
+          })
+        }
 
         return result.data
       } finally {
@@ -135,10 +195,20 @@ export function useUploadContext() {
         processQueue()
       }
     },
-    onSuccess: data => {
-      toast.success('File uploaded successfully', {
-        description: data.originalFilename,
-      })
+    onSuccess: (data, variables) => {
+      const uploadId = variables.path
+      const file = useUploadStore.getState().files[uploadId]
+
+      if (file?.status === 'unsynced') {
+        toast.warning('File uploaded locally but not synced', {
+          description: `${data.originalFilename} - will retry automatically`,
+        })
+      } else {
+        toast.success('File uploaded successfully', {
+          description: data.originalFilename,
+        })
+      }
+
       logger.info('Upload completed', { filename: data.originalFilename })
     },
     onError: (error: Error, variables) => {
@@ -174,4 +244,97 @@ export function queueUploads(
       uploadQueue.push(startUpload)
     }
   })
+}
+
+/**
+ * Hook to automatically retry failed Convex syncs.
+ * Runs every 30 seconds and attempts to sync items in the retry queue.
+ */
+export function useConvexRetry() {
+  const retryQueue = useUploadStore(state => state.retryQueue)
+  const removeFromRetryQueue = useUploadStore(
+    state => state.removeFromRetryQueue
+  )
+  const updateRetryAttempt = useUploadStore(state => state.updateRetryAttempt)
+  const updateFile = useUploadStore(state => state.updateFile)
+  const convexCreate = useConvexMutation(api.contexts.create)
+
+  useEffect(() => {
+    if (retryQueue.length === 0) {
+      return
+    }
+
+    const interval = setInterval(
+      async () => {
+        const now = Date.now()
+
+        for (const item of retryQueue) {
+          // Skip if attempted too recently (less than 30s ago)
+          if (now - item.lastAttempt < 30000) {
+            continue
+          }
+
+          // Skip if too many attempts (max 10)
+          if (item.attempts >= 10) {
+            logger.warn('Max retry attempts reached, removing from queue', {
+              id: item.id,
+              attempts: item.attempts,
+            })
+            removeFromRetryQueue(item.id)
+            continue
+          }
+
+          logger.info('Retrying Convex sync', {
+            id: item.id,
+            attempt: item.attempts + 1,
+          })
+
+          try {
+            await convexCreate({
+              projectId: item.projectId,
+              originalFilename: item.record.originalFilename,
+              storedFilename: item.record.storedFilename,
+              fileType: item.record.fileType,
+              detectedType: item.record.detectedType,
+              rows: item.record.rows,
+              columns: item.record.columns,
+              preview: item.record.preview,
+              pages: item.record.pages,
+              textPreview: item.record.textPreview,
+              sizeBytes: item.record.sizeBytes,
+              relativeFilePath: item.record.relativeFilePath,
+              isLFS: item.record.isLFS,
+              uploadedAt: item.uploadedAt,
+              syncStatus: 'synced',
+            })
+
+            logger.info('Retry successful, synced to Convex', { id: item.id })
+
+            // Remove from retry queue and update file status
+            removeFromRetryQueue(item.id)
+            updateFile(item.id, 'complete', 100)
+
+            toast.success('File synced to cloud', {
+              description: item.record.originalFilename,
+            })
+          } catch (error) {
+            logger.error('Retry failed', {
+              id: item.id,
+              error: error instanceof Error ? error.message : String(error),
+            })
+            updateRetryAttempt(item.id)
+          }
+        }
+      },
+      30000
+    ) // Every 30 seconds
+
+    return () => clearInterval(interval)
+  }, [
+    retryQueue,
+    convexCreate,
+    removeFromRetryQueue,
+    updateRetryAttempt,
+    updateFile,
+  ])
 }

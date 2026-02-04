@@ -12,7 +12,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { useProjectStore } from '@/store/project-store'
 import { useUploadStore } from '@/store/upload-store'
-import { useUploadContext, queueUploads } from '@/services/context'
+import {
+  useUploadContext,
+  queueUploads,
+  useConvexRetry,
+} from '@/services/context'
 import { logger } from '@/lib/logger'
 
 // Supported file extensions
@@ -25,7 +29,10 @@ export function ContextUploader() {
   const clearCompleted = useUploadStore(state => state.clearCompleted)
   const [isDragging, setIsDragging] = useState(false)
 
-  const { mutate: uploadFile } = useUploadContext()
+  const { mutate: uploadFile } = useUploadContext(currentProject?._id ?? null)
+
+  // Enable automatic retry for failed Convex syncs
+  useConvexRetry()
 
   useEffect(() => {
     if (!currentProject) {
@@ -98,7 +105,10 @@ export function ContextUploader() {
   const fileEntries = Object.entries(files)
   const hasFiles = fileEntries.length > 0
   const completedCount = fileEntries.filter(
-    ([_, file]) => file.status === 'complete' || file.status === 'error'
+    ([_, file]) =>
+      file.status === 'complete' ||
+      file.status === 'error' ||
+      file.status === 'unsynced'
   ).length
 
   return (
@@ -166,7 +176,14 @@ interface FileUploadItemProps {
   id: string
   file: {
     originalFilename: string
-    status: 'parsing' | 'copying' | 'committing' | 'complete' | 'error'
+    status:
+      | 'parsing'
+      | 'copying'
+      | 'committing'
+      | 'syncing'
+      | 'complete'
+      | 'error'
+      | 'unsynced'
     percent: number
     error?: string
   }
@@ -180,16 +197,20 @@ function FileUploadItem({ id, file }: FileUploadItemProps) {
     parsing: t('context.upload.status.parsing'),
     copying: t('context.upload.status.copying'),
     committing: t('context.upload.status.committing'),
+    syncing: t('context.upload.status.syncing'),
     complete: t('context.upload.status.complete'),
     error: t('context.upload.status.error'),
+    unsynced: t('context.upload.status.unsynced'),
   }[file.status]
 
   const statusColor = {
     parsing: 'bg-blue-500',
     copying: 'bg-yellow-500',
     committing: 'bg-purple-500',
+    syncing: 'bg-cyan-500',
     complete: 'bg-green-500',
     error: 'bg-red-500',
+    unsynced: 'bg-orange-500',
   }[file.status]
 
   return (
@@ -199,7 +220,9 @@ function FileUploadItem({ id, file }: FileUploadItemProps) {
           <p className="text-sm font-medium">{file.originalFilename}</p>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground text-xs">{statusText}</span>
-            {(file.status === 'complete' || file.status === 'error') && (
+            {(file.status === 'complete' ||
+              file.status === 'error' ||
+              file.status === 'unsynced') && (
               <Button
                 variant="ghost"
                 size="icon-sm"
@@ -211,7 +234,9 @@ function FileUploadItem({ id, file }: FileUploadItemProps) {
           </div>
         </div>
 
-        {file.status !== 'complete' && file.status !== 'error' && (
+        {file.status !== 'complete' &&
+          file.status !== 'error' &&
+          file.status !== 'unsynced' && (
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
               className={`h-full transition-all duration-300 ${statusColor}`}

@@ -62,11 +62,8 @@ Context library UI to display uploaded files. NO delete UI (out of scope).
 - [ ] NO delete action in UI
 
 ## Done summary
-
-TBD
-
+Implemented context library UI with ContextLibrary and ContextFileCard components, displaying uploaded files in a responsive grid with file type icons, metadata badges, and sync status indicators.
 ## Evidence
-
-- Commits:
-- Tests:
+- Commits: d444404c4843e2b6a3f4253ac1080cdcfdd55dcc
+- Tests: npm run typecheck
 - PRs:
