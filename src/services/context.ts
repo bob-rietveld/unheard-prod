@@ -1,10 +1,13 @@
 import { useMutation } from '@tanstack/react-query'
+import { useQuery as useConvexQuery } from 'convex/react'
+import { api } from '../../convex/_generated/api'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { commands } from '@/lib/tauri-bindings'
 import type { UploadProgress } from '@/lib/bindings'
 import { useUploadStore } from '@/store/upload-store'
 import { Channel } from '@tauri-apps/api/core'
+import type { Id } from '../../convex/_generated/dataModel'
 
 // Supported file extensions
 const SUPPORTED_EXTENSIONS = ['.csv', '.pdf', '.xlsx', '.xls']
@@ -32,6 +35,16 @@ function processQueue() {
 }
 
 /**
+ * Query hook to get all context files for a project from Convex.
+ */
+export function useContextFiles(projectId: Id<'projects'> | null | undefined) {
+  return useConvexQuery(
+    api.contexts.listByProject,
+    projectId ? { projectId } : 'skip'
+  )
+}
+
+/**
  * Hook to upload context files with progress tracking.
  * Handles file upload, progress updates via Tauri channels, and state management.
  */
@@ -56,7 +69,9 @@ export function useUploadContext() {
       const filename = path.split('/').pop() || path
 
       // Check file extension
-      const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'))
+      const extension = filename
+        .toLowerCase()
+        .substring(filename.lastIndexOf('.'))
       if (!SUPPORTED_EXTENSIONS.includes(extension)) {
         throw new Error(
           `Unsupported file type: ${extension}. Supported types: ${SUPPORTED_EXTENSIONS.join(', ')}`
@@ -87,14 +102,23 @@ export function useUploadContext() {
             updateFile(uploadId, 'complete', 100)
             break
           case 'Error':
-            updateFile(uploadId, 'error', 0, progress.message || 'Upload failed')
+            updateFile(
+              uploadId,
+              'error',
+              0,
+              progress.message || 'Upload failed'
+            )
             break
         }
       }
 
       try {
         // Invoke Rust command with channel
-        const result = await commands.uploadContextFile(path, projectPath, channel)
+        const result = await commands.uploadContextFile(
+          path,
+          projectPath,
+          channel
+        )
 
         if (result.status === 'error') {
           throw new Error(result.error)

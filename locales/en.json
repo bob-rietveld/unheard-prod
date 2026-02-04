@@ -118,5 +118,12 @@
   "context.upload.status.complete": "Complete",
   "context.upload.status.error": "Error",
   "context.upload.clearCompleted": "Clear completed",
-  "context.upload.noProject": "No project selected. Please create or select a project first."
+  "context.upload.noProject": "No project selected. Please create or select a project first.",
+
+  "context.library.noProject": "No project selected. Please create or select a project first.",
+  "context.library.lfs": "LFS",
+  "context.library.uploadedAt": "Uploaded {{date}}",
+  "context.library.syncStatus.synced": "Synced",
+  "context.library.syncStatus.pending": "Pending",
+  "context.library.syncStatus.error": "Sync Error"
 }

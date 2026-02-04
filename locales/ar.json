@@ -106,5 +106,24 @@
   "toast.error.windowMinimizeFailed": "فشل تصغير النافذة: {{message}}",
   "toast.error.windowMaximizeFailed": "فشل تبديل التكبير: {{message}}",
   "toast.error.fullscreenEnterFailed": "فشل الدخول إلى ملء الشاشة: {{message}}",
-  "toast.error.fullscreenExitFailed": "فشل الخروج من ملء الشاشة: {{message}}"
+  "toast.error.fullscreenExitFailed": "فشل الخروج من ملء الشاشة: {{message}}",
+
+  "context.upload.title": "تحميل ملفات السياق",
+  "context.upload.dropZone": "اسحب الملفات أو انقر للتحميل",
+  "context.upload.supportedFormats": "التنسيقات المدعومة: CSV، PDF، Excel (.xlsx، .xls)",
+  "context.upload.uploading": "جاري تحميل {{count}} ملف (ملفات)...",
+  "context.upload.status.parsing": "جاري التحليل...",
+  "context.upload.status.copying": "جاري النسخ...",
+  "context.upload.status.committing": "جاري الحفظ...",
+  "context.upload.status.complete": "مكتمل",
+  "context.upload.status.error": "خطأ",
+  "context.upload.clearCompleted": "مسح المكتملة",
+  "context.upload.noProject": "لم يتم تحديد مشروع. يرجى إنشاء أو تحديد مشروع أولاً.",
+
+  "context.library.noProject": "لم يتم تحديد مشروع. يرجى إنشاء أو تحديد مشروع أولاً.",
+  "context.library.lfs": "LFS",
+  "context.library.uploadedAt": "تم التحميل {{date}}",
+  "context.library.syncStatus.synced": "متزامن",
+  "context.library.syncStatus.pending": "قيد الانتظار",
+  "context.library.syncStatus.error": "خطأ في المزامنة"
 }
