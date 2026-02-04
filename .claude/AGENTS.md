@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository is a template with sensible defaults for building Tauri React apps.
+**Unheard** is a decision support tool for founders that provides integrated decision analysis through synthetic data generation, hypothesis testing, and data visualization.
 
 ## Core Rules
 

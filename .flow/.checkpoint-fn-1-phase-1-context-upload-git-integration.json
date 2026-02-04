@@ -1,0 +1,176 @@
+{
+  "created_at": "2026-02-04T12:12:33.791777Z",
+  "epic": {
+    "data": {
+      "branch_name": "fn-1-phase-1-context-upload-git-integration",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-02-04T11:35:27.709875Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-1-phase-1-context-upload-git-integration",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-1-phase-1-context-upload-git-integration.md",
+      "status": "open",
+      "title": "Phase 1: Context Upload & Git Integration",
+      "updated_at": "2026-02-04T11:57:10.905372Z"
+    },
+    "spec": "# Phase 1: Context Upload & Git Integration\n\n## Overview\n\nEnable users to upload company context files (CSV, PDF, Excel) via drag-and-drop, automatically parse metadata, store files in version control (Git), and sync metadata to Convex cloud backend. This is the foundational feature for the entire Unheard decision support platform.\n\n**Duration**: Weeks 1-2 (14 days)\n**Stack**: Tauri v2 (Rust), React 19, Zustand, TanStack Query, Convex, git2, csv crate\n\n## Scope\n\n### In Scope\n- File upload UI using Tauri file-drop events (CSV, PDF, Excel support)\n- Rust commands for file parsing (CSV/PDF/Excel metadata extraction)\n- Context library UI for browsing uploaded files\n- Git auto-commit with LFS support for large files\n- Convex database storage for file metadata (aligned with existing auth)\n- Error handling for parse failures and duplicate files\n- Project foundation using EXISTING Convex projects table\n- Filename sanitization and duplicate resolution\n\n### Out of Scope\n- File deletion UI (covered in Phase 5)\n- Advanced PDF features (OCR, annotations)\n- File versioning/history UI (Git history exists but no UI)\n- Template system integration (Phase 2)\n- Cloud execution (Phase 3)\n\n## Approach\n\nFollow vertical slice strategy: complete working feature end-to-end before moving to next phase.\n\n**Architecture Pattern**:\n```\nUser drops file via Tauri window.onFileDrop\n  \u2193 Tauri event provides filesystem path\ninvoke upload_context_file(path, projectId) [Rust]\n  \u2193 spawn_blocking thread\n1. Read file bytes + compute size\n2. Parse metadata \u2192 FileParseResult\n3. Generate safe storedFilename (slugify original)\n4. Check for duplicates \u2192 append -2 if needed\n5. Atomic copy to {project}/context/{storedFilename}\n6. Git LFS track (if >10MB) + add + commit\n  \u2193 emit progress events via Tauri Channel\n7. Return ContextFileRecord to frontend\n  \u2193\nFrontend: Add projectId + uploadedAt + userId\n  \u2193\nConvex mutation api.contexts.create(record)\n  \u2193 on failure: mark \"unsynced\", queue retry\nReact ContextLibrary refreshes \u2192 Display file card\n```\n\n**Key Technical Decisions**:\n1. **Tauri file-drop events** - window.onFileDrop for reliable paths\n2. **Files stored locally** in `{project_path}/context/`\n3. **Git LFS configured** via `.gitattributes` for files >10MB\n4. **Metadata in Convex** - uses EXISTING projects + userId pattern\n5. **Tauri Channels mandatory** - stream progress, no UI freeze\n6. **Filename strategy**: originalFilename + storedFilename (slugified)\n7. **Auth strategy**: Use EXISTING Convex auth pattern (userId from context)\n8. **Upload state machine**: pending_copy \u2192 pending_git \u2192 pending_convex \u2192 synced\n\n**Dependencies Resolution**:\n- Day 0: Rust crates (git2, csv, lopdf, calamine with xlsb)\n- Day 0: Deploy Convex schema (contextFiles WITH userId to match existing)\n- Day 0: `.gitattributes` for LFS tracking\n- Day 0: Detect git-lfs; warn if missing\n- Day 0: Use EXISTING Convex projects table (no new table needed)\n\n## Quick commands\n\n```bash\n# Setup dependencies\ncd src-tauri && cargo add git2 csv lopdf \"calamine@0.26\" --features xlsb\n\n# Create .gitattributes\necho \"context/**/*.pdf filter=lfs diff=lfs merge=lfs -text\" > .gitattributes\necho \"context/**/*.xlsx filter=lfs diff=lfs merge=lfs -text\" >> .gitattributes\n\n# Deploy Convex schema\nnpx convex dev\n\n# Run tests\nnpm run test src/components/context/ContextUploader.test.tsx\ncargo test --lib commands::context::tests\n\n# Manual test\nnpm run tauri:dev\n```\n\n## Acceptance\n\n- [ ] User can create project via EXISTING Convex projects table\n- [ ] Project init creates `.gitattributes` + checks LFS\n- [ ] Tauri file-drop handler receives paths\n- [ ] CSV/PDF/Excel parsing in spawn_blocking with progress\n- [ ] Filename sanitization: originalFilename + storedFilename (slugified)\n- [ ] Duplicates: `file.csv` \u2192 `file-2.csv`\n- [ ] Atomic copy to context/\n- [ ] Git LFS track (>10MB) + commit\n- [ ] Channel emits progress events\n- [ ] ContextFileRecord with userId from Convex auth\n- [ ] Convex failure \u2192 retry queue\n- [ ] Context library shows files with progress\n- [ ] LFS badge for >10MB files\n- [ ] 5 concurrent uploads work\n- [ ] All error paths tested\n\n## Data Model Changes\n\n**Convex Schema** (aligned with existing):\n```typescript\ncontextFiles: defineTable({\n  userId: v.id('users'),  // Match existing pattern\n  projectId: v.id('projects'),  // Use EXISTING projects table\n  originalFilename: v.string(),\n  storedFilename: v.string(),\n  fileType: v.string(),\n  detectedType: v.optional(v.string()),\n  rows: v.optional(v.number()),\n  columns: v.optional(v.array(v.string())),\n  preview: v.optional(v.string()),\n  pages: v.optional(v.number()),\n  textPreview: v.optional(v.string()),\n  sizeBytes: v.number(),\n  relativeFilePath: v.string(),\n  isLFS: v.boolean(),\n  uploadedAt: v.number(),\n  syncStatus: v.union(\n    v.literal('synced'),\n    v.literal('pending'),\n    v.literal('error')\n  ),\n})\n  .index('by_user', ['userId'])\n  .index('by_project', ['projectId']),\n```\n\n## Risks & Mitigations\n\n| Risk | Mitigation |\n|------|------------|\n| **LFS not installed** | Detect on project init; warn user; continue without LFS |\n| **Filename sanitization** | Preserve originalFilename; sanitize storedFilename |\n| **UI freeze** | Mandatory spawn_blocking + Channels |\n| **Convex failures** | Retry queue with localStorage |\n\n## References\n\n- Tauri command registration: `src-tauri/src/bindings.rs` (NOT just mod.rs)\n- Window events: [Tauri v2 onFileDrop](https://v2.tauri.app/reference/javascript/api/namespacewindow/#onfiledrop)\n- Existing patterns: `src-tauri/src/commands/preferences.rs`, `src/store/ui-store.ts`\n"
+  },
+  "epic_id": "fn-1-phase-1-context-upload-git-integration",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-04T11:37:43.612808Z",
+        "depends_on": [],
+        "epic": "fn-1-phase-1-context-upload-git-integration",
+        "id": "fn-1-phase-1-context-upload-git-integration.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.1.md",
+        "status": "todo",
+        "title": "Day 0: Dependencies & Convex schema setup",
+        "updated_at": "2026-02-04T11:58:29.782790Z"
+      },
+      "id": "fn-1-phase-1-context-upload-git-integration.1",
+      "runtime": null,
+      "spec": "# fn-1-phase-1-context-upload-git-integration.1 Day 0: Dependencies & Convex schema setup\n\n## Description\n\nAdd Rust crates (git2, csv, lopdf, calamine), deploy Convex schema aligned with EXISTING userId pattern, create `.gitattributes` for Git LFS, and add minimal auth table.\n\n**Size:** M\n**Files:** `src-tauri/Cargo.toml`, `.gitattributes`, `convex/schema.ts`, `convex/contexts.ts`, `convex/auth.config.ts`\n\n## Approach\n\n**Cargo**: Add to `src-tauri/Cargo.toml`:\n```toml\ngit2 = \"0.19\"\ncsv = \"1.3\"\nlopdf = \"0.34\"\ncalamine = { version = \"0.26\", features = [\"xlsb\"] }\n```\n\n**Git LFS**: Create `.gitattributes`:\n```\ncontext/**/*.pdf filter=lfs diff=lfs merge=lfs -text\ncontext/**/*.xlsx filter=lfs diff=lfs merge=lfs -text\n```\n\n**Auth Setup** (CRITICAL - fixes Codex blocker):\n```typescript\n// convex/auth.config.ts - Minimal auth for Phase 1\nimport { convexAuth } from \"@convex-dev/auth/server\";\nexport const { auth, signIn, signOut, store } = convexAuth({\n  providers: [],  // Anonymous auth only for Phase 1\n});\n```\n\nAdd to schema.ts:\n```typescript\nimport { authTables } from \"@convex-dev/auth/server\";\n// ... in defineSchema:\n  ...authTables,  // Creates users table\n```\n\n**Convex Schema**: Add `contextFiles` table WITH userId:\n```typescript\ncontextFiles: defineTable({\n  userId: v.id('users'),  // Now valid with authTables\n  projectId: v.id('projects'),\n  originalFilename: v.string(),\n  storedFilename: v.string(),\n  fileType: v.string(),\n  sizeBytes: v.number(),\n  relativeFilePath: v.string(),\n  isLFS: v.boolean(),\n  uploadedAt: v.number(),\n  syncStatus: v.union(v.literal('synced'), v.literal('pending'), v.literal('error')),\n  detectedType: v.optional(v.string()),\n  rows: v.optional(v.number()),\n  columns: v.optional(v.array(v.string())),\n  preview: v.optional(v.string()),\n  pages: v.optional(v.number()),\n  textPreview: v.optional(v.string()),\n})\n  .index('by_user', ['userId'])\n  .index('by_project', ['projectId']),\n```\n\n**Convex Mutations**: Create `convex/contexts.ts` with getUserId() helper\n\n## Acceptance\n\n- [ ] Rust crates added: git2, csv, lopdf, calamine (xlsb feature)\n- [ ] `cargo build` succeeds\n- [ ] `.gitattributes` created with LFS rules\n- [ ] @convex-dev/auth package installed\n- [ ] convex/auth.config.ts created with anonymous auth\n- [ ] authTables added to schema (creates users table)\n- [ ] contextFiles table defined WITH userId + projectId (v.id types)\n- [ ] by_user and by_project indexes added\n- [ ] convex/contexts.ts created with getUserId() helper\n- [ ] `npx convex dev` deploys successfully without errors\n- [ ] Convex dashboard shows both users and contextFiles tables\n\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-04T11:37:49.734224Z",
+        "depends_on": [
+          "fn-1-phase-1-context-upload-git-integration.1"
+        ],
+        "epic": "fn-1-phase-1-context-upload-git-integration",
+        "id": "fn-1-phase-1-context-upload-git-integration.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.2.md",
+        "status": "todo",
+        "title": "Minimal project creation & selection",
+        "updated_at": "2026-02-04T11:58:29.854734Z"
+      },
+      "id": "fn-1-phase-1-context-upload-git-integration.2",
+      "runtime": null,
+      "spec": "# fn-1-phase-1-context-upload-git-integration.2 Minimal project creation & selection\n\n## Description\nUse EXISTING Convex projects table for project management. Add Git init command with LFS detection.\n\n**Size:** M\n**Files:** `src/store/project-store.ts`, `src-tauri/src/commands/projects.rs`, `src/components/projects/ProjectSelector.tsx`, `src-tauri/src/bindings.rs`\n\n## Approach\n\n**Use Existing Schema**: Repo has `projects` table with userId in Convex (auth added in Task 1) - use it directly\n\n**Zustand Store**: Create `src/store/project-store.ts` following pattern at `src/store/ui-store.ts`:\n- `currentProject: Project | null`\n- `setCurrentProject(project: Project)`\n- Load from Convex query via TanStack Query\n- Use selector pattern (not destructuring)\n\n**Tauri Commands**: Add `src-tauri/src/commands/projects.rs` following pattern at `src-tauri/src/commands/preferences.rs:41`:\n- `#[tauri::command]` + `#[specta::specta]` annotations\n- `initialize_git(path: PathBuf) -> Result<GitInitResult, String>`\n- `detect_git_lfs() -> Result<bool, String>` - Check for `git-lfs` binary\n\n**Git Initialization Flow**:\n1. `Repository::init(path)`\n2. Create directories: `context/`, `decisions/`, `experiments/`\n3. Create `.gitattributes` with LFS rules (from git-integration-spec.md)\n4. Check LFS availability with `detect_git_lfs()`\n5. Initial commit with README\n\n**Command Registration** (critical per Codex review):\n- Add modules to `src-tauri/src/commands/mod.rs`\n- **MUST** register in `src-tauri/src/bindings.rs` collect_commands! macro\n- Run `cargo test export_bindings -- --ignored` to generate TS types\n\n**React UI**: Use shadcn Dialog from `src/components/ui/dialog.tsx`:\n- Project selector dropdown (loads from Convex projects query)\n- Name input validation (required, max 50 chars)\n- Location picker using `@tauri-apps/plugin-dialog`\n- LFS status indicator after Git initialization\n\n**Service Layer**: Create `src/services/projects.ts` with TanStack Query:\n- `useCurrentProject()` query from Convex\n- `useCreateProject()` mutation (Convex + Git init)\n- Follow wrapper pattern from `src/services/convex-wrapper.ts`\n\n## Key Context\n\n- **Convex Integration**: Use existing projects table (userId now valid with @convex-dev/auth from Task 1)\n- **LFS detection**: Use `Command::new(\"git-lfs\").arg(\"version\")` to check availability\n- **Command registration**: MUST update bindings.rs, not just mod.rs (Codex critical issue)\n- **Git initialization**: Use git2 `Repository::init()` per github-scout findings\n## Acceptance\n- [ ] project-store loads from EXISTING Convex projects table\n- [ ] initialize_git command creates directories + .gitattributes\n- [ ] detect_git_lfs checks for git-lfs binary\n- [ ] Commands registered in bindings.rs\n- [ ] TypeScript bindings generated\n- [ ] Project selector UI uses Convex query\n- [ ] LFS warning shown if not installed\n- [ ] Initial commit created successfully\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-04T11:37:54.939993Z",
+        "depends_on": [
+          "fn-1-phase-1-context-upload-git-integration.1"
+        ],
+        "epic": "fn-1-phase-1-context-upload-git-integration",
+        "id": "fn-1-phase-1-context-upload-git-integration.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.3.md",
+        "status": "todo",
+        "title": "Rust file parsing commands (CSV, PDF, Excel)",
+        "updated_at": "2026-02-04T11:58:29.928739Z"
+      },
+      "id": "fn-1-phase-1-context-upload-git-integration.3",
+      "runtime": null,
+      "spec": "# fn-1-phase-1-context-upload-git-integration.3 Rust file parsing commands (CSV, PDF, Excel)\n\n## Description\nImplement upload_context_file command with spawn_blocking, Channels, and ContextFileRecord return.\n\n**Size:** M\n**Files:** `src-tauri/src/commands/context.rs`, `src-tauri/src/types.rs`, `src-tauri/src/bindings.rs`\n\n## Approach\n\n**ContextFileRecord Type**: Add to `src-tauri/src/types.rs`:\n```rust\n#[derive(Type)]\npub struct ContextFileRecord {\n    pub original_filename: String,\n    pub stored_filename: String,  // Sanitized (slugified)\n    pub file_type: String,\n    pub detected_type: Option<String>,\n    pub rows: Option<usize>,\n    pub columns: Option<Vec<String>>,\n    pub preview: Option<String>,  // 500 chars max\n    pub pages: Option<usize>,\n    pub text_preview: Option<String>,\n    pub size_bytes: u64,\n    pub relative_file_path: String,  // \"context/file-2.csv\"\n    pub is_lfs: bool,  // true if >10MB\n}\n\n#[derive(Type, Clone, Serialize)]\n#[serde(tag = \"type\")]\npub enum UploadProgress {\n    Parsing { percent: u8 },\n    Copying { percent: u8 },\n    Committing { percent: u8 },\n    Complete { record: ContextFileRecord },\n    Error { message: String },\n}\n```\n\n**Command with Channel**: Create `src-tauri/src/commands/context.rs`:\n```rust\n#[tauri::command]\n#[specta::specta]\npub async fn upload_context_file(\n    path: String,\n    project_id: String,\n    on_progress: Channel<UploadProgress>\n) -> Result<ContextFileRecord, String> {\n    // spawn_blocking for heavy I/O (mandatory per Codex)\n    let record = tokio::task::spawn_blocking(move || {\n        on_progress.send(UploadProgress::Parsing { percent: 10 });\n        let metadata = parse_file(&path)?;\n        // ... copy file, git commit\n    }).await??;\n\n    Ok(record)\n}\n```\n\n**CSV Parsing**: Use csv crate with `.flexible(true)`:\n- Extract headers as `Vec<String>`\n- Count rows with `.records().count()`\n- First 10 rows for preview\n- Detect type from column names heuristic\n\n**PDF Parsing**: Use lopdf with stability handling:\n- Wrap in `catch_unwind(AssertUnwindSafe(...))` per practice-scout\n- Extract page count + first 500 chars\n- Return empty text if extraction fails (image-based PDF)\n\n**Excel Parsing**: Use calamine `open_workbook_auto`:\n- First sheet only\n- Similar metadata to CSV (rows, columns)\n\n**Filename Sanitization**:\n- Create `sanitize_filename()` helper\n- Preserve originalFilename separately\n- Slugify for storedFilename (lowercase, hyphens, no spaces/parens)\n\n## Key Context\n\n- **Threading**: ALL file parsing in spawn_blocking (mandatory per Codex)\n- **Channels**: Use Tauri Channel for progress, not events (per best practices)\n- **Error handling**: catch_unwind for lopdf stability, descriptive errors\n- **Command registration**: Update bindings.rs AND mod.rs\n- **Modern Rust**: Use `format!(\"{variable}\")` not `format!(\"{}\", variable)`\n## Acceptance\n- [ ] ContextFileRecord struct defined\n- [ ] UploadProgress enum with Parsing/Copying/Committing/Complete/Error\n- [ ] upload_context_file uses Channel parameter\n- [ ] Parsing runs in spawn_blocking\n- [ ] Progress emitted at key steps\n- [ ] CSV/PDF/Excel parsing works\n- [ ] Filename sanitization (slugify)\n- [ ] isLFS flag set for >10MB\n- [ ] Registered in bindings.rs\n- [ ] TypeScript bindings updated\n- [ ] Tests cover all parsers\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-04T11:37:59.986370Z",
+        "depends_on": [
+          "fn-1-phase-1-context-upload-git-integration.2",
+          "fn-1-phase-1-context-upload-git-integration.3"
+        ],
+        "epic": "fn-1-phase-1-context-upload-git-integration",
+        "id": "fn-1-phase-1-context-upload-git-integration.4",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.4.md",
+        "status": "todo",
+        "title": "File upload UI with drag-and-drop",
+        "updated_at": "2026-02-04T11:58:30.001245Z"
+      },
+      "id": "fn-1-phase-1-context-upload-git-integration.4",
+      "runtime": null,
+      "spec": "# fn-1-phase-1-context-upload-git-integration.4 File upload UI with drag-and-drop\n\n## Description\nFile upload UI using Tauri window.onFileDrop events with Channel progress tracking.\n\n**Size:** M\n**Files:** `src/components/context/ContextUploader.tsx`, `src/store/upload-store.ts`\n\n## Approach\n\n**Tauri File Drop** (NO react-dropzone - Codex critical fix):\n```typescript\nimport { getCurrentWindow } from '@tauri-apps/api/window';\nimport { listen } from '@tauri-apps/api/event';\n\nuseEffect(() => {\n  const unlisten = getCurrentWindow().onFileDrop((event) => {\n    if (event.payload.type === 'drop') {\n      const paths: string[] = event.payload.paths;\n      handleFilePaths(paths);\n    }\n  });\n\n  return () => { unlisten.then(fn => fn()); };\n}, []);\n```\n\n**Upload Flow**:\n1. Tauri event provides filesystem paths\n2. Filter by extension (.csv, .pdf, .xlsx)\n3. Invoke `commands.uploadContextFile(path, projectId)` with Channel\n4. Listen to Channel for progress updates (UploadProgress enum)\n5. Update upload-store with status\n\n**ContextUploader Component**: Use shadcn Card from `src/components/ui/card.tsx`:\n- Drop zone visual (dashed border card)\n- File icon + text: \"Drag files or click to upload\"\n- List of supported formats (.csv, .pdf, .xlsx)\n- Real-time progress bars for each file\n- Error messages from Rust\n\n**Upload State** (Zustand): Create `src/store/upload-store.ts`:\n```typescript\n{\n  [fileId]: {\n    originalFilename: string,\n    status: 'parsing' | 'copying' | 'committing' | 'complete' | 'error',\n    percent: number,\n    error?: string,\n  }\n}\n```\n\n**Service Layer**: Create `src/services/context.ts`:\n- `useUploadContext()` hook - Handles upload + progress streaming\n- Listen to Tauri Channel events\n- Update upload-store as progress arrives\n- NO Convex mutation here (Task 7)\n\n**Tauri Capabilities**: Ensure window events enabled in `src-tauri/tauri.conf.json`\n\n## Key Context\n\n- **NO react-dropzone**: Use Tauri window.onFileDrop API (Codex critical fix)\n- **Channel listening**: Use Tauri event system for progress updates\n- **Concurrent uploads**: Limit to 5 concurrent uploads\n- **Error toasts**: Use existing toast notification pattern\n- **i18n**: All strings from translation keys (not hardcoded English)\n- **State pattern**: Use Zustand selectors, not destructuring\n## Acceptance\n- [ ] window.onFileDrop handler implemented\n- [ ] File paths received from event\n- [ ] upload_context_file invoked with Channel\n- [ ] Progress updates via Channel events\n- [ ] upload-store tracks status per file\n- [ ] Progress bars shown\n- [ ] Error toasts for failures\n- [ ] 5 concurrent upload limit\n- [ ] Tauri capabilities configured for window events\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-04T11:38:07.667603Z",
+        "depends_on": [
+          "fn-1-phase-1-context-upload-git-integration.1"
+        ],
+        "epic": "fn-1-phase-1-context-upload-git-integration",
+        "id": "fn-1-phase-1-context-upload-git-integration.5",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.5.md",
+        "status": "todo",
+        "title": "Git auto-commit implementation",
+        "updated_at": "2026-02-04T11:58:30.074329Z"
+      },
+      "id": "fn-1-phase-1-context-upload-git-integration.5",
+      "runtime": null,
+      "spec": "# fn-1-phase-1-context-upload-git-integration.5 Git auto-commit implementation\n\n## Description\nGit auto-commit with LFS tracking for files >10MB.\n\n**Size:** M\n**Files:** `src-tauri/src/commands/git.rs`, `src-tauri/src/bindings.rs`\n\n## Approach\n\n**Git Commands**: Create `src-tauri/src/commands/git.rs` following github-scout pattern (simeg/eureka):\n```rust\n#[tauri::command]\n#[specta::specta]\npub fn git_auto_commit(\n    repo_path: PathBuf,\n    files: Vec<String>,\n    message: String\n) -> Result<String, String>\n```\n\n**Git Auto-Commit Flow** (per git-integration-spec.md):\n1. Open repository with `Repository::open()`\n2. Get index with `repo.index()`\n3. Add files with `index.add_path()` for each file\n4. **Critical**: Call `index.write()` before `write_tree()` (from practice-scout pitfall)\n5. Write tree with `index.write_tree()`\n6. Get parent commit (if exists) - handle first commit vs subsequent\n7. Create commit with `Signature::now(\"Unheard\", \"auto@unheard.local\")`\n8. Return commit ID\n\n**Commit Message Format**:\n- Single file: \"Add context: {filename}\"\n- Multiple files: \"Add context files: {file1}, {file2}, ...\"\n- Follow format from git-integration-spec.md\n\n**LFS Integration**:\n- LFS tracking handled via `.gitattributes` rules (created in Task 2)\n- Files >10MB automatically tracked by Git LFS via pattern rules\n- No explicit `git lfs track` needed in commit flow\n\n**GitStatus Type**: Add to `src-tauri/src/types.rs`:\n```rust\npub struct GitStatus {\n    pub uncommitted_changes: usize,\n    pub synced: bool,\n}\n```\n\n## Key Context\n\n- **Error handling**: Handle missing repo, locked index, empty commits gracefully\n- **Signature**: Use `Signature::now(\"Unheard\", \"auto@unheard.local\")` for auto-commits\n- **Parent commit**: Handle first commit (no parent) vs subsequent commits\n- **Command registration**: Update bindings.rs AND mod.rs\n## Acceptance\n- [ ] git_auto_commit command implemented\n- [ ] LFS tracking applied if use_lfs=true\n- [ ] index.write called before write_tree\n- [ ] Commit created with message\n- [ ] Commit ID returned\n- [ ] Error handling for missing repo\n- [ ] Registered in bindings.rs\n- [ ] Tests cover LFS and non-LFS commits\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-04T11:38:07.739563Z",
+        "depends_on": [
+          "fn-1-phase-1-context-upload-git-integration.2"
+        ],
+        "epic": "fn-1-phase-1-context-upload-git-integration",
+        "id": "fn-1-phase-1-context-upload-git-integration.6",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.6.md",
+        "status": "todo",
+        "title": "Context library UI for browsing files",
+        "updated_at": "2026-02-04T11:58:30.148166Z"
+      },
+      "id": "fn-1-phase-1-context-upload-git-integration.6",
+      "runtime": null,
+      "spec": "# fn-1-phase-1-context-upload-git-integration.6 Context library UI for browsing files\n\n## Description\nContext library UI to display uploaded files. NO delete UI (out of scope).\n\n**Size:** M\n**Files:** `src/components/context/ContextLibrary.tsx`, `src/components/context/ContextFileCard.tsx`\n\n## Approach\n\n**ContextLibrary Component**: Grid layout for file cards:\n- Load files with `useConvexQuery(api.contexts.listByProject, { projectId })`\n- Display grid of ContextFileCard components\n- Empty state with ContextUploader when no files\n- Search/filter bar (optional for Phase 1)\n\n**ContextFileCard Component**: shadcn Card from `src/components/ui/card.tsx`:\n- File icon based on type (lucide-react icons):\n  - CSV \u2192 Table icon\n  - PDF \u2192 Document icon\n  - Excel \u2192 Spreadsheet icon\n- Filename as card title\n- Metadata: \"{rows} rows \u2022 {columns} columns\" for CSV\n- Upload timestamp (formatted with date utility)\n- Badge for detected_type (variant=\"secondary\")\n- Sync status indicator (synced/pending/error)\n\n**Responsive Grid**:\n- 1 column mobile\n- 2 columns tablet\n- 3 columns desktop\n\n**Convex Integration**: Extend `src/services/context.ts`:\n- `useContextFiles(projectId)` query\n- Follow wrapper pattern from `src/services/convex-wrapper.ts`\n\n**NO Delete UI**: Out of scope per epic (Phase 1 is upload-only)\n\n## Key Context\n\n- **Grid responsive**: 1 col mobile, 2 cols tablet, 3 cols desktop\n- **Date formatting**: Use existing utility from src/lib/\n- **Badge colors**: Use variant=\"secondary\" for metadata badges\n- **Empty state**: Encourage first upload with clear CTA\n- **Sync status**: Show badge for pending/error states (from syncStatus field)\n## Acceptance\n- [ ] ContextLibrary renders file grid\n- [ ] Files loaded from Convex by_project index\n- [ ] Cards show filename, metadata, LFS badge\n- [ ] Sync status indicator (synced/pending/error)\n- [ ] Responsive grid layout\n- [ ] NO delete action in UI\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-02-04T11:38:07.812995Z",
+        "depends_on": [
+          "fn-1-phase-1-context-upload-git-integration.4",
+          "fn-1-phase-1-context-upload-git-integration.5",
+          "fn-1-phase-1-context-upload-git-integration.6"
+        ],
+        "epic": "fn-1-phase-1-context-upload-git-integration",
+        "id": "fn-1-phase-1-context-upload-git-integration.7",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.7.md",
+        "status": "todo",
+        "title": "Convex integration & error handling",
+        "updated_at": "2026-02-04T11:58:30.221067Z"
+      },
+      "id": "fn-1-phase-1-context-upload-git-integration.7",
+      "runtime": null,
+      "spec": "# fn-1-phase-1-context-upload-git-integration.7 Convex integration & error handling\n\n## Description\nConvex integration with retry queue for failed mutations.\n\n**Size:** M\n**Files:** `src/services/context.ts`, `src/store/upload-store.ts`\n\n## Approach\n\n**Full Upload Flow Integration**:\n1. User drops file \u2192 ContextUploader (Task 4)\n2. Validate file (type, size) \u2192 Show error if invalid\n3. Invoke `commands.uploadContextFile(path, projectId)` with Channel \u2192 Returns ContextFileRecord\n4. **Convex Mutation**: After Rust completes (file copied + committed):\n   ```typescript\n   const uploadMutation = useConvexMutation(api.contexts.create);\n\n   const convexRecord = {\n     userId: await getUserId(),  // From @convex-dev/auth (Task 1)\n     projectId: currentProject.id,\n     ...rustRecord,  // ContextFileRecord from Rust\n     uploadedAt: Date.now(),\n     syncStatus: 'pending',\n   };\n\n   try {\n     await uploadMutation(convexRecord);\n     // Mark synced in upload-store\n   } catch (error) {\n     // Add to retry queue\n     queueRetry(convexRecord);\n     // Show warning toast\n   }\n   ```\n\n**Error Handling Strategy**:\n- Parse failure \u2192 Toast error, don't proceed\n- Git commit failure \u2192 Log warning, continue (file still local)\n- Convex failure \u2192 Queue retry, mark unsynced badge\n- Duplicate file \u2192 Auto-rename with counter in Convex mutation\n\n**Duplicate Resolution**: In `convex/contexts.ts`:\n- Check existing filenames in project with query\n- Append ` (N)` before extension if duplicate\n- Logic: `file.csv` exists \u2192 `file (2).csv`\n\n**Retry Queue** (localStorage persistence):\n```typescript\nconst retryQueue = useUploadStore(state => state.retryQueue);\n\n// Periodic retry (every 30s)\nuseEffect(() => {\n  const interval = setInterval(() => {\n    retryQueue.forEach(record => attemptRetry(record));\n  }, 30000);\n  return () => clearInterval(interval);\n}, []);\n```\n\n**Network Resilience**:\n- Convex mutation failure doesn't block local operations\n- Queue failed mutations for retry\n- Show unsynced badge on files in error state\n\n**Testing Strategy**:\n- Unit tests for duplicate filename logic\n- Mock Tauri commands with `vi.fn()`\n- Test Convex failure + retry logic\n- E2E test with fixture files\n\n## Key Context\n\n- **Zero data loss**: File saved locally even if Convex fails\n- **Retry persistence**: Queue survives app restarts (localStorage)\n- **Transactional boundaries**: Clear separation of copy/git/convex steps\n- **Atomic operations**: File copy should be atomic (tmp file + rename)\n- **User feedback**: Clear progress and error states for all scenarios\n## Acceptance\n- [ ] Convex mutation with userId from auth\n- [ ] Retry queue in localStorage\n- [ ] Periodic retry (30s interval)\n- [ ] State machine tracked in upload-store\n- [ ] Unsynced badge shown on failure\n- [ ] Tests cover success + Convex failure paths\n- [ ] Test coverage >80%\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

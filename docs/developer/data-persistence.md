@@ -4,22 +4,24 @@ Patterns for saving and loading data to disk.
 
 ## Choosing a Storage Method
 
-| Need               | Solution           | When to Use                                                           |
-| ------------------ | ------------------ | --------------------------------------------------------------------- |
-| App preferences    | Preferences System | Strongly-typed settings (theme, shortcuts)                            |
-| Emergency recovery | Recovery System    | Crash recovery, backup before risky operations                        |
-| Relational data    | SQLite             | User data requiring queries, relationships                            |
-| External API data  | TanStack Query     | Remote data with caching (see [external-apis.md](./external-apis.md)) |
+| Need                    | Solution           | When to Use                                                           |
+| ----------------------- | ------------------ | --------------------------------------------------------------------- |
+| App preferences         | Preferences System | Strongly-typed settings (theme, shortcuts)                            |
+| User data (cloud)       | Convex             | Decisions, projects, analyses - collaborative data                    |
+| Emergency recovery      | Recovery System    | Crash recovery, backup before risky operations                        |
+| Relational data (local) | SQLite             | Local user data requiring queries, relationships                      |
+| External API data       | TanStack Query     | Remote data with caching (see [external-apis.md](./external-apis.md)) |
 
 ```
 Need to persist data?
 ├─ App settings? → Preferences (Rust struct + TanStack Query)
-├─ User data with queries/relationships? → SQLite (see below)
+├─ User decisions/projects? → Convex (cloud, see convex-setup.md)
+├─ Local user data with queries/relationships? → SQLite (see below)
 ├─ Remote API data? → external-apis.md
 └─ Emergency/crash recovery? → Recovery System
 ```
 
-All data goes through Rust for type safety and security. Use TanStack Query on the frontend for loading states and cache invalidation.
+**Hybrid Architecture**: Cloud data goes through Convex, local data goes through Rust (Tauri). TanStack Query provides unified frontend API for both sources.
 
 ## File Locations
 

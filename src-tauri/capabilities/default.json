@@ -24,6 +24,10 @@
     "notification:default",
     "process:default",
     "os:default",
-    "global-shortcut:default"
+    "global-shortcut:default",
+    "clerk:default",
+    "http:default",
+    "http:allow-fetch",
+    "store:default"
   ]
 }

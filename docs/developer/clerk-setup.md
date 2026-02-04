@@ -1,0 +1,112 @@
+# Clerk Authentication Setup
+
+This project uses [Clerk](https://clerk.com) for authentication via the [tauri-plugin-clerk](https://github.com/Nipsuli/tauri-plugin-clerk) plugin.
+
+## Initial Setup
+
+### 1. Create a Clerk Account
+
+1. Go to [clerk.com](https://clerk.com) and sign up
+2. Create a new application
+3. Choose "Email & Password" as the authentication method for Phase 1
+
+### 2. Get Your Publishable Key
+
+1. In the Clerk Dashboard, navigate to "API Keys"
+2. Copy your "Publishable Key" (starts with `pk_test_...` for test/development)
+3. Add it to your `.env.local` file:
+
+```bash
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_your-key-here
+```
+
+### 3. Configure Authentication Settings
+
+In your Clerk Dashboard:
+
+1. Go to "User & Authentication" → "Email & Password"
+2. Enable "Password" authentication
+3. Configure password requirements as needed
+4. Optionally enable email verification
+
+## Architecture
+
+### Session Persistence
+
+The application uses `tauri-plugin-store` to persist Clerk sessions across app restarts. The session is stored in a secure local store managed by Tauri.
+
+### Authentication Flow
+
+```
+User opens app
+  ↓
+ClerkLoader initializes Clerk instance via initClerk()
+  ↓
+If signed out → Show SignInPage (Clerk's SignIn component)
+  ↓
+User signs in with email/password
+  ↓
+Clerk session stored in tauri-plugin-store
+  ↓
+SignedIn component renders App
+  ↓
+User closes app
+  ↓
+User reopens app → Session restored from store
+```
+
+### User ID Mapping
+
+- **Frontend**: Use `useUser()` from `@clerk/clerk-react` to get `user?.id` (Clerk user ID)
+- **Convex**: Store `clerkUserId` as a string field (NOT `v.id('users')`)
+- **Mutations**: Pass `clerkUserId` from frontend to Convex mutations
+
+Example:
+
+```typescript
+import { useUser } from '@clerk/clerk-react';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+
+function MyComponent() {
+  const { user } = useUser();
+  const createContext = useMutation(api.contexts.create);
+
+  const handleUpload = async (file: File) => {
+    await createContext({
+      clerkUserId: user!.id,
+      projectId: selectedProjectId,
+      // ... other fields
+    });
+  };
+}
+```
+
+## OAuth Support (Phase 2)
+
+OAuth providers (Google, GitHub, etc.) are planned for Phase 2. The current tauri-plugin-clerk version has limitations with OAuth flows in Tauri, which will be addressed in a future update.
+
+## Troubleshooting
+
+### "Loading authentication..." stuck
+
+- Check that `VITE_CLERK_PUBLISHABLE_KEY` is set in `.env.local`
+- Verify the key is valid in Clerk Dashboard
+- Check browser console for errors
+
+### Session not persisting
+
+- Ensure `tauri-plugin-store` is initialized BEFORE `tauri-plugin-clerk` in `lib.rs`
+- Check that `.with_tauri_store()` is called in the Clerk plugin builder
+
+### TypeScript errors
+
+- Ensure `@clerk/clerk-react` and `tauri-plugin-clerk` are installed
+- Run `npm install` to install dependencies
+- Restart your TypeScript server
+
+## References
+
+- [Clerk Documentation](https://clerk.com/docs)
+- [tauri-plugin-clerk GitHub](https://github.com/Nipsuli/tauri-plugin-clerk)
+- [Clerk React SDK](https://clerk.com/docs/references/react/overview)

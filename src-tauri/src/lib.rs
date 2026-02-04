@@ -86,7 +86,22 @@ pub fn run() {
         app_builder = app_builder.plugin(tauri_nspanel::init());
     }
 
+    // NOTE: tauri-plugin-store must be initialized BEFORE tauri-plugin-clerk
+    // because clerk uses it for session persistence via with_tauri_store()
+    app_builder = app_builder.plugin(tauri_plugin_store::Builder::default().build());
+
+    // Get Clerk publishable key from environment variable
+    let clerk_key = std::env::var("VITE_CLERK_PUBLISHABLE_KEY")
+        .unwrap_or_else(|_| "pk_test_placeholder".to_string());
+
     app_builder
+        .plugin(tauri_plugin_http::init())
+        .plugin(
+            tauri_plugin_clerk::ClerkPluginBuilder::new()
+                .publishable_key(clerk_key)
+                .with_tauri_store()
+                .build(),
+        )
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_dialog::init())

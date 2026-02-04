@@ -1,6 +1,6 @@
-# Tauri React Template
+# Unheard
 
-A "batteries-included" template for building production-ready desktop applications with **Tauri v2**, **React**, and **TypeScript**. Designed with opinionated patterns that help both human developers and AI coding agents build well-architected apps from the start.
+A decision support tool for founders that provides integrated decision analysis through synthetic data generation, hypothesis testing, and data visualization. Built with **Tauri v2**, **React**, and **TypeScript**.
 
 ## Why This Template?
 
