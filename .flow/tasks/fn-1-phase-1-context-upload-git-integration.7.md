@@ -24,7 +24,8 @@ Convex integration with retry queue for failed mutations. Uses Clerk user ID fro
 
    const convexRecord = {
      clerkUserId: user!.id, // Clerk user ID from hook
-     projectId: currentProject.id,
+     projectId: currentProject._id, // Convex uses _id not id
+<!-- Updated by plan-sync: fn-1.2 project store uses Convex Id<'projects'> accessed via _id -->
      ...rustRecord, // ContextFileRecord from Rust
      uploadedAt: Date.now(),
      syncStatus: 'pending',

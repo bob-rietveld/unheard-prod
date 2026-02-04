@@ -69,6 +69,9 @@ useEffect(() => {
 
 ## Key Context
 
+<!-- Updated by plan-sync: fn-1.2 project store and services patterns -->
+- **Project access**: Use `useProjectStore(state => state.currentProject)` selector to get current project's `_id`
+- **Services pattern**: Follow `src/services/projects.ts` pattern (useProjects, useCreateProject hooks)
 - **NO react-dropzone**: Use Tauri window.onFileDrop API (Codex critical fix)
 - **Channel listening**: Use Tauri event system for progress updates
 - **Concurrent uploads**: Limit to 5 concurrent uploads

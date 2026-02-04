@@ -50,7 +50,9 @@ pub fn initialize_git(path: PathBuf) -> Result<GitInitResult, String> {
     // Check if directory is empty or only contains hidden files
     let entries: Vec<_> = fs::read_dir(&path)
         .map_err(|e| format!("Failed to read directory: {e}"))?
-        .filter_map(Result::ok)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| format!("Failed to read directory entry: {e}"))?
+        .into_iter()
         .filter(|entry| {
             // Allow hidden files/folders (starting with .)
             entry.file_name().to_string_lossy().starts_with('.').not()

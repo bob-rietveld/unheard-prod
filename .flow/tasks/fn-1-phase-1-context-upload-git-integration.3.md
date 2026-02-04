@@ -86,6 +86,8 @@ pub async fn upload_context_file(
 
 ## Key Context
 
+<!-- Updated by plan-sync: fn-1.2 creates project directory structure -->
+- **Project directories**: fn-1.2's `initialize_git` creates `context/`, `decisions/`, `experiments/` - files go in `context/`
 - **Threading**: ALL file parsing in spawn_blocking (mandatory per Codex)
 - **Channels**: Use Tauri Channel for progress, not events (per best practices)
 - **Error handling**: catch_unwind for lopdf stability, descriptive errors

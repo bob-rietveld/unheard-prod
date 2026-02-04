@@ -43,6 +43,8 @@ Context library UI to display uploaded files. NO delete UI (out of scope).
 
 ## Key Context
 
+<!-- Updated by plan-sync: fn-1.2 established project store pattern below -->
+- **Project ID access**: Use `useProjectStore(state => state.currentProject)` selector, access `currentProject._id` (Convex Id)
 - **Grid responsive**: 1 col mobile, 2 cols tablet, 3 cols desktop
 - **Date formatting**: Use existing utility from src/lib/
 - **Badge colors**: Use variant="secondary" for metadata badges

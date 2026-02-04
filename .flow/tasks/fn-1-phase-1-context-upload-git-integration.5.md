@@ -29,7 +29,7 @@ pub fn git_auto_commit(
 4. **Critical**: Call `index.write()` before `write_tree()` (from practice-scout pitfall)
 5. Write tree with `index.write_tree()`
 6. Get parent commit (if exists) - handle first commit vs subsequent
-7. Create commit with `Signature::now("Unheard", "auto@unheard.local")`
+7. Create commit with `repo.signature()`, fallback `Signature::now("Unheard User", "user@unheard.local")`
 8. Return commit ID
 
 **Commit Message Format**:
@@ -57,7 +57,8 @@ pub struct GitStatus {
 ## Key Context
 
 - **Error handling**: Handle missing repo, locked index, empty commits gracefully
-- **Signature**: Use `Signature::now("Unheard", "auto@unheard.local")` for auto-commits
+- **Signature**: Use `repo.signature()` first (respects Git config), fallback to `Signature::now("Unheard User", "user@unheard.local")` for consistency with initialize_git
+<!-- Updated by plan-sync: fn-1.2 used repo.signature() with fallback to "Unheard User"/"user@unheard.local" not "Unheard"/"auto@unheard.local" -->
 - **Parent commit**: Handle first commit (no parent) vs subsequent commits
 - **Command registration**: Update bindings.rs AND mod.rs
 - **LFS tracking**: Automatic via .gitattributes, no manual track command

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import {
   useQuery as useConvexQuery,
   useMutation as useConvexMutation,
@@ -124,7 +124,6 @@ export function useCreateProject() {
  * Update project metadata (name, description) in Convex.
  */
 export function useUpdateProject() {
-  const queryClient = useQueryClient()
   const convexUpdate = useConvexMutation(api.projects.update)
 
   return useMutation({
@@ -137,10 +136,7 @@ export function useUpdateProject() {
       await convexUpdate(args)
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: projectQueryKeys.detail(variables.id),
-      })
-      queryClient.invalidateQueries({ queryKey: projectQueryKeys.lists() })
+      // Convex subscriptions handle automatic updates, no need for manual invalidation
       toast.success('Project updated')
       logger.info('Project updated successfully', { id: variables.id })
     },
@@ -157,7 +153,6 @@ export function useUpdateProject() {
  * Archive a project (soft delete) in Convex.
  */
 export function useArchiveProject() {
-  const queryClient = useQueryClient()
   const convexArchive = useConvexMutation(api.projects.archive)
   const currentProject = useProjectStore(state => state.currentProject)
   const setCurrentProject = useProjectStore(state => state.setCurrentProject)
@@ -174,7 +169,7 @@ export function useArchiveProject() {
         logger.info('Cleared current project after archiving')
       }
 
-      queryClient.invalidateQueries({ queryKey: projectQueryKeys.lists() })
+      // Convex subscriptions handle automatic updates, no need for manual invalidation
       toast.success('Project archived')
       logger.info('Project archived successfully', { id })
     },

@@ -84,16 +84,14 @@ export function ProjectSelector() {
         localPath: projectPath,
       })
 
-      // Set the newly created project as current
-      // Note: Convex will update the projects list automatically via subscription
-      setCurrentProject({
-        _id: result.projectId,
-        name: result.projectName,
-        description: result.projectDescription,
-        clerkUserId: '', // Will be populated by Convex query
-        archived: false,
-        createdAt: Date.now(),
-      })
+      // Wait for Convex subscription to populate projects list, then select the new project
+      // Use a short timeout to allow Convex to sync
+      setTimeout(() => {
+        const project = projects?.find(p => p._id === result.projectId)
+        if (project) {
+          setCurrentProject(project)
+        }
+      }, 500)
 
       // Close dialog and reset form
       setIsCreateDialogOpen(false)
@@ -223,8 +221,8 @@ export function ProjectSelector() {
             </div>
 
             {lfsAvailable === false && (
-              <div className="flex items-start gap-2 rounded-md border border-warning bg-warning/10 p-3">
-                <AlertTriangleIcon className="size-5 text-warning shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 rounded-md border border-yellow-500 bg-yellow-500/10 p-3">
+                <AlertTriangleIcon className="size-5 text-yellow-600 shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <p className="font-medium">
                     {t('projects.lfsWarning', 'Git LFS not detected')}

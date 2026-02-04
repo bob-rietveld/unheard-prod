@@ -79,11 +79,8 @@ Use EXISTING Convex projects table for project management. Add Git init command 
 - [ ] Initial commit created successfully
 
 ## Done summary
-
-TBD
-
+Implemented minimal project creation with Git initialization. Created Zustand project store following selector pattern, Rust commands with directory validation, Convex queries/mutations with proper auth, and ProjectSelector UI with TanStack Query integration. Fixed auth config, added empty directory validation, and optimized creation flow (Convex first, then Git).
 ## Evidence
-
 - Commits:
 - Tests:
 - PRs:
