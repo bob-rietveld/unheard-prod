@@ -89,9 +89,10 @@ pub fn git_auto_commit(
         })?;
 
     // Get parent commit (if exists)
-    let parent_commit = repo.head().ok().and_then(|head| {
-        head.target().and_then(|oid| repo.find_commit(oid).ok())
-    });
+    let parent_commit = repo
+        .head()
+        .ok()
+        .and_then(|head| head.target().and_then(|oid| repo.find_commit(oid).ok()));
 
     // Create commit
     let commit_id = if let Some(parent) = parent_commit {
@@ -199,16 +200,8 @@ context/**/*.xlsx filter=lfs diff=lfs merge=lfs -text
         let (_temp_dir, repo_path) = create_test_repo();
 
         // Create multiple files
-        fs::write(
-            repo_path.join("context/file1.csv"),
-            "name,age\nAlice,30",
-        )
-        .unwrap();
-        fs::write(
-            repo_path.join("context/file2.csv"),
-            "name,score\nBob,95",
-        )
-        .unwrap();
+        fs::write(repo_path.join("context/file1.csv"), "name,age\nAlice,30").unwrap();
+        fs::write(repo_path.join("context/file2.csv"), "name,score\nBob,95").unwrap();
 
         // Commit multiple files
         let result = git_auto_commit(
@@ -237,11 +230,7 @@ context/**/*.xlsx filter=lfs diff=lfs merge=lfs -text
         let (_temp_dir, repo_path) = create_test_repo();
 
         // Try to commit with empty file list
-        let result = git_auto_commit(
-            repo_path,
-            vec![],
-            "Empty commit".to_string(),
-        );
+        let result = git_auto_commit(repo_path, vec![], "Empty commit".to_string());
 
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("No files provided"));
@@ -262,7 +251,9 @@ context/**/*.xlsx filter=lfs diff=lfs merge=lfs -text
         );
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Commit message cannot be empty"));
+        assert!(result
+            .unwrap_err()
+            .contains("Commit message cannot be empty"));
     }
 
     #[test]
@@ -277,7 +268,9 @@ context/**/*.xlsx filter=lfs diff=lfs merge=lfs -text
         );
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Failed to open Git repository"));
+        assert!(result
+            .unwrap_err()
+            .contains("Failed to open Git repository"));
     }
 
     #[test]

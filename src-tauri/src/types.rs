@@ -178,6 +178,7 @@ pub enum UploadProgress {
 /// Git repository status information.
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 pub struct GitStatus {
     /// Number of uncommitted changes in the repository
     pub uncommitted_changes: usize,

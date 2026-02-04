@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import type { Id } from '../../convex/_generated/dataModel'
+import type { ContextFileRecord } from '@/lib/bindings'
 
 export type UploadStatus =
   | 'parsing'
@@ -21,7 +22,7 @@ export interface UploadFileState {
 export interface RetryQueueItem {
   id: string
   projectId: Id<'projects'>
-  record: any // ContextFileRecord from Rust
+  record: ContextFileRecord
   uploadedAt: number
   attempts: number
   lastAttempt: number
@@ -32,10 +33,17 @@ interface UploadState {
   retryQueue: RetryQueueItem[]
 
   addFile: (id: string, filename: string) => void
-  updateFile: (id: string, status: UploadStatus, percent: number, error?: string) => void
+  updateFile: (
+    id: string,
+    status: UploadStatus,
+    percent: number,
+    error?: string
+  ) => void
   removeFile: (id: string) => void
   clearCompleted: () => void
-  addToRetryQueue: (item: Omit<RetryQueueItem, 'attempts' | 'lastAttempt'>) => void
+  addToRetryQueue: (
+    item: Omit<RetryQueueItem, 'attempts' | 'lastAttempt'>
+  ) => void
   removeFromRetryQueue: (id: string) => void
   updateRetryAttempt: (id: string) => void
 }
@@ -65,17 +73,21 @@ export const useUploadStore = create<UploadState>()(
 
         updateFile: (id, status, percent, error) =>
           set(
-            state => ({
-              files: {
-                ...state.files,
-                [id]: {
-                  ...state.files[id]!,
-                  status,
-                  percent,
-                  error,
+            state => {
+              const existingFile = state.files[id]
+              if (!existingFile) return state
+              return {
+                files: {
+                  ...state.files,
+                  [id]: {
+                    ...existingFile,
+                    status,
+                    percent,
+                    error,
+                  },
                 },
-              },
-            }),
+              }
+            },
             undefined,
             'updateFile'
           ),

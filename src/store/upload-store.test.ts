@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import type { Id } from '../../convex/_generated/dataModel'
+import type { ContextFileRecord } from '@/lib/bindings'
 
 // Define types inline to avoid persist middleware issues in tests
 type UploadStatus =
@@ -23,7 +24,7 @@ interface UploadFileState {
 interface RetryQueueItem {
   id: string
   projectId: Id<'projects'>
-  record: any
+  record: ContextFileRecord
   uploadedAt: number
   attempts: number
   lastAttempt: number
@@ -34,10 +35,17 @@ interface UploadState {
   retryQueue: RetryQueueItem[]
 
   addFile: (id: string, filename: string) => void
-  updateFile: (id: string, status: UploadStatus, percent: number, error?: string) => void
+  updateFile: (
+    id: string,
+    status: UploadStatus,
+    percent: number,
+    error?: string
+  ) => void
   removeFile: (id: string) => void
   clearCompleted: () => void
-  addToRetryQueue: (item: Omit<RetryQueueItem, 'attempts' | 'lastAttempt'>) => void
+  addToRetryQueue: (
+    item: Omit<RetryQueueItem, 'attempts' | 'lastAttempt'>
+  ) => void
   removeFromRetryQueue: (id: string) => void
   updateRetryAttempt: (id: string) => void
 }
@@ -68,17 +76,21 @@ function createTestUploadStore() {
 
         updateFile: (id, status, percent, error) =>
           set(
-            state => ({
-              files: {
-                ...state.files,
-                [id]: {
-                  ...state.files[id]!,
-                  status,
-                  percent,
-                  error,
+            state => {
+              const existingFile = state.files[id]
+              if (!existingFile) return state
+              return {
+                files: {
+                  ...state.files,
+                  [id]: {
+                    ...existingFile,
+                    status,
+                    percent,
+                    error,
+                  },
                 },
-              },
-            }),
+              }
+            },
             undefined,
             'updateFile'
           ),
@@ -162,6 +174,21 @@ describe('upload store - retry queue', () => {
   let useUploadStore: ReturnType<typeof createTestUploadStore>
   const mockProjectId = 'test-project-id' as Id<'projects'>
 
+  const createMockRecord = (filename: string): ContextFileRecord => ({
+    originalFilename: filename,
+    storedFilename: filename,
+    fileType: 'csv',
+    detectedType: null,
+    rows: null,
+    columns: null,
+    preview: null,
+    pages: null,
+    textPreview: null,
+    sizeBytes: 1024,
+    relativeFilePath: `context/${filename}`,
+    isLfs: false,
+  })
+
   beforeEach(() => {
     useUploadStore = createTestUploadStore()
   })
@@ -170,14 +197,7 @@ describe('upload store - retry queue', () => {
     useUploadStore.getState().addToRetryQueue({
       id: '/path/to/test.csv',
       projectId: mockProjectId,
-      record: {
-        originalFilename: 'test.csv',
-        storedFilename: 'test.csv',
-        fileType: 'csv',
-        sizeBytes: 1024,
-        relativeFilePath: 'context/test.csv',
-        isLFS: false,
-      },
+      record: createMockRecord('test.csv'),
       uploadedAt: Date.now(),
     })
 
@@ -191,9 +211,7 @@ describe('upload store - retry queue', () => {
     useUploadStore.getState().addToRetryQueue({
       id: '/path/to/test.csv',
       projectId: mockProjectId,
-      record: {
-        originalFilename: 'test.csv',
-      },
+      record: createMockRecord('test.csv'),
       uploadedAt: Date.now(),
     })
 
@@ -208,9 +226,7 @@ describe('upload store - retry queue', () => {
     useUploadStore.getState().addToRetryQueue({
       id: '/path/to/test.csv',
       projectId: mockProjectId,
-      record: {
-        originalFilename: 'test.csv',
-      },
+      record: createMockRecord('test.csv'),
       uploadedAt: Date.now(),
     })
 
@@ -225,14 +241,14 @@ describe('upload store - retry queue', () => {
     useUploadStore.getState().addToRetryQueue({
       id: '/path/to/test1.csv',
       projectId: mockProjectId,
-      record: { originalFilename: 'test1.csv' },
+      record: createMockRecord('test1.csv'),
       uploadedAt: Date.now(),
     })
 
     useUploadStore.getState().addToRetryQueue({
       id: '/path/to/test2.csv',
       projectId: mockProjectId,
-      record: { originalFilename: 'test2.csv' },
+      record: createMockRecord('test2.csv'),
       uploadedAt: Date.now(),
     })
 
@@ -281,7 +297,12 @@ describe('upload store - file status', () => {
     useUploadStore.getState().addFile('/path/to/test.csv', 'test.csv')
     useUploadStore
       .getState()
-      .updateFile('/path/to/test.csv', 'unsynced', 100, 'Failed to sync to cloud')
+      .updateFile(
+        '/path/to/test.csv',
+        'unsynced',
+        100,
+        'Failed to sync to cloud'
+      )
 
     const file = useUploadStore.getState().files['/path/to/test.csv']
     expect(file?.status).toBe('unsynced')

@@ -1,7 +1,9 @@
 use tauri_specta::{collect_commands, Builder};
 
 pub fn generate_bindings() -> Builder<tauri::Wry> {
-    use crate::commands::{context, git, notifications, preferences, projects, quick_pane, recovery};
+    use crate::commands::{
+        context, git, notifications, preferences, projects, quick_pane, recovery,
+    };
 
     Builder::<tauri::Wry>::new().commands(collect_commands![
         preferences::greet,

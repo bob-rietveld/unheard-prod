@@ -21,7 +21,7 @@ const MAX_CONCURRENT_UPLOADS = 5
 
 // Upload queue state (module-level to persist across hook instances)
 let activeUploads = 0
-const uploadQueue: Array<() => void> = []
+const uploadQueue: (() => void)[] = []
 
 /**
  * Process the next upload in the queue.
@@ -144,15 +144,15 @@ export function useUploadContext(projectId: Id<'projects'> | null) {
               originalFilename: result.data.originalFilename,
               storedFilename: result.data.storedFilename,
               fileType: result.data.fileType,
-              detectedType: result.data.detectedType,
-              rows: result.data.rows,
-              columns: result.data.columns,
-              preview: result.data.preview,
-              pages: result.data.pages,
-              textPreview: result.data.textPreview,
+              detectedType: result.data.detectedType ?? undefined,
+              rows: result.data.rows ?? undefined,
+              columns: result.data.columns ?? undefined,
+              preview: result.data.preview ?? undefined,
+              pages: result.data.pages ?? undefined,
+              textPreview: result.data.textPreview ?? undefined,
               sizeBytes: result.data.sizeBytes,
               relativeFilePath: result.data.relativeFilePath,
-              isLFS: result.data.isLFS,
+              isLFS: result.data.isLfs,
               uploadedAt: Date.now(),
               syncStatus: 'synced',
             })
@@ -165,7 +165,10 @@ export function useUploadContext(projectId: Id<'projects'> | null) {
             updateFile(uploadId, 'complete', 100)
           } catch (convexError) {
             logger.error('Failed to sync to Convex, queuing for retry', {
-              error: convexError instanceof Error ? convexError.message : String(convexError),
+              error:
+                convexError instanceof Error
+                  ? convexError.message
+                  : String(convexError),
               filename: result.data.originalFilename,
             })
 
@@ -264,70 +267,67 @@ export function useConvexRetry() {
       return
     }
 
-    const interval = setInterval(
-      async () => {
-        const now = Date.now()
+    const interval = setInterval(async () => {
+      const now = Date.now()
 
-        for (const item of retryQueue) {
-          // Skip if attempted too recently (less than 30s ago)
-          if (now - item.lastAttempt < 30000) {
-            continue
-          }
+      for (const item of retryQueue) {
+        // Skip if attempted too recently (less than 30s ago)
+        if (now - item.lastAttempt < 30000) {
+          continue
+        }
 
-          // Skip if too many attempts (max 10)
-          if (item.attempts >= 10) {
-            logger.warn('Max retry attempts reached, removing from queue', {
-              id: item.id,
-              attempts: item.attempts,
-            })
-            removeFromRetryQueue(item.id)
-            continue
-          }
-
-          logger.info('Retrying Convex sync', {
+        // Skip if too many attempts (max 10)
+        if (item.attempts >= 10) {
+          logger.warn('Max retry attempts reached, removing from queue', {
             id: item.id,
-            attempt: item.attempts + 1,
+            attempts: item.attempts,
+          })
+          removeFromRetryQueue(item.id)
+          continue
+        }
+
+        logger.info('Retrying Convex sync', {
+          id: item.id,
+          attempt: item.attempts + 1,
+        })
+
+        try {
+          await convexCreate({
+            projectId: item.projectId,
+            originalFilename: item.record.originalFilename,
+            storedFilename: item.record.storedFilename,
+            fileType: item.record.fileType,
+            detectedType: item.record.detectedType ?? undefined,
+            rows: item.record.rows ?? undefined,
+            columns: item.record.columns ?? undefined,
+            preview: item.record.preview ?? undefined,
+            pages: item.record.pages ?? undefined,
+            textPreview: item.record.textPreview ?? undefined,
+            sizeBytes: item.record.sizeBytes,
+            relativeFilePath: item.record.relativeFilePath,
+            isLFS: item.record.isLfs,
+            uploadedAt: item.uploadedAt,
+            syncStatus: 'synced',
           })
 
-          try {
-            await convexCreate({
-              projectId: item.projectId,
-              originalFilename: item.record.originalFilename,
-              storedFilename: item.record.storedFilename,
-              fileType: item.record.fileType,
-              detectedType: item.record.detectedType,
-              rows: item.record.rows,
-              columns: item.record.columns,
-              preview: item.record.preview,
-              pages: item.record.pages,
-              textPreview: item.record.textPreview,
-              sizeBytes: item.record.sizeBytes,
-              relativeFilePath: item.record.relativeFilePath,
-              isLFS: item.record.isLFS,
-              uploadedAt: item.uploadedAt,
-              syncStatus: 'synced',
-            })
+          logger.info('Retry successful, synced to Convex', { id: item.id })
 
-            logger.info('Retry successful, synced to Convex', { id: item.id })
+          // Remove from retry queue and update file status
+          removeFromRetryQueue(item.id)
+          updateFile(item.id, 'complete', 100)
 
-            // Remove from retry queue and update file status
-            removeFromRetryQueue(item.id)
-            updateFile(item.id, 'complete', 100)
-
-            toast.success('File synced to cloud', {
-              description: item.record.originalFilename,
-            })
-          } catch (error) {
-            logger.error('Retry failed', {
-              id: item.id,
-              error: error instanceof Error ? error.message : String(error),
-            })
-            updateRetryAttempt(item.id)
-          }
+          toast.success('File synced to cloud', {
+            description: item.record.originalFilename,
+          })
+        } catch (error) {
+          logger.error('Retry failed', {
+            id: item.id,
+            error: error instanceof Error ? error.message : String(error),
+          })
+          updateRetryAttempt(item.id)
         }
-      },
-      30000
-    ) // Every 30 seconds
+      }
+    }, 30000) // Every 30 seconds
 
     return () => clearInterval(interval)
   }, [

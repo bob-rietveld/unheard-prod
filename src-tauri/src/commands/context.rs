@@ -51,8 +51,7 @@ fn sanitize_filename(filename: &str) -> String {
 fn parse_csv(path: &Path) -> Result<ContextFileRecord, String> {
     log::debug!("Parsing CSV file: {path:?}");
 
-    let content = fs::read_to_string(path)
-        .map_err(|e| format!("Failed to read CSV file: {e}"))?;
+    let content = fs::read_to_string(path).map_err(|e| format!("Failed to read CSV file: {e}"))?;
 
     let mut reader = ReaderBuilder::new()
         .flexible(true) // Handle variable column counts
@@ -81,10 +80,8 @@ fn parse_csv(path: &Path) -> Result<ContextFileRecord, String> {
     }
 
     // Add up to 10 data rows
-    for result in preview_reader.records().take(10) {
-        if let Ok(record) = result {
-            preview_lines.push(record.iter().collect::<Vec<_>>().join(","));
-        }
+    for record in preview_reader.records().take(10).flatten() {
+        preview_lines.push(record.iter().collect::<Vec<_>>().join(","));
     }
 
     let preview = preview_lines.join("\n");
@@ -97,8 +94,7 @@ fn parse_csv(path: &Path) -> Result<ContextFileRecord, String> {
     // Detect type from column names (simple heuristic)
     let detected_type = detect_csv_type(&columns);
 
-    let metadata = fs::metadata(path)
-        .map_err(|e| format!("Failed to read file metadata: {e}"))?;
+    let metadata = fs::metadata(path).map_err(|e| format!("Failed to read file metadata: {e}"))?;
 
     let filename = path
         .file_name()
@@ -128,9 +124,15 @@ fn parse_csv(path: &Path) -> Result<ContextFileRecord, String> {
 fn detect_csv_type(columns: &[String]) -> Option<String> {
     let cols_lower: Vec<String> = columns.iter().map(|c| c.to_lowercase()).collect();
 
-    if cols_lower.iter().any(|c| c.contains("customer") || c.contains("user")) {
+    if cols_lower
+        .iter()
+        .any(|c| c.contains("customer") || c.contains("user"))
+    {
         Some("customer_data".to_string())
-    } else if cols_lower.iter().any(|c| c.contains("sale") || c.contains("revenue")) {
+    } else if cols_lower
+        .iter()
+        .any(|c| c.contains("sale") || c.contains("revenue"))
+    {
         Some("sales_data".to_string())
     } else if cols_lower.iter().any(|c| c.contains("product")) {
         Some("product_data".to_string())
@@ -144,8 +146,7 @@ fn detect_csv_type(columns: &[String]) -> Option<String> {
 fn parse_pdf(path: &Path) -> Result<ContextFileRecord, String> {
     log::debug!("Parsing PDF file: {path:?}");
 
-    let metadata = fs::metadata(path)
-        .map_err(|e| format!("Failed to read file metadata: {e}"))?;
+    let metadata = fs::metadata(path).map_err(|e| format!("Failed to read file metadata: {e}"))?;
 
     let filename = path
         .file_name()
@@ -156,9 +157,7 @@ fn parse_pdf(path: &Path) -> Result<ContextFileRecord, String> {
     let stored_filename = sanitize_filename(&filename);
 
     // Wrap PDF parsing in catch_unwind for stability
-    let parse_result = catch_unwind(AssertUnwindSafe(|| {
-        Document::load(path)
-    }));
+    let parse_result = catch_unwind(AssertUnwindSafe(|| Document::load(path)));
 
     let (pages, text_preview) = match parse_result {
         Ok(Ok(doc)) => {
@@ -221,8 +220,8 @@ fn extract_pdf_text(doc: &Document) -> Result<String, String> {
 fn parse_excel(path: &Path) -> Result<ContextFileRecord, String> {
     log::debug!("Parsing Excel file: {path:?}");
 
-    let mut workbook = open_workbook_auto(path)
-        .map_err(|e| format!("Failed to open Excel file: {e}"))?;
+    let mut workbook =
+        open_workbook_auto(path).map_err(|e| format!("Failed to open Excel file: {e}"))?;
 
     // Get first sheet
     let sheet_names = workbook.sheet_names().to_vec();
@@ -269,8 +268,7 @@ fn parse_excel(path: &Path) -> Result<ContextFileRecord, String> {
         preview
     };
 
-    let metadata = fs::metadata(path)
-        .map_err(|e| format!("Failed to read file metadata: {e}"))?;
+    let metadata = fs::metadata(path).map_err(|e| format!("Failed to read file metadata: {e}"))?;
 
     let filename = path
         .file_name()
@@ -349,7 +347,9 @@ pub async fn upload_context_file(
         let context_dir = project_path.join("context");
 
         if !context_dir.exists() {
-            return Err(format!("Project context directory does not exist: {context_dir:?}"));
+            return Err(format!(
+                "Project context directory does not exist: {context_dir:?}"
+            ));
         }
 
         let dest_path = context_dir.join(&record.stored_filename);
@@ -426,9 +426,14 @@ pub async fn upload_context_file(
         )
         .map_err(|e| format!("Failed to create commit: {e}"))?;
 
-        log::info!("Created commit for context file: {}", record.original_filename);
+        log::info!(
+            "Created commit for context file: {}",
+            record.original_filename
+        );
 
-        let _ = on_progress.send(UploadProgress::Complete { record: record.clone() });
+        let _ = on_progress.send(UploadProgress::Complete {
+            record: record.clone(),
+        });
 
         Ok(record)
     })
@@ -464,7 +469,14 @@ mod tests {
 
         assert_eq!(record.file_type, "csv");
         assert_eq!(record.rows, Some(3));
-        assert_eq!(record.columns, Some(vec!["name".to_string(), "age".to_string(), "city".to_string()]));
+        assert_eq!(
+            record.columns,
+            Some(vec![
+                "name".to_string(),
+                "age".to_string(),
+                "city".to_string()
+            ])
+        );
         assert!(record.preview.is_some());
         assert_eq!(record.is_lfs, false);
     }
@@ -515,13 +527,19 @@ mod tests {
     #[test]
     fn test_detect_csv_type() {
         let customer_cols = vec!["customer_id".to_string(), "name".to_string()];
-        assert_eq!(detect_csv_type(&customer_cols), Some("customer_data".to_string()));
+        assert_eq!(
+            detect_csv_type(&customer_cols),
+            Some("customer_data".to_string())
+        );
 
         let sales_cols = vec!["date".to_string(), "revenue".to_string()];
         assert_eq!(detect_csv_type(&sales_cols), Some("sales_data".to_string()));
 
         let product_cols = vec!["product_id".to_string(), "price".to_string()];
-        assert_eq!(detect_csv_type(&product_cols), Some("product_data".to_string()));
+        assert_eq!(
+            detect_csv_type(&product_cols),
+            Some("product_data".to_string())
+        );
 
         let generic_cols = vec!["id".to_string(), "value".to_string()];
         assert_eq!(detect_csv_type(&generic_cols), None);

@@ -96,7 +96,9 @@ export function ContextUploader() {
     return (
       <Card>
         <CardContent className="py-8 text-center">
-          <p className="text-muted-foreground">{t('context.upload.noProject')}</p>
+          <p className="text-muted-foreground">
+            {t('context.upload.noProject')}
+          </p>
         </CardContent>
       </Card>
     )
@@ -116,7 +118,9 @@ export function ContextUploader() {
       <Card>
         <CardHeader>
           <CardTitle>{t('context.upload.title')}</CardTitle>
-          <CardDescription>{t('context.upload.supportedFormats')}</CardDescription>
+          <CardDescription>
+            {t('context.upload.supportedFormats')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div
@@ -128,7 +132,9 @@ export function ContextUploader() {
           >
             <FileUp className="size-12 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium">{t('context.upload.dropZone')}</p>
+              <p className="text-sm font-medium">
+                {t('context.upload.dropZone')}
+              </p>
               <p className="text-muted-foreground text-xs">
                 {t('context.upload.supportedFormats')}
               </p>
@@ -158,11 +164,7 @@ export function ContextUploader() {
           <CardContent>
             <div className="space-y-3">
               {fileEntries.map(([id, file]) => (
-                <FileUploadItem
-                  key={id}
-                  id={id}
-                  file={file}
-                />
+                <FileUploadItem key={id} id={id} file={file} />
               ))}
             </div>
           </CardContent>
@@ -237,13 +239,13 @@ function FileUploadItem({ id, file }: FileUploadItemProps) {
         {file.status !== 'complete' &&
           file.status !== 'error' &&
           file.status !== 'unsynced' && (
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className={`h-full transition-all duration-300 ${statusColor}`}
-              style={{ width: `${file.percent}%` }}
-            />
-          </div>
-        )}
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className={`h-full transition-all duration-300 ${statusColor}`}
+                style={{ width: `${file.percent}%` }}
+              />
+            </div>
+          )}
 
         {file.status === 'error' && file.error && (
           <p className="text-xs text-destructive">{file.error}</p>

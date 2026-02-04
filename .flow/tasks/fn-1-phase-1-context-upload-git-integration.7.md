@@ -112,11 +112,8 @@ useEffect(() => {
 - [ ] Test coverage >80%
 
 ## Done summary
-
-TBD
-
+Implemented Convex integration with automatic retry queue for failed syncs. Upload flow now syncs metadata to Convex after Rust completes local operations, with automatic retry every 30 seconds for failed syncs. Added syncing and unsynced status types with UI feedback.
 ## Evidence
-
-- Commits:
-- Tests:
+- Commits: 904ad3fe286007b7353da1b4d86eb5d5f461a445
+- Tests: npm run test -- src/store/upload-store.test.ts
 - PRs:
