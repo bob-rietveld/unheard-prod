@@ -1,9 +1,11 @@
 import { mutation } from './_generated/server'
 import { v } from 'convex/values'
+import { getCurrentUserClerkId } from './auth'
 
 export const create = mutation({
   args: {
-    clerkUserId: v.string(),
+    // NOTE: clerkUserId is NOT accepted from client for security
+    // It is derived server-side from the authenticated user's identity
     projectId: v.id('projects'),
     originalFilename: v.string(),
     storedFilename: v.string(),
@@ -25,6 +27,15 @@ export const create = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert('contextFiles', args)
+    // Get authenticated user's Clerk ID from server-side auth context
+    const clerkUserId = await getCurrentUserClerkId(ctx)
+
+    // TODO: Verify user owns the project (projectId ownership check)
+    // This will be implemented when project ownership queries are added
+
+    return await ctx.db.insert('contextFiles', {
+      ...args,
+      clerkUserId,
+    })
   },
 })

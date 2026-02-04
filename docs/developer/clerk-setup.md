@@ -57,30 +57,37 @@ User reopens app → Session restored from store
 
 ### User ID Mapping
 
-- **Frontend**: Use `useUser()` from `@clerk/clerk-react` to get `user?.id` (Clerk user ID)
-- **Convex**: Store `clerkUserId` as a string field (NOT `v.id('users')`)
-- **Mutations**: Pass `clerkUserId` from frontend to Convex mutations
+- **Frontend**: Use `useUser()` from `@clerk/clerk-react` to get user information
+- **Convex**: All tables use `clerkUserId: v.string()` field
+- **Mutations**: DO NOT pass `clerkUserId` from frontend - it is derived server-side from authenticated identity
 
 Example:
 
 ```typescript
-import { useUser } from '@clerk/clerk-react';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 
 function MyComponent() {
-  const { user } = useUser();
   const createContext = useMutation(api.contexts.create);
 
   const handleUpload = async (file: File) => {
+    // clerkUserId is automatically derived server-side from auth context
     await createContext({
-      clerkUserId: user!.id,
       projectId: selectedProjectId,
-      // ... other fields
+      // ... other fields (NO clerkUserId)
     });
   };
 }
 ```
+
+### Server-Side Authentication
+
+All Convex mutations verify the user's identity server-side using Clerk JWT tokens:
+
+1. `ConvexProviderWithClerk` passes Clerk auth tokens to Convex
+2. Convex validates the JWT and extracts the Clerk user ID
+3. Mutations use `getCurrentUserClerkId(ctx)` to get the authenticated user
+4. User cannot spoof their identity or access other users' data
 
 ## OAuth Support (Phase 2)
 

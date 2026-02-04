@@ -90,21 +90,10 @@ pub fn run() {
     // because clerk uses it for session persistence via with_tauri_store()
     app_builder = app_builder.plugin(tauri_plugin_store::Builder::default().build());
 
-    // Get Clerk publishable key from environment variable
-    // In development, this comes from .env.local via Vite
-    // In production, this should be embedded at build time
-    let clerk_key = std::env::var("VITE_CLERK_PUBLISHABLE_KEY").unwrap_or_else(|_| {
-        // In release builds, fail fast if key is missing
-        #[cfg(not(debug_assertions))]
-        {
-            panic!("VITE_CLERK_PUBLISHABLE_KEY environment variable is required in production");
-        }
-        #[cfg(debug_assertions)]
-        {
-            log::warn!("VITE_CLERK_PUBLISHABLE_KEY not set, using placeholder");
-            "pk_test_placeholder".to_string()
-        }
-    });
+    // Clerk publishable key is provided by the JS-side ClerkProvider
+    // The Rust-side plugin needs a placeholder key for initialization
+    // The actual auth is handled entirely on the frontend
+    let clerk_key = "pk_placeholder_for_tauri_plugin".to_string();
 
     app_builder
         .plugin(tauri_plugin_http::init())

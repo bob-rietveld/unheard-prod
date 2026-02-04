@@ -5,10 +5,10 @@ export default defineSchema({
   projects: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
-    userId: v.id('users'),
+    clerkUserId: v.string(),
     archived: v.boolean(),
     createdAt: v.number(),
-  }).index('by_user', ['userId']),
+  }).index('by_user', ['clerkUserId']),
 
   decisions: defineTable({
     title: v.string(),
@@ -19,10 +19,10 @@ export default defineSchema({
       v.literal('decided')
     ),
     projectId: v.optional(v.id('projects')),
-    userId: v.id('users'),
+    clerkUserId: v.string(),
     createdAt: v.number(),
   })
-    .index('by_user', ['userId'])
+    .index('by_user', ['clerkUserId'])
     .index('by_project', ['projectId']),
 
   analyses: defineTable({
@@ -30,7 +30,7 @@ export default defineSchema({
     type: v.string(),
     parameters: v.any(),
     results: v.any(),
-    userId: v.id('users'),
+    clerkUserId: v.string(),
     createdAt: v.number(),
   }).index('by_decision', ['decisionId']),
 
@@ -38,9 +38,9 @@ export default defineSchema({
     name: v.string(),
     schema: v.any(),
     data: v.any(),
-    userId: v.id('users'),
+    clerkUserId: v.string(),
     createdAt: v.number(),
-  }).index('by_user', ['userId']),
+  }).index('by_user', ['clerkUserId']),
 
   contextFiles: defineTable({
     clerkUserId: v.string(),

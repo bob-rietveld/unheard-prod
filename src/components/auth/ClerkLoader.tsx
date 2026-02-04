@@ -1,7 +1,8 @@
 import React from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { ConvexProvider, ConvexReactClient } from 'convex/react'
+import { ConvexProviderWithClerk } from 'convex/react-clerk'
+import { ConvexReactClient } from 'convex/react'
 import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react'
 import { initClerk } from 'tauri-plugin-clerk'
 import type { Clerk } from '@clerk/clerk-js'
@@ -49,17 +50,17 @@ export function ClerkLoader() {
       publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string}
       Clerk={clerk}
     >
-      <ConvexProvider client={convex}>
+      <ConvexProviderWithClerk client={convex}>
         <QueryClientProvider client={queryClient}>
           <SignedIn>
             <App />
-            <ReactQueryDevtools initialIsOpen={false} />
+            {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
           </SignedIn>
           <SignedOut>
             <SignInPage />
           </SignedOut>
         </QueryClientProvider>
-      </ConvexProvider>
+      </ConvexProviderWithClerk>
     </ClerkProvider>
   )
 }

@@ -30,7 +30,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' tauri: ipc: http://ipc.localhost https: wss:; frame-src https:"
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://img.clerk.com; font-src 'self' data:; connect-src 'self' tauri: ipc: http://ipc.localhost https://*.clerk.accounts.dev https://*.clerk.com https://*.convex.cloud https://*.convex.site wss://*.convex.cloud; frame-src https://*.clerk.accounts.dev https://*.clerk.com"
     },
     "macOSPrivateApi": true
   },
