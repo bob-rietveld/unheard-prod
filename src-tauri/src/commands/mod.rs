@@ -4,6 +4,7 @@
 //! Import specific commands via their submodule (e.g., `commands::preferences::greet`).
 
 pub mod context;
+pub mod git;
 pub mod notifications;
 pub mod preferences;
 pub mod projects;

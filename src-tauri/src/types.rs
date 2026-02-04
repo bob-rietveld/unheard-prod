@@ -170,3 +170,17 @@ pub enum UploadProgress {
     /// Error occurred
     Error { message: String },
 }
+
+// ============================================================================
+// Git Status
+// ============================================================================
+
+/// Git repository status information.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct GitStatus {
+    /// Number of uncommitted changes in the repository
+    pub uncommitted_changes: usize,
+    /// Whether local changes are synced with remote
+    pub synced: bool,
+}

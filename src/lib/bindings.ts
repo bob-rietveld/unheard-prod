@@ -187,6 +187,28 @@ async uploadContextFile(path: string, projectId: string, onProgress: TAURI_CHANN
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Auto-commit files to Git repository with proper LFS handling.
+ * 
+ * LFS tracking is automatic via .gitattributes rules created during project init.
+ * Files matching .gitattributes patterns (PDF, Excel >10MB) are automatically tracked by Git LFS.
+ * 
+ * # Arguments
+ * * `repo_path` - Path to the Git repository
+ * * `files` - List of file paths relative to repo root (e.g., "context/file.csv")
+ * * `message` - Commit message
+ * 
+ * # Returns
+ * The commit ID (SHA) as a string
+ */
+async gitAutoCommit(repoPath: string, files: string[], message: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("git_auto_commit", { repoPath, files, message }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
