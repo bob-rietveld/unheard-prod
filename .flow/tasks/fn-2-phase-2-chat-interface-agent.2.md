@@ -1,6 +1,5 @@
-# fn-2-phase-2-chat-interface-agent.2 Claude SDK Tauri streaming command
-
 ## Description
+
 Implement Tauri command that calls Claude API via Rust reqwest with SSE streaming via Channel.
 
 **Size:** M
@@ -12,7 +11,7 @@ Implement Tauri command that calls Claude API via Rust reqwest with SSE streamin
 
 ## Approach
 
-**Tauri Streaming Pattern** (from architecture guide):
+**Tauri Streaming Pattern**:
 - Use `tauri::ipc::Channel` for token streaming (no UI freeze)
 - Spawn blocking task for async HTTP calls
 - Emit progress events: `{type: 'token', content: string}`, `{type: 'done'}`, `{type: 'error', message: string}`
@@ -39,7 +38,7 @@ eventsource-stream = "0.2"
 
 ## Key Context
 
-**Claude API Streaming** (from docs-scout):
+**Claude API Streaming**:
 - POST to `https://api.anthropic.com/v1/messages`
 - Headers: `anthropic-version: 2023-06-01`, `x-api-key`, `content-type: application/json`
 - Body: `{ model, max_tokens, messages, stream: true, system }`
@@ -63,46 +62,9 @@ eventsource-stream = "0.2"
 - Claude API: `https://platform.claude.com/docs/en/api/messages-streaming`
 - Bindings pattern: `src-tauri/src/bindings.rs`
 - eventsource-stream: `https://docs.rs/eventsource-stream/`
-## Approach
 
-**Tauri Streaming Pattern** (from architecture guide):
-- Use `tauri::ipc::Channel` for token streaming (no UI freeze)
-- Spawn blocking task for async HTTP calls
-- Emit progress events: `{type: 'token', content: string}`, `{type: 'done'}`, `{type: 'error', message: string}`
-
-**Rust Dependencies**:
-```toml
-reqwest = { version = "0.12", features = ["json", "stream"] }
-tokio-stream = "0.1"
-serde_json = "1.0"
-```
-
-**API Key Strategy** (from gap analysis):
-- Read from environment variable `ANTHROPIC_API_KEY`
-- Return clear error if missing: "ANTHROPIC_API_KEY not configured"
-
-**Follow Pattern**: `src-tauri/src/commands/preferences.rs:1-50`
-
-## Key Context
-
-**Claude SDK Streaming** (from docs-scout):
-- POST to `https://api.anthropic.com/v1/messages`
-- Headers: `anthropic-version: 2023-06-01`, `x-api-key`, `content-type: application/json`
-- Body: `{ model, max_tokens, messages, stream: true, system }`
-- Response: Server-sent events (SSE) stream
-- Event format: `data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"token"}}`
-
-**Error Handling**:
-- 429 Rate Limit → return `RateLimitError` with retry-after
-- 500 Server Error → return `ApiError` with message
-- Timeout (60s) → return `TimeoutError`
-
-## References
-
-- Tauri Channel: `https://v2.tauri.app/reference/javascript/api/ipc/#channel`
-- Claude API: `https://platform.claude.com/docs/en/api/messages-streaming`
-- Pattern: `src-tauri/src/commands/preferences.rs`
 ## Acceptance
+
 - [ ] Rust command `send_chat_message` accepts: message (String), history (Vec<ChatMessage>), system_prompt (String), channel (Channel)
 - [ ] Command returns `Result<ChatResponse, ChatError>`
 - [ ] Command calls Claude API via `reqwest` (NO @anthropic-ai/sdk)
@@ -126,10 +88,3 @@ serde_json = "1.0"
 - [ ] cargo clippy passes with no warnings
 - [ ] Documentation: Update `docs/developer/tauri-commands.md` with streaming command pattern
 - [ ] Documentation: Create `docs/developer/claude-sdk-integration.md` (document Rust approach, not Node SDK)
-## Done summary
-TBD
-
-## Evidence
-- Commits:
-- Tests:
-- PRs:

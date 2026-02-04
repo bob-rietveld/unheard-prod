@@ -64,6 +64,7 @@ export function ClerkLoader() {
   }
 
   return (
+    // publishableKey must match the one used by the Rust plugin
     <ClerkProvider publishableKey={publishableKey} Clerk={clerk}>
       <ConvexAuthProvider>
         <QueryClientProvider client={queryClient}>

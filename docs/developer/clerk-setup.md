@@ -48,14 +48,15 @@ In your Clerk Dashboard:
 
 The application uses `tauri-plugin-store` to persist Clerk sessions across app restarts. The session is stored in a secure local store managed by Tauri.
 
-**Important**: The Rust-side `tauri-plugin-clerk` only handles session persistence. The actual Clerk authentication is initialized entirely on the JS side:
+**Important**: The Clerk authentication flow works as follows:
 
-1. Rust plugin: Initialized with a placeholder key (only used for storage)
-2. JS side: `initClerk()` creates the Clerk instance
-3. `ClerkProvider`: Uses the real `VITE_CLERK_PUBLISHABLE_KEY` from `.env.local`
-4. The `publishableKey` prop on `ClerkProvider` overrides any key from the Clerk instance
+1. **Rust plugin initialization**: Reads `VITE_CLERK_PUBLISHABLE_KEY` from environment at runtime and initializes the plugin
+2. **JS side initialization**: `initClerk()` fetches the Clerk instance from the plugin (with the key from step 1)
+3. **ClerkProvider**: Wraps the app with the Clerk instance from `initClerk()`
 
-This architecture ensures the sensitive publishable key only needs to be in `.env.local` and is managed by Vite, not embedded in Rust compilation.
+The publishable key must be set in `.env.local` for development. Vite loads this file and makes `VITE_*` variables available as environment variables that both the frontend and Rust backend can access at runtime.
+
+**Production builds**: Ensure `VITE_CLERK_PUBLISHABLE_KEY` is set in your build environment so it's available when the Rust code runs.
 
 ### Authentication Flow
 

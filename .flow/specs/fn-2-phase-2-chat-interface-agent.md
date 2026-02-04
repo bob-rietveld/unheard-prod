@@ -15,7 +15,7 @@ Enable founders to make decisions through conversational AI. Users describe thei
 
 - **Chat UI**: Claude Desktop-style interface with message bubbles, streaming responses, input area
 - **Claude API Integration**: Rust backend calls Claude API via reqwest with streaming (SSE)
-- **Agent System**: Intent classification, template recommendation, guided configuration wizard  
+- **Agent System**: Intent classification, template recommendation, guided configuration wizard
 - **Template Library**: 3 core templates in Convex (Investor Evaluation, Pricing Strategy, Product Roadmap)
 - **Decision Log Generation**: Auto-create markdown in `/decisions/`, Git auto-commit
 - **State Management**: New `useChatStore` (Zustand) for ephemeral conversation state
@@ -101,7 +101,7 @@ Agent: "Decision log created! View at decisions/2026-02-04-investor-evaluation.m
 
 5. **Template Storage**: Templates stored as YAML in Convex `experimentTemplates` table. Agent fetches via `api.templates.list()` query.
 
-6. **Decision Log Storage**: Extend existing Convex `decisions` table with new fields (backward compatible). New fields: `markdownFilePath`, `templateId`, `configData`. Existing status values preserved.
+6. **Decision Log Storage**: Extend existing Convex `decisions` table with new fields (backward compatible). New fields: `markdownFilePath`, `templateId`, `configData`. Existing status values preserved, new ones added.
 
 7. **Error Boundaries**: React error boundaries catch rendering errors. API errors shown inline with retry.
 
@@ -146,6 +146,7 @@ experimentTemplates: defineTable({
 // Conversations are ephemeral in Zustand only
 
 // EXTEND existing decisions table (backward compatible)
+// Existing schema uses clerkUserId (from Phase 1) - keep it consistent
 decisions: defineTable({
   title: v.string(),
   description: v.optional(v.string()),
@@ -159,7 +160,7 @@ decisions: defineTable({
     v.literal('completed')
   ),
   projectId: v.optional(v.id('projects')),
-  clerkUserId: v.string(),
+  clerkUserId: v.string(), // Existing field from Phase 1 - preserved
   createdAt: v.number(),
   // NEW Phase 2 fields:
   templateId: v.optional(v.id('experimentTemplates')),
