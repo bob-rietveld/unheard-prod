@@ -75,11 +75,8 @@ pub struct GitStatus {
 - [ ] Tests cover LFS and non-LFS commits
 
 ## Done summary
-
-TBD
-
+Implemented git_auto_commit command with LFS support via .gitattributes. Command handles single/multiple file commits, calls index.write() before write_tree(), and supports both first and subsequent commits.
 ## Evidence
-
-- Commits:
-- Tests:
+- Commits: 7055f87fe444ffaac5b7c56a3ffd088bbfeb1802
+- Tests: cargo test --lib commands::git::tests, cargo test --lib
 - PRs:
