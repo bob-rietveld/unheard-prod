@@ -38,7 +38,6 @@ export function useProject(id: Id<'projects'>) {
  * This mutation combines Convex DB creation with local Git setup.
  */
 export function useCreateProject() {
-  const queryClient = useQueryClient()
   const convexCreate = useConvexMutation(api.projects.create)
 
   return useMutation({
@@ -52,18 +51,32 @@ export function useCreateProject() {
         path: args.localPath,
       })
 
-      // Step 1: Initialize Git repository locally
+      // Step 1: Create project in Convex first (fail fast if auth/network issues)
+      const projectId = await convexCreate({
+        name: args.name,
+        description: args.description,
+      })
+
+      logger.info('Project created in Convex', { projectId })
+
+      // Step 2: Initialize Git repository locally
+      // If this fails, we have a DB project with no local repo (partial success)
       const gitResult = await commands.initializeGit(args.localPath)
 
       if (gitResult.status === 'error') {
         logger.error('Failed to initialize Git repository', {
           error: gitResult.error,
+          projectId,
         })
-        throw new Error(`Git initialization failed: ${gitResult.error}`)
+        throw new Error(
+          `Git initialization failed: ${gitResult.error}. Project created in database (ID: ${projectId}) but local repository setup incomplete.`
+        )
       }
 
       if (!gitResult.data.success) {
-        throw new Error('Git initialization failed')
+        throw new Error(
+          `Git initialization failed. Project created in database (ID: ${projectId}) but local repository setup incomplete.`
+        )
       }
 
       logger.info('Git repository initialized', {
@@ -72,22 +85,16 @@ export function useCreateProject() {
         commit: gitResult.data.commitHash,
       })
 
-      // Step 2: Create project in Convex
-      const projectId = await convexCreate({
-        name: args.name,
-        description: args.description,
-      })
-
-      logger.info('Project created in Convex', { projectId })
-
       return {
         projectId,
+        projectName: args.name,
+        projectDescription: args.description,
         gitResult: gitResult.data,
       }
     },
     onSuccess: (data, variables) => {
-      // Invalidate projects list to refetch
-      queryClient.invalidateQueries({ queryKey: projectQueryKeys.lists() })
+      // Note: Convex queries update automatically via subscriptions
+      // No need for manual invalidation
 
       // Show success toast with LFS warning if needed
       if (!data.gitResult.lfsAvailable) {

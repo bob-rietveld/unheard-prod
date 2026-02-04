@@ -6,6 +6,7 @@ use git2::Repository;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::fs;
+use std::ops::Not;
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -31,6 +32,38 @@ pub struct GitInitResult {
 #[specta::specta]
 pub fn initialize_git(path: PathBuf) -> Result<GitInitResult, String> {
     log::info!("Initializing Git repository at {path:?}");
+
+    // Validate directory is safe to initialize
+    if !path.exists() {
+        return Err("Directory does not exist".to_string());
+    }
+
+    if !path.is_dir() {
+        return Err("Path is not a directory".to_string());
+    }
+
+    // Check if .git already exists
+    if path.join(".git").exists() {
+        return Err("Directory already contains a Git repository (.git exists)".to_string());
+    }
+
+    // Check if directory is empty or only contains hidden files
+    let entries: Vec<_> = fs::read_dir(&path)
+        .map_err(|e| format!("Failed to read directory: {e}"))?
+        .filter_map(Result::ok)
+        .filter(|entry| {
+            // Allow hidden files/folders (starting with .)
+            entry.file_name().to_string_lossy().starts_with('.').not()
+        })
+        .collect();
+
+    if !entries.is_empty() {
+        log::warn!("Directory is not empty: {path:?}");
+        return Err(format!(
+            "Directory must be empty to initialize a new project. Found {} file(s)/folder(s).",
+            entries.len()
+        ));
+    }
 
     // Initialize Git repository
     let repo = Repository::init(&path).map_err(|e| {

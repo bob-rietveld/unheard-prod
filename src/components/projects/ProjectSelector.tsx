@@ -84,18 +84,27 @@ export function ProjectSelector() {
         localPath: projectPath,
       })
 
-      // After successful creation, fetch the full project and set it as current
-      if (result.projectId && projects) {
-        // Close dialog and reset form
-        setIsCreateDialogOpen(false)
-        setProjectName('')
-        setProjectDescription('')
-        setProjectPath('')
+      // Set the newly created project as current
+      // Note: Convex will update the projects list automatically via subscription
+      setCurrentProject({
+        _id: result.projectId,
+        name: result.projectName,
+        description: result.projectDescription,
+        clerkUserId: '', // Will be populated by Convex query
+        archived: false,
+        createdAt: Date.now(),
+      })
 
-        logger.info('Project created and selected', {
-          projectId: result.projectId,
-        })
-      }
+      // Close dialog and reset form
+      setIsCreateDialogOpen(false)
+      setProjectName('')
+      setProjectDescription('')
+      setProjectPath('')
+
+      logger.info('Project created and selected', {
+        projectId: result.projectId,
+        name: result.projectName,
+      })
     } catch (error) {
       logger.error('Failed to create project', { error })
       // Error toast is already shown by the mutation
