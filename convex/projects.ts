@@ -47,6 +47,7 @@ export const create = mutation({
   args: {
     name: v.string(),
     description: v.optional(v.string()),
+    localPath: v.string(),
   },
   handler: async (ctx, args) => {
     const clerkUserId = await getCurrentUserClerkId(ctx)

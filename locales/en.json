@@ -106,5 +106,17 @@
   "toast.error.windowMinimizeFailed": "Failed to minimize window: {{message}}",
   "toast.error.windowMaximizeFailed": "Failed to toggle maximize: {{message}}",
   "toast.error.fullscreenEnterFailed": "Failed to enter fullscreen: {{message}}",
-  "toast.error.fullscreenExitFailed": "Failed to exit fullscreen: {{message}}"
+  "toast.error.fullscreenExitFailed": "Failed to exit fullscreen: {{message}}",
+
+  "context.upload.title": "Upload Context Files",
+  "context.upload.dropZone": "Drag files or click to upload",
+  "context.upload.supportedFormats": "Supported formats: CSV, PDF, Excel (.xlsx, .xls)",
+  "context.upload.uploading": "Uploading {{count}} file(s)...",
+  "context.upload.status.parsing": "Parsing...",
+  "context.upload.status.copying": "Copying...",
+  "context.upload.status.committing": "Committing...",
+  "context.upload.status.complete": "Complete",
+  "context.upload.status.error": "Error",
+  "context.upload.clearCompleted": "Clear completed",
+  "context.upload.noProject": "No project selected. Please create or select a project first."
 }

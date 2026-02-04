@@ -5,6 +5,7 @@ export default defineSchema({
   projects: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
+    localPath: v.string(),
     clerkUserId: v.string(),
     archived: v.boolean(),
     createdAt: v.number(),

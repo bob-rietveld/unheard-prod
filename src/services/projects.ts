@@ -55,6 +55,7 @@ export function useCreateProject() {
       const projectId = await convexCreate({
         name: args.name,
         description: args.description,
+        localPath: args.localPath,
       })
 
       logger.info('Project created in Convex', { projectId })

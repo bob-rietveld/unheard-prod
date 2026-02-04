@@ -6,6 +6,7 @@ interface Project {
   _id: Id<'projects'>
   name: string
   description?: string
+  localPath: string
   clerkUserId: string
   archived: boolean
   createdAt: number
