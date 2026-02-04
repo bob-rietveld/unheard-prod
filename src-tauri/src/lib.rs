@@ -105,7 +105,7 @@ pub fn run() {
     app_builder = app_builder.plugin(tauri_plugin_store::Builder::default().build());
 
     // Get Clerk publishable key from runtime environment
-    // In development: Tauri loads .env.local via Vite, making VITE_* vars available
+    // In development: Loaded from .env.local via dotenvy (see above)
     // In production: Set this env var in your deployment/build environment
     let clerk_key = std::env::var("VITE_CLERK_PUBLISHABLE_KEY").unwrap_or_else(|_| {
         log::warn!("VITE_CLERK_PUBLISHABLE_KEY not set, authentication will not work");
