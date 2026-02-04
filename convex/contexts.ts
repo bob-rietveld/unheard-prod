@@ -30,8 +30,14 @@ export const create = mutation({
     // Get authenticated user's Clerk ID from server-side auth context
     const clerkUserId = await getCurrentUserClerkId(ctx)
 
-    // TODO: Verify user owns the project (projectId ownership check)
-    // This will be implemented when project ownership queries are added
+    // Verify user owns the project
+    const project = await ctx.db.get(args.projectId)
+    if (!project) {
+      throw new Error('Project not found')
+    }
+    if (project.clerkUserId !== clerkUserId) {
+      throw new Error('Unauthorized: You do not own this project')
+    }
 
     return await ctx.db.insert('contextFiles', {
       ...args,

@@ -20,6 +20,19 @@ This project uses [Clerk](https://clerk.com) for authentication via the [tauri-p
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_your-key-here
 ```
 
+### 3. Configure JWT for Convex
+
+1. In Clerk Dashboard, go to "JWT Templates"
+2. Create a new template or use existing "Convex" template
+3. Note the "Issuer" domain (e.g., `https://your-app.clerk.accounts.dev`)
+4. Add it to your `.env.local` file:
+
+```bash
+CLERK_JWT_ISSUER_DOMAIN=https://your-app.clerk.accounts.dev
+```
+
+This allows Convex to validate Clerk JWT tokens for server-side authentication.
+
 ### 3. Configure Authentication Settings
 
 In your Clerk Dashboard:
