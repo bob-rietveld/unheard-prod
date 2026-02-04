@@ -17,6 +17,16 @@ pub use types::DEFAULT_QUICK_PANE_SHORTCUT;
 /// Application entry point. Sets up all plugins and initializes the app.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Load .env.local in development to access VITE_CLERK_PUBLISHABLE_KEY
+    // In production, set environment variables via your deployment system
+    #[cfg(debug_assertions)]
+    {
+        // Try to load from project root (where .env.local is located)
+        if let Err(e) = dotenvy::from_filename("../.env.local") {
+            log::warn!("Could not load .env.local: {}", e);
+        }
+    }
+
     let builder = bindings::generate_bindings();
 
     // Export TypeScript bindings in debug builds

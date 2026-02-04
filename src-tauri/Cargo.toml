@@ -48,6 +48,7 @@ calamine = "0.26"
 tauri-plugin-clerk = "0.1.0"
 tauri-plugin-http = "2.5.7"
 tauri-plugin-store = "2.4.2"
+dotenvy = "0.15.7"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2"

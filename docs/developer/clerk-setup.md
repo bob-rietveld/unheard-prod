@@ -50,13 +50,14 @@ The application uses `tauri-plugin-store` to persist Clerk sessions across app r
 
 **Important**: The Clerk authentication flow works as follows:
 
-1. **Rust plugin initialization**: Reads `VITE_CLERK_PUBLISHABLE_KEY` from environment at runtime and initializes the plugin
-2. **JS side initialization**: `initClerk()` fetches the Clerk instance from the plugin (with the key from step 1)
-3. **ClerkProvider**: Wraps the app with the Clerk instance from `initClerk()`
+1. **Environment loading**: In development, Rust loads `../.env.local` using `dotenvy` to read `VITE_CLERK_PUBLISHABLE_KEY`
+2. **Rust plugin initialization**: Reads the key from environment and initializes `tauri-plugin-clerk`
+3. **JS side initialization**: `initClerk()` fetches the Clerk instance from the plugin (with the key from step 1)
+4. **ClerkProvider**: Wraps the app with the Clerk instance from `initClerk()`
 
-The publishable key must be set in `.env.local` for development. Vite loads this file and makes `VITE_*` variables available as environment variables that both the frontend and Rust backend can access at runtime.
+The publishable key must be set in `.env.local` for development. The Rust code explicitly loads this file in debug builds using the `dotenvy` crate.
 
-**Production builds**: Ensure `VITE_CLERK_PUBLISHABLE_KEY` is set in your build environment so it's available when the Rust code runs.
+**Production builds**: Set `VITE_CLERK_PUBLISHABLE_KEY` as an environment variable in your deployment system (CI/CD, hosting platform, etc.) so it's available when the Rust code runs. The `dotenvy` loading is only active in development builds.
 
 ### Authentication Flow
 
