@@ -26,8 +26,23 @@
     "os:default",
     "global-shortcut:default",
     "clerk:default",
-    "http:default",
-    "http:allow-fetch",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://*.clerk.accounts.dev/*"
+        },
+        {
+          "url": "https://*.clerk.com/*"
+        },
+        {
+          "url": "https://*.convex.cloud/*"
+        },
+        {
+          "url": "https://*.convex.site/*"
+        }
+      ]
+    },
     "store:default"
   ]
 }

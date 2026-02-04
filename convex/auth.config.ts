@@ -4,10 +4,10 @@
 export default {
   providers: [
     {
-      // Clerk JWT issuer domain
+      // CLERK_FRONTEND_API_URL
       // For development: https://your-app.clerk.accounts.dev
       // Get this from your Clerk Dashboard -> JWT Templates -> Convex
-      domain: process.env.CLERK_JWT_ISSUER_DOMAIN!,
+      domain: process.env.CLERK_FRONTEND_API_URL,
       applicationID: 'convex',
     },
   ],

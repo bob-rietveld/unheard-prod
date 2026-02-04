@@ -19,6 +19,8 @@ package-lock.json
 .git/
 src/lib/bindings.ts
 convex/_generated/
+.flow/
+scripts/ralph/
 
 # Logs
 *.log
