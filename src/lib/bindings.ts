@@ -248,6 +248,25 @@ async sendChatMessage(message: string, history: ChatMessage[], systemPrompt: str
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Create a decision log markdown file and commit it to Git.
+ * 
+ * # Arguments
+ * * `content` - Markdown content with YAML frontmatter
+ * * `filename` - Filename (e.g., "2026-02-04-investor-eval.md")
+ * * `project_path` - Path to the project root (Git repository)
+ * 
+ * # Returns
+ * The full relative path to the created file (e.g., "decisions/2026-02-04-investor-eval.md")
+ */
+async createDecisionLog(content: string, filename: string, projectPath: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("create_decision_log", { content, filename, projectPath }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
