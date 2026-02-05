@@ -67,4 +67,32 @@ export default defineSchema({
   })
     .index('by_user', ['clerkUserId'])
     .index('by_project', ['projectId']),
+
+  chats: defineTable({
+    projectId: v.id('projects'),
+    clerkUserId: v.string(),
+    title: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    archived: v.boolean(),
+  })
+    .index('by_user', ['clerkUserId'])
+    .index('by_project', ['projectId'])
+    .index('by_project_active', ['projectId', 'archived']),
+
+  messages: defineTable({
+    chatId: v.id('chats'),
+    role: v.union(v.literal('user'), v.literal('assistant')),
+    content: v.string(),
+    timestamp: v.number(),
+    status: v.optional(
+      v.union(
+        v.literal('sending'),
+        v.literal('streaming'),
+        v.literal('complete'),
+        v.literal('error')
+      )
+    ),
+    metadata: v.optional(v.any()),
+  }).index('by_chat', ['chatId']),
 })

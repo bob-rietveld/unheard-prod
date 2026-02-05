@@ -20,6 +20,7 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         quick_pane::update_quick_pane_shortcut,
         projects::initialize_git,
         projects::detect_git_lfs,
+        projects::list_project_files,
         context::upload_context_file,
         git::git_auto_commit,
         chat::send_chat_message,

@@ -32,8 +32,10 @@ ChatInterface (container)
 - `Button` from `src/components/ui/button.tsx`
 
 **Streaming Rendering** (from practice-scout):
+<!-- Updated by plan-sync: fn-2-phase-2-chat-interface-agent.2 - documented StreamEvent types -->
 
-- Use `useEffect` to subscribe to streaming channel events
+- Use `useEffect` to subscribe to streaming channel events via Tauri Channel
+- StreamEvent types from `src/lib/bindings.ts`: `Token { content }`, `Done`, `Error { message }`
 - Accumulate tokens in local state or directly update useChatStore
 - Auto-scroll to bottom on new messages (with "scroll to bottom" button if user scrolled up)
 
@@ -72,7 +74,9 @@ const { messages, isStreaming } = useChatStore()
 
 - State pattern: `docs/developer/state-management.md`
 - UI patterns: `docs/developer/ui-patterns.md`
-- Task 1: Types from `src/types/chat.ts`
+- Task 1: Frontend types from `src/types/chat.ts` (ChatMessage with id, role, content, timestamp, status, metadata)
+- Task 2: Rust API types from `src/lib/bindings.ts` (ChatMessage, StreamEvent, ChatError, ChatResponse)
+<!-- Updated by plan-sync: fn-2-phase-2-chat-interface-agent.2 - clarified two type sources for ChatMessage -->
 
 ## Acceptance
 

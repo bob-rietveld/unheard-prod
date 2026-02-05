@@ -3,6 +3,8 @@
  * These types support streaming responses, message state tracking, and template configuration.
  */
 
+import type { Id } from '../../convex/_generated/dataModel'
+
 /**
  * Possible roles in a chat conversation.
  * - 'user': Message sent by the user
@@ -18,6 +20,33 @@ export type ChatRole = 'user' | 'assistant'
  * - 'error': Message encountered an error during transmission or receipt
  */
 export type MessageStatus = 'sending' | 'streaming' | 'complete' | 'error'
+
+/**
+ * A chat session within a project.
+ * Each chat has its own message history and can be thought of as an experiment or conversation thread.
+ */
+export interface Chat {
+  /** Unique identifier from Convex */
+  _id: Id<'chats'>
+
+  /** Project this chat belongs to */
+  projectId: Id<'projects'>
+
+  /** Owner of the chat */
+  clerkUserId: string
+
+  /** User-defined title for the chat */
+  title: string
+
+  /** Unix timestamp (milliseconds) when created */
+  createdAt: number
+
+  /** Unix timestamp (milliseconds) when last updated */
+  updatedAt: number
+
+  /** Whether this chat is archived (soft deleted) */
+  archived: boolean
+}
 
 /**
  * A single message in a chat conversation.
@@ -49,6 +78,9 @@ export interface ChatMessage {
 export interface ChatState {
   // ===== State =====
 
+  /** ID of the currently active chat (null if no chat selected) */
+  currentChatId: Id<'chats'> | null
+
   /** Array of all messages in the current conversation */
   messages: ChatMessage[]
 
@@ -71,6 +103,9 @@ export interface ChatState {
   queuedMessage: string | null
 
   // ===== Actions =====
+
+  /** Set the current active chat */
+  setCurrentChat: (chatId: Id<'chats'> | null) => void
 
   /** Add a new message to the conversation */
   addMessage: (message: ChatMessage) => void

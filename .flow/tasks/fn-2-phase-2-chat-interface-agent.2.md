@@ -96,3 +96,10 @@ eventsource-stream = "0.2"
 - [ ] cargo clippy passes with no warnings
 - [ ] Documentation: Update `docs/developer/tauri-commands.md` with streaming command pattern
 - [ ] Documentation: Create `docs/developer/claude-sdk-integration.md` (document Rust approach, not Node SDK)
+
+## Done summary
+- Task completed
+## Evidence
+- Commits:
+- Tests:
+- PRs:

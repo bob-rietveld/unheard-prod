@@ -361,3 +361,226 @@ This preserves scroll position, form state, and resize dimensions.
 - Override shadcn components in place (copy and modify instead)
 - Add `cursor-pointer` everywhere (only for actual clickable elements)
 - Use viewport-based responsive design (this is a fixed-size desktop app)
+
+## Chat Components
+
+The chat interface follows a component composition pattern for AI-powered decision support conversations.
+
+### Component Structure
+
+```
+src/components/chat/
+├── ChatInterface.tsx    # Main container with state management
+├── ChatMessages.tsx     # Message list with auto-scroll
+├── ChatInput.tsx        # Input area with keyboard shortcuts
+├── ChatBubble.tsx       # Individual message bubble
+└── index.ts            # Clean exports
+```
+
+### Architecture
+
+```tsx
+ChatInterface (container)
+├── ChatMessages (scroll area with message list)
+│   └── ChatBubble (individual message bubble)
+└── ChatInput (textarea + send button)
+```
+
+### State Pattern
+
+Chat components use **Zustand selector pattern** (enforced by ast-grep):
+
+```tsx
+// ✅ GOOD: Selector syntax
+const messages = useChatStore(state => state.messages)
+const isStreaming = useChatStore(state => state.isStreaming)
+
+// ❌ BAD: Destructuring (causes render cascades)
+const { messages, isStreaming } = useChatStore()
+
+// ✅ GOOD: Use getState() in callbacks
+const handleSend = () => {
+  const { addMessage, setError } = useChatStore.getState()
+  addMessage(newMessage)
+}
+```
+
+### Streaming Pattern
+
+Streaming uses Tauri Channels for real-time token updates:
+
+```tsx
+import { Channel } from '@tauri-apps/api/core'
+import { commands, type StreamEvent } from '@/lib/bindings'
+
+const channel = new Channel<StreamEvent>()
+let accumulatedContent = ''
+
+channel.onmessage = (event: StreamEvent) => {
+  if (event.type === 'Token') {
+    accumulatedContent += event.content
+    updateStreamingMessage(messageId, accumulatedContent)
+  } else if (event.type === 'Done') {
+    completeStreaming(messageId)
+  } else if (event.type === 'Error') {
+    setError(event.message)
+  }
+}
+
+await commands.sendChatMessage(message, history, null, channel)
+```
+
+### Auto-scroll Behavior
+
+ChatMessages implements smart auto-scroll:
+
+- Auto-scrolls to bottom when user is within 100px of bottom
+- Shows "New messages ↓" button when user scrolls up
+- Preserves scroll position when user is reading previous messages
+
+```tsx
+const isNearBottom = () => {
+  const { scrollTop, scrollHeight, clientHeight } = scrollAreaRef.current
+  return scrollHeight - scrollTop - clientHeight < 100
+}
+
+useEffect(() => {
+  if (messages.length > 0 && isNearBottom()) {
+    scrollToBottom('smooth')
+  } else if (messages.length > 0 && !isNearBottom()) {
+    setShowScrollButton(true)
+  }
+}, [messages])
+```
+
+### Keyboard Shortcuts
+
+ChatInput supports standard messaging shortcuts:
+
+- **Enter**: Send message
+- **Shift+Enter**: New line
+- **Escape**: Clear input (or stop streaming if empty and streaming)
+
+```tsx
+const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault()
+    handleSend()
+    return
+  }
+
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    if (input.trim() === '' && isStreaming) {
+      onStopStreaming?.()
+    } else {
+      setInput('')
+    }
+  }
+}
+```
+
+### Accessibility
+
+Chat components include full ARIA support:
+
+```tsx
+<div
+  role="log"
+  aria-live="polite"
+  aria-label={t('chat.messages.ariaLabel')}
+>
+  {messages.map(message => (
+    <ChatBubble key={message.id} message={message} />
+  ))}
+</div>
+
+<Textarea
+  aria-label={t('chat.input.ariaLabel')}
+  placeholder={t('chat.input.placeholder')}
+/>
+```
+
+### Message Styling
+
+- **User messages**: Right-aligned, blue background
+- **Assistant messages**: Left-aligned, gray background
+- **Streaming messages**: Animated cursor indicator
+- **Error messages**: Red border with error details
+
+```tsx
+<Card
+  className={`
+    max-w-[80%] px-4 py-3
+    ${isUser ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-800'}
+    ${isError ? 'border-red-500 bg-red-50 dark:bg-red-950' : ''}
+  `}
+>
+  {message.content}
+  {isStreaming && <span className="inline-block w-2 h-4 ml-1 bg-current animate-pulse" />}
+</Card>
+```
+
+### Empty State
+
+Chat shows a welcoming empty state with suggested prompts:
+
+```tsx
+if (messages.length === 0) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+      <h2 className="text-2xl font-semibold mb-4">
+        {t('chat.empty.title')}
+      </h2>
+      <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+        {t('chat.empty.description')}
+      </p>
+      <ul className="text-sm space-y-1">
+        <li>• {t('chat.empty.prompt1')}</li>
+        <li>• {t('chat.empty.prompt2')}</li>
+        <li>• {t('chat.empty.prompt3')}</li>
+      </ul>
+    </div>
+  )
+}
+```
+
+### Concurrent Input Handling
+
+Users can type while assistant is streaming. Messages are queued and sent after stream completes:
+
+```tsx
+// Queue message if user types while streaming
+const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  setInput(e.target.value)
+
+  if (isStreaming && e.target.value.trim()) {
+    const { queueMessage } = useChatStore.getState()
+    queueMessage(e.target.value.trim())
+  }
+}
+
+// Process queued messages after streaming completes
+useEffect(() => {
+  if (!isStreaming) {
+    const { dequeueMessage } = useChatStore.getState()
+    const queuedMsg = dequeueMessage()
+    if (queuedMsg) {
+      handleSendMessage(queuedMsg)
+    }
+  }
+}, [isStreaming])
+```
+
+### Testing
+
+Chat components have comprehensive tests covering:
+
+- Message rendering (user vs assistant styling)
+- Streaming behavior (token accumulation, typing indicator)
+- Keyboard shortcuts (Enter, Shift+Enter, Escape)
+- Auto-scroll behavior (near bottom vs scrolled up)
+- Error states (API failures, network errors)
+- ARIA live regions for screen readers
+
+See `src/components/chat/ChatInterface.test.tsx` for examples.

@@ -175,6 +175,20 @@ async detectGitLfs() : Promise<Result<boolean, string>> {
 }
 },
 /**
+ * List all files in a project directory recursively.
+ * 
+ * Filters for supported file types (CSV, PDF, XLSX, XLS) and returns
+ * file metadata for display and selection.
+ */
+async listProjectFiles(projectPath: string) : Promise<Result<ProjectFile[], string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_project_files", { projectPath }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
  * Upload a context file to the project.
  * 
  * Parses the file (CSV/PDF/Excel), copies it to the project's context directory,
@@ -355,6 +369,10 @@ isLfs: boolean }
  */
 export type GitInitResult = { success: boolean; path: string; lfsAvailable: boolean; commitHash: string | null }
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
+/**
+ * Information about a file in the project directory.
+ */
+export type ProjectFile = { path: string; name: string; extension: string; size: number; isSupported: boolean }
 /**
  * Error types for recovery operations (typed for frontend matching)
  */

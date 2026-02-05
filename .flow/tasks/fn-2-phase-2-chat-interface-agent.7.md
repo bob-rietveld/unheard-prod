@@ -15,13 +15,15 @@ Implement comprehensive error handling, retry logic, and UX polish for chat syst
 
 ## Approach
 
-**Error Types** (from gap analysis):
+**Error Types** (from Task 2 implementation - `ChatError` enum in `src/lib/bindings.ts`):
+<!-- Updated by plan-sync: fn-2-phase-2-chat-interface-agent.2 implemented ChatError with additional types -->
 
-- **API Key Missing**: Show config guide modal
-- **Rate Limit (429)**: Show countdown timer, auto-retry after delay
-- **Network Offline**: Show "You're offline" banner, queue messages
-- **API Timeout**: Show "Try Again" button inline
-- **Validation Error**: Show field-specific error message
+- **ConfigError** (API Key Missing): Show config guide modal
+- **RateLimitError** (429): Show countdown timer, auto-retry after `retry_after` delay
+- **NetworkError** (Network/HTTP failures): Show "You're offline" banner, queue messages
+- **TimeoutError**: Show "Try Again" button inline
+- **ApiError** (5xx server errors): Show error message with "Try Again"
+- **ParseError** (SSE parsing failures): Show generic error with "Try Again"
 - **Git/Convex Failure**: Show warning, continue with degraded functionality
 
 **Retry Strategy**:
@@ -92,8 +94,8 @@ interface QueuedMessage {
 - [ ] React error boundary wraps ChatInterface
 - [ ] Error boundary shows "Something went wrong" + "Reset Chat" button
 - [ ] ErrorMessage component displays inline errors with "Try Again" button
-- [ ] API key missing error shows modal with setup instructions
-- [ ] Rate limit error shows countdown timer and auto-retries after delay
+- [ ] ConfigError (API key missing) shows modal with setup instructions
+- [ ] RateLimitError shows countdown timer using `retry_after` value and auto-retries
 - [ ] Network offline shows banner: "You're offline. Messages will send when you reconnect."
 - [ ] Offline queue stores messages in localStorage
 - [ ] On reconnect, queued messages sync in order

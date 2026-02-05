@@ -221,6 +221,105 @@ pub fn detect_git_lfs() -> Result<bool, String> {
     }
 }
 
+/// Information about a file in the project directory.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectFile {
+    pub path: String,
+    pub name: String,
+    pub extension: String,
+    pub size: u64,
+    pub is_supported: bool,
+}
+
+/// List all files in a project directory recursively.
+///
+/// Filters for supported file types (CSV, PDF, XLSX, XLS) and returns
+/// file metadata for display and selection.
+#[tauri::command]
+#[specta::specta]
+pub fn list_project_files(project_path: PathBuf) -> Result<Vec<ProjectFile>, String> {
+    log::info!("Listing files in project directory: {project_path:?}");
+
+    if !project_path.exists() {
+        return Err("Project directory does not exist".to_string());
+    }
+
+    if !project_path.is_dir() {
+        return Err("Path is not a directory".to_string());
+    }
+
+    let supported_extensions = vec!["csv", "pdf", "xlsx", "xls"];
+    let mut files = Vec::new();
+
+    fn scan_directory(
+        dir: &PathBuf,
+        base_path: &PathBuf,
+        supported_exts: &[&str],
+        files: &mut Vec<ProjectFile>,
+    ) -> Result<(), String> {
+        let entries = fs::read_dir(dir)
+            .map_err(|e| format!("Failed to read directory {dir:?}: {e}"))?;
+
+        for entry in entries {
+            let entry = entry.map_err(|e| format!("Failed to read entry: {e}"))?;
+            let path = entry.path();
+
+            // Skip hidden files and directories
+            if let Some(name) = path.file_name() {
+                if name.to_string_lossy().starts_with('.') {
+                    continue;
+                }
+            }
+
+            if path.is_dir() {
+                // Recursively scan subdirectories
+                scan_directory(&path, base_path, supported_exts, files)?;
+            } else if path.is_file() {
+                let extension = path
+                    .extension()
+                    .and_then(|s| s.to_str())
+                    .map(|s| s.to_lowercase())
+                    .unwrap_or_default();
+
+                let is_supported = supported_exts.contains(&extension.as_str());
+
+                // Get relative path from project root
+                let relative_path = path
+                    .strip_prefix(base_path)
+                    .unwrap_or(&path)
+                    .to_string_lossy()
+                    .to_string();
+
+                let name = path
+                    .file_name()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("unknown")
+                    .to_string();
+
+                let size = fs::metadata(&path)
+                    .map(|m| m.len())
+                    .unwrap_or(0);
+
+                files.push(ProjectFile {
+                    path: relative_path,
+                    name,
+                    extension,
+                    size,
+                    is_supported,
+                });
+            }
+        }
+
+        Ok(())
+    }
+
+    scan_directory(&project_path, &project_path, &supported_extensions, &mut files)?;
+
+    log::info!("Found {} files in project", files.len());
+    Ok(files)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

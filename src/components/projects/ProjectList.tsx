@@ -9,18 +9,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   useProjects,
   useCreateProject,
@@ -28,8 +20,14 @@ import {
 } from '@/services/projects'
 import { useProjectStore } from '@/store/project-store'
 import { logger } from '@/lib/logger'
+import type { Project } from '@/types/project'
 
-export function ProjectSelector() {
+/**
+ * ProjectList displays projects as a clean list (not dropdown).
+ * Follows Dieter Rams principles: minimal, peaceful, functional.
+ */
+
+export function ProjectList() {
   const { t } = useTranslation()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [projectName, setProjectName] = useState('')
@@ -43,12 +41,9 @@ export function ProjectSelector() {
   const currentProject = useProjectStore(state => state.currentProject)
   const setCurrentProject = useProjectStore(state => state.setCurrentProject)
 
-  const handleSelectProject = (projectId: string) => {
-    const project = projects?.find((p: { _id: string }) => p._id === projectId)
-    if (project) {
-      setCurrentProject(project)
-      logger.info('Project selected', { projectId, name: project.name })
-    }
+  const handleSelectProject = (project: Project) => {
+    setCurrentProject(project)
+    logger.info('Project selected', { projectId: project._id, name: project.name })
   }
 
   const handleBrowsePath = async () => {
@@ -69,11 +64,7 @@ export function ProjectSelector() {
   }
 
   const handleCreateProject = async () => {
-    if (!projectName.trim()) {
-      return
-    }
-
-    if (!projectPath.trim()) {
+    if (!projectName.trim() || !projectPath.trim()) {
       return
     }
 
@@ -85,7 +76,6 @@ export function ProjectSelector() {
       })
 
       // Wait for Convex subscription to populate projects list, then select the new project
-      // Use a short timeout to allow Convex to sync
       setTimeout(() => {
         const project = projects?.find(p => p._id === result.projectId)
         if (project) {
@@ -105,53 +95,87 @@ export function ProjectSelector() {
       })
     } catch (error) {
       logger.error('Failed to create project', { error })
-      // Error toast is already shown by the mutation
     }
   }
 
   const isFormValid =
     projectName.trim().length > 0 && projectPath.trim().length > 0
 
-  return (
-    <div className="flex items-center gap-2">
-      <Select
-        value={currentProject?._id}
-        onValueChange={handleSelectProject}
-        disabled={projectsLoading}
-      >
-        <SelectTrigger className="w-full border-border/60 bg-background/50 hover:bg-background hover:border-border transition-colors">
-          <SelectValue
-            placeholder={
-              projectsLoading
-                ? t('projects.loading', 'Loading...')
-                : t('projects.selectProject', 'Select project')
-            }
-          />
-        </SelectTrigger>
-        <SelectContent className="border-border/60">
-          {projects?.map((project: { _id: string; name: string }) => (
-            <SelectItem
-              key={project._id}
-              value={project._id}
-              className="cursor-pointer"
-            >
-              <span className="font-medium">{project.name}</span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+  if (projectsLoading) {
+    return (
+      <div className="flex flex-col">
+        {/* Section header skeleton */}
+        <div className="px-5 py-3 flex items-center justify-between">
+          <div className="h-3 w-16 bg-foreground/10 rounded animate-pulse" />
+          <div className="size-3.5 bg-foreground/10 rounded animate-pulse" />
+        </div>
 
+        {/* Project list skeleton */}
+        <div className="px-2 space-y-0.5">
+          {[1, 2, 3].map(i => (
+            <div
+              key={i}
+              className="h-9 bg-foreground/5 rounded-md animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col">
+      {/* Section header with + button - recurring pattern */}
+      <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+        <h2 className="text-[11px] font-medium tracking-wider uppercase text-foreground/40">
+          {t('projects.title', 'Projects')}
+        </h2>
+        <button
+          onClick={() => setIsCreateDialogOpen(true)}
+          className="size-4 flex items-center justify-center text-foreground/40 hover:text-foreground transition-colors cursor-pointer"
+          title={t('projects.create', 'New Project')}
+        >
+          <PlusIcon className="size-3.5" />
+        </button>
+      </div>
+
+      {/* Project list - clean, peaceful */}
+      <div className="px-2 pb-3">
+        {projects && projects.length > 0 ? (
+          <div className="space-y-0.5">
+            {projects.map((project: Project) => {
+              const isSelected = currentProject?._id === project._id
+              return (
+                <button
+                  key={project._id}
+                  onClick={() => handleSelectProject(project)}
+                  className={`
+                    w-full px-3 py-2 rounded-md text-left transition-all cursor-pointer
+                    ${
+                      isSelected
+                        ? 'bg-foreground/8 text-foreground'
+                        : 'text-foreground/70 hover:bg-foreground/4 hover:text-foreground'
+                    }
+                  `}
+                >
+                  <span className="text-[13px] font-medium block truncate">
+                    {project.name}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="px-3 py-6 text-center">
+            <p className="text-xs text-foreground/40">
+              {t('projects.empty', 'No projects yet')}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Create project dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon"
-            title={t('projects.createNew', 'Create project')}
-            className="shrink-0 border-border/60 hover:bg-accent transition-colors cursor-pointer"
-          >
-            <PlusIcon className="size-4" />
-          </Button>
-        </DialogTrigger>
         <DialogContent className="border-border/60">
           <DialogHeader>
             <DialogTitle className="text-lg">

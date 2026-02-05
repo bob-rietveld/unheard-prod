@@ -28,6 +28,7 @@ export const useChatStore = create<ChatState>()(
   devtools(
     (set): ChatState => ({
       // ===== Initial State =====
+      currentChatId: null,
       messages: [],
       isStreaming: false,
       streamingMessageId: null,
@@ -37,6 +38,9 @@ export const useChatStore = create<ChatState>()(
       queuedMessage: null,
 
       // ===== Actions =====
+
+      setCurrentChat: chatId =>
+        set({ currentChatId: chatId }, undefined, 'setCurrentChat'),
 
       addMessage: message =>
         set(
