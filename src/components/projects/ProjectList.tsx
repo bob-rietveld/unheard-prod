@@ -43,7 +43,10 @@ export function ProjectList() {
 
   const handleSelectProject = (project: Project) => {
     setCurrentProject(project)
-    logger.info('Project selected', { projectId: project._id, name: project.name })
+    logger.info('Project selected', {
+      projectId: project._id,
+      name: project.name,
+    })
   }
 
   const handleBrowsePath = async () => {

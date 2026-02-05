@@ -43,6 +43,7 @@ export function ConfigQuestion({
   // Validate on value change
   useEffect(() => {
     const validationResult = validateAnswer(question, localValue)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(validationResult.error)
     onValidationChange(validationResult.isValid, validationResult.error)
   }, [localValue, question, onValidationChange])
@@ -54,6 +55,7 @@ export function ConfigQuestion({
       question.default !== undefined
     ) {
       const defaultValue = question.default
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalValue(defaultValue)
       onChange(defaultValue)
     }
@@ -71,7 +73,9 @@ export function ConfigQuestion({
         <div className="space-y-2">
           <Label htmlFor={question.id}>
             {question.question}
-            {question.required && <span className="text-destructive ml-1">*</span>}
+            {question.required && (
+              <span className="text-destructive ml-1">*</span>
+            )}
           </Label>
           <Input
             id={question.id}
@@ -94,7 +98,7 @@ export function ConfigQuestion({
           )}
           {question.maxLength && (
             <p className="text-xs text-muted-foreground text-end">
-              {((localValue as string)?.length || 0)} / {question.maxLength}
+              {(localValue as string)?.length || 0} / {question.maxLength}
             </p>
           )}
         </div>
@@ -105,7 +109,9 @@ export function ConfigQuestion({
         <div className="space-y-2">
           <Label htmlFor={question.id}>
             {question.question}
-            {question.required && <span className="text-destructive ml-1">*</span>}
+            {question.required && (
+              <span className="text-destructive ml-1">*</span>
+            )}
           </Label>
           <Textarea
             id={question.id}
@@ -128,7 +134,7 @@ export function ConfigQuestion({
           )}
           {question.maxLength && (
             <p className="text-xs text-muted-foreground text-end">
-              {((localValue as string)?.length || 0)} / {question.maxLength}
+              {(localValue as string)?.length || 0} / {question.maxLength}
             </p>
           )}
         </div>
@@ -139,7 +145,9 @@ export function ConfigQuestion({
         <div className="space-y-2">
           <Label htmlFor={question.id}>
             {question.question}
-            {question.required && <span className="text-destructive ml-1">*</span>}
+            {question.required && (
+              <span className="text-destructive ml-1">*</span>
+            )}
           </Label>
           <Select
             value={(localValue as string) || ''}
@@ -151,7 +159,9 @@ export function ConfigQuestion({
               aria-describedby={error ? `${question.id}-error` : undefined}
             >
               <SelectValue
-                placeholder={question.placeholder || t('config.selectPlaceholder')}
+                placeholder={
+                  question.placeholder || t('config.selectPlaceholder')
+                }
               />
             </SelectTrigger>
             <SelectContent>
@@ -183,13 +193,17 @@ export function ConfigQuestion({
         <div className="space-y-2">
           <Label>
             {question.question}
-            {question.required && <span className="text-destructive ml-1">*</span>}
+            {question.required && (
+              <span className="text-destructive ml-1">*</span>
+            )}
           </Label>
           <div className="space-y-2">
             {question.options?.map(opt => {
               const optValue = typeof opt === 'string' ? opt : opt.value
               const optLabel = typeof opt === 'string' ? opt : opt.label
-              const checked = ((localValue as string[]) || []).includes(optValue)
+              const checked = ((localValue as string[]) || []).includes(
+                optValue
+              )
 
               return (
                 <div key={optValue} className="flex items-center space-x-2">
@@ -231,7 +245,9 @@ export function ConfigQuestion({
         <div className="space-y-2">
           <Label htmlFor={question.id}>
             {question.question}
-            {question.required && <span className="text-destructive ml-1">*</span>}
+            {question.required && (
+              <span className="text-destructive ml-1">*</span>
+            )}
           </Label>
           <div className="flex items-center gap-2">
             <Input
@@ -281,7 +297,9 @@ export function ConfigQuestion({
           <div className="flex items-center justify-between">
             <Label htmlFor={question.id} className="flex-1">
               {question.question}
-              {question.required && <span className="text-destructive ml-1">*</span>}
+              {question.required && (
+                <span className="text-destructive ml-1">*</span>
+              )}
             </Label>
             <Switch
               id={question.id}

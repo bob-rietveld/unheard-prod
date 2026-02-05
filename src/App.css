@@ -15,15 +15,15 @@
     @apply text-foreground;
     /* System font stack - Apple San Francisco on macOS, native fonts per OS */
     font-family:
-      -apple-system,           /* macOS San Francisco */
-      BlinkMacSystemFont,      /* macOS San Francisco fallback */
-      'Segoe UI',              /* Windows 10/11 */
-      'Roboto',                /* Android, Chrome OS */
-      'Oxygen',                /* KDE Plasma */
-      'Ubuntu',                /* Ubuntu */
-      'Cantarell',             /* GNOME */
-      'Helvetica Neue',        /* Older macOS */
-      sans-serif;              /* Final fallback */
+      -apple-system,
+      /* macOS San Francisco */ BlinkMacSystemFont,
+      /* macOS San Francisco fallback */ 'Segoe UI',
+      /* Windows 10/11 */ 'Roboto',
+      /* Android, Chrome OS */ 'Oxygen',
+      /* KDE Plasma */ 'Ubuntu',
+      /* Ubuntu */ 'Cantarell',
+      /* GNOME */ 'Helvetica Neue',
+      /* Older macOS */ sans-serif; /* Final fallback */
     font-size: 14px;
     font-weight: 400;
     line-height: 1.5;

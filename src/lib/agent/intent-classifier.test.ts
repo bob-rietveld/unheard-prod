@@ -74,7 +74,8 @@ describe('Intent Classifier', () => {
     })
 
     it('identifies roadmap-related intent', () => {
-      const message = 'Which features should I prioritize in my product roadmap?'
+      const message =
+        'Which features should I prioritize in my product roadmap?'
       const result = classifyIntent(message, mockTemplates)
 
       expect(result.suggestions.length).toBeGreaterThan(0)
@@ -94,7 +95,8 @@ describe('Intent Classifier', () => {
     })
 
     it('handles multiple keyword matches', () => {
-      const message = 'Should I raise funding and what pricing strategy should I use?'
+      const message =
+        'Should I raise funding and what pricing strategy should I use?'
       const result = classifyIntent(message, mockTemplates)
 
       // Should match both investor and pricing templates
@@ -147,7 +149,9 @@ describe('Intent Classifier', () => {
 
     it('detects decision indicators', () => {
       expect(requiresTemplateHelp('I need to decide on pricing')).toBe(true)
-      expect(requiresTemplateHelp('Help me make a decision about features')).toBe(true)
+      expect(
+        requiresTemplateHelp('Help me make a decision about features')
+      ).toBe(true)
     })
 
     it('returns false for statements', () => {

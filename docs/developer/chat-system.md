@@ -231,12 +231,12 @@ useEffect(() => {
 
 Implemented in ChatInput component:
 
-| Shortcut      | Action                                   |
-| ------------- | ---------------------------------------- |
-| Enter         | Send message                             |
-| Shift+Enter   | New line in textarea                     |
-| Escape        | Clear input (or stop streaming if empty) |
-| Cmd/Ctrl+A    | Select all (native textarea behavior)    |
+| Shortcut    | Action                                   |
+| ----------- | ---------------------------------------- |
+| Enter       | Send message                             |
+| Shift+Enter | New line in textarea                     |
+| Escape      | Clear input (or stop streaming if empty) |
+| Cmd/Ctrl+A  | Select all (native textarea behavior)    |
 
 **Implementation:**
 

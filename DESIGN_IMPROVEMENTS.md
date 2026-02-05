@@ -18,12 +18,14 @@ A design so refined and functional that it becomes invisible, allowing users to 
 **After:** Sophisticated neutral palette with subtle warmth
 
 #### Light Mode Improvements
+
 - Background: `oklch(0.99 0 0)` - Off-white reduces eye strain
 - Primary: `oklch(0.22 0.01 60)` - Charcoal with warm undertone
 - Borders: `oklch(0.91 0 0)` with 60% opacity for subtle separation
 - Accent: Barely perceptible blue hint for interactive elements
 
 #### Dark Mode Improvements
+
 - Background: `oklch(0.12 0.005 60)` - True black with subtle warmth
 - Improved contrast ratios (WCAG AAA compliant)
 - Refined border opacity for better separation
@@ -38,6 +40,7 @@ A design so refined and functional that it becomes invisible, allowing users to 
 **After:** 14px base with refined optical sizing
 
 #### Scale
+
 - h1: 22px (page titles)
 - h2: 18px (sections)
 - h3: 15px (cards)
@@ -46,6 +49,7 @@ A design so refined and functional that it becomes invisible, allowing users to 
 - small: 13px/12px (meta)
 
 #### Refinements
+
 - Negative letter-spacing (-0.01em to -0.02em) for refined feel
 - Optimized line-heights (1.3 to 1.5 based on size)
 - Only 400 and 600 weights for consistency
@@ -58,12 +62,15 @@ A design so refined and functional that it becomes invisible, allowing users to 
 ### 3. Chat Interface - Complete Redesign
 
 #### Message Bubbles
+
 **Before:**
+
 - Blue user bubbles
 - Generic gray assistant bubbles
 - Basic timestamp below
 
 **After:**
+
 - Role indicators (subtle uppercase labels)
 - User: Refined primary color with proper foreground
 - Assistant: Card-style with border
@@ -72,24 +79,30 @@ A design so refined and functional that it becomes invisible, allowing users to 
 - Error states with refined destructive colors
 
 #### Empty State
+
 **Before:** Basic centered text
 **After:**
+
 - Generous spacing (px-8 py-16)
 - Clear hierarchy with title and description
 - Suggested prompts with arrow indicators
 - Max-width for readability
 
 #### Input Area
+
 **Before:** Simple border-t with gray background
 **After:**
+
 - Backdrop blur effect (`bg-background/50 backdrop-blur-sm`)
 - Centered with max-width constraint
 - Refined borders (60% opacity)
 - Improved button sizing and typography
 
 #### Error Banner
+
 **Before:** Red background with harsh borders
 **After:**
+
 - Subtle destructive/5 background
 - Refined border opacity (20%)
 - Centered content with max-width
@@ -103,6 +116,7 @@ A design so refined and functional that it becomes invisible, allowing users to 
 
 **Before:** Basic dropdown and icon button
 **After:**
+
 - Refined select trigger with subtle borders
 - Improved hover states
 - Elegant dialog with proper spacing
@@ -117,28 +131,36 @@ A design so refined and functional that it becomes invisible, allowing users to 
 ### 5. Layout Components - Improved Spacing
 
 #### LeftSideBar
+
 **Before:** Simple p-4 padding
 **After:**
+
 - p-5 with border-b separator
 - Subtle sidebar background differentiation
 - Proper overflow handling
 
 #### RightSideBar
+
 **Before:** Basic border-l
 **After:**
+
 - Refined border opacity (60%)
 - Subtle background differentiation
 
 #### MainWindowContent
+
 **Before:** p-4 spacing, basic borders
 **After:**
+
 - px-6 py-5 header with refined border
 - gap-6 content spacing (vs gap-4)
 - Improved empty state
 
 #### MainWindow
+
 **Before:** Standard toaster styling
 **After:**
+
 - Refined toast borders (border/60)
 - Subtle shadows (shadow-sm vs shadow-lg)
 - Improved typography in actions
@@ -150,8 +172,10 @@ A design so refined and functional that it becomes invisible, allowing users to 
 ### 6. Context Components - Polish
 
 #### FolderScanner
+
 **Before:** Basic card with standard spacing
 **After:**
+
 - Refined card borders (border/60)
 - Improved header hierarchy
 - Better file list item hover states
@@ -159,6 +183,7 @@ A design so refined and functional that it becomes invisible, allowing users to 
 - Improved empty state spacing
 
 #### File Items
+
 - Hover transitions with subtle background change
 - Better spacing between elements
 - Refined text hierarchy (font sizes)
@@ -171,6 +196,7 @@ A design so refined and functional that it becomes invisible, allowing users to 
 ### 7. Interaction States - Micro-interactions
 
 #### Universal Improvements
+
 - All buttons: `transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1)`
 - Hover states: Subtle `bg-accent` shift
 - Focus states: Clear 2px outline with 2px offset
@@ -178,6 +204,7 @@ A design so refined and functional that it becomes invisible, allowing users to 
 - Border refinements: 60% opacity default, 100% on interaction
 
 #### Cursor Management
+
 - `cursor-pointer` on all interactive elements
 - Maintains default cursor on non-interactive areas (desktop app pattern)
 
@@ -190,11 +217,13 @@ A design so refined and functional that it becomes invisible, allowing users to 
 **Philosophy:** 4px base grid with refined progression
 
 #### Before
+
 - Inconsistent padding (mix of p-2, p-3, p-4)
 - Variable gaps
 - No clear system
 
 #### After
+
 - Card padding: p-5 or p-6
 - Form fields: gap-2.5
 - Sections: gap-5 or gap-6
@@ -208,26 +237,31 @@ A design so refined and functional that it becomes invisible, allowing users to 
 ## Files Modified
 
 ### Core Design System
+
 1. `src/theme-variables.css` - Complete color refinement
 2. `src/App.css` - Typography system and base styles
 
 ### Chat Components
+
 3. `src/components/chat/ChatBubble.tsx` - Complete redesign
 4. `src/components/chat/ChatMessages.tsx` - Empty state and scroll button
 5. `src/components/chat/ChatInput.tsx` - Input area refinement
 6. `src/components/chat/ChatInterface.tsx` - Error banner polish
 
 ### Layout Components
+
 7. `src/components/layout/LeftSideBar.tsx` - Spacing and structure
 8. `src/components/layout/RightSideBar.tsx` - Subtle refinements
 9. `src/components/layout/MainWindowContent.tsx` - Header and spacing
 10. `src/components/layout/MainWindow.tsx` - Toast refinement
 
 ### Feature Components
+
 11. `src/components/projects/ProjectSelector.tsx` - Complete redesign
 12. `src/components/context/FolderScanner.tsx` - Polish and refinement
 
 ### Documentation
+
 13. `docs/developer/design-system.md` - Complete design system guide (NEW)
 
 ---
@@ -259,16 +293,19 @@ A design so refined and functional that it becomes invisible, allowing users to 
 ## Accessibility Improvements
 
 ### Contrast Ratios
+
 - Light mode: 14:1 (foreground/background)
 - Dark mode: 11:1 (foreground/background)
 - All combinations exceed WCAG AAA standards
 
 ### Focus Management
+
 - Clear focus indicators (2px ring)
 - Proper focus-visible support
 - Consistent across all interactive elements
 
 ### ARIA Support
+
 - Maintained all existing ARIA labels
 - Improved screen reader experience
 - Semantic HTML structure preserved
@@ -278,12 +315,14 @@ A design so refined and functional that it becomes invisible, allowing users to 
 ## Performance Impact
 
 ### Positive
+
 - System fonts = zero font loading
 - CSS variables = efficient theme switching
 - Transform/opacity animations = GPU accelerated
 - Minimal shadow usage = better rendering
 
 ### Neutral
+
 - Added backdrop blur (chat input only)
 - Slightly more complex transitions (still 60fps)
 
@@ -292,22 +331,27 @@ A design so refined and functional that it becomes invisible, allowing users to 
 ## Before & After Comparison
 
 ### Visual Hierarchy
+
 **Before:** Flat, generic, lacks distinction
 **After:** Clear levels, refined contrast, professional
 
 ### Typography
+
 **Before:** 16px base, generic system fonts
 **After:** 14px base, refined scale, negative tracking
 
 ### Colors
+
 **Before:** Standard grays, high contrast
 **After:** Refined neutrals, subtle warmth, sophisticated
 
 ### Spacing
+
 **Before:** Tight, cramped, inconsistent
 **After:** Generous, rhythmic, breathing room
 
 ### Interactions
+
 **Before:** Instant state changes
 **After:** Smooth 150ms transitions, refined feedback
 
@@ -373,5 +417,5 @@ This redesign transforms Unheard from a functional app into a **refined, profess
 
 ---
 
-*Redesigned: February 2026*
-*Design System: Refined Functional Minimalism*
+_Redesigned: February 2026_
+_Design System: Refined Functional Minimalism_

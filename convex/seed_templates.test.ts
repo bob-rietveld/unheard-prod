@@ -10,7 +10,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 describe('Seed Templates', () => {
   describe('Template Slugs', () => {
     it('has correct slugs for 3 core templates', () => {
-      const expectedSlugs = ['investor-evaluation', 'pricing-strategy', 'product-roadmap']
+      const expectedSlugs = [
+        'investor-evaluation',
+        'pricing-strategy',
+        'product-roadmap',
+      ]
 
       // These slugs are used for idempotent seeding
       expect(expectedSlugs).toHaveLength(3)

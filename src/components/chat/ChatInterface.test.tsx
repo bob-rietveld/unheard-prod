@@ -194,7 +194,9 @@ describe('ChatInput', () => {
   it('send button is disabled when input is empty', () => {
     render(<ChatInput onSend={mockOnSend} />)
 
-    const sendButton = screen.getByRole('button', { name: 'chat.input.sendButton' })
+    const sendButton = screen.getByRole('button', {
+      name: 'chat.input.sendButton',
+    })
     expect(sendButton).toBeDisabled()
   })
 
@@ -257,7 +259,9 @@ describe('ChatInput', () => {
     render(<ChatInput onSend={mockOnSend} />)
 
     const input = screen.getByPlaceholderText('chat.input.streamingPlaceholder')
-    const sendButton = screen.getByRole('button', { name: 'chat.input.sendButton' })
+    const sendButton = screen.getByRole('button', {
+      name: 'chat.input.sendButton',
+    })
 
     expect(input).toBeDisabled()
     expect(sendButton).toBeDisabled()
@@ -271,7 +275,9 @@ describe('ChatInput', () => {
     )
 
     const input = screen.getByPlaceholderText('chat.input.streamingPlaceholder')
-    const sendButton = screen.getByRole('button', { name: 'chat.input.sendButton' })
+    const sendButton = screen.getByRole('button', {
+      name: 'chat.input.sendButton',
+    })
 
     expect(input).toBeDisabled()
     expect(sendButton).toBeDisabled()

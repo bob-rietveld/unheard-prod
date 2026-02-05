@@ -55,10 +55,11 @@ export function ConfigWizard({
   const [currentError, setCurrentError] = useState<string>()
   const [showSummary, setShowSummary] = useState(false)
 
-  // Parse template YAML when loaded
+  // Parse template YAML when loaded (using useEffect to update state)
   useEffect(() => {
     if (template?.yamlContent) {
       const parsed = parseTemplateYaml(template.yamlContent)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setParsedTemplate(parsed)
 
       if (!parsed) {
@@ -223,11 +224,7 @@ export function ConfigWizard({
         />
 
         <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={onCancel}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={onCancel} className="flex-1">
             {t('config.cancel')}
           </Button>
           <Button

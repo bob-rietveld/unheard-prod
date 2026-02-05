@@ -64,9 +64,7 @@ export function ChatMessages() {
       <div className="flex flex-col items-center justify-center h-full px-8 py-16">
         <div className="max-w-md text-center space-y-6">
           <div className="space-y-3">
-            <h2 className="text-foreground">
-              {t('chat.empty.title')}
-            </h2>
+            <h2 className="text-foreground">{t('chat.empty.title')}</h2>
             <p className="text-muted-foreground text-sm leading-relaxed">
               {t('chat.empty.description')}
             </p>

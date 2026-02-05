@@ -517,7 +517,9 @@ Chat components include full ARIA support:
   `}
 >
   {message.content}
-  {isStreaming && <span className="inline-block w-2 h-4 ml-1 bg-current animate-pulse" />}
+  {isStreaming && (
+    <span className="inline-block w-2 h-4 ml-1 bg-current animate-pulse" />
+  )}
 </Card>
 ```
 
@@ -529,9 +531,7 @@ Chat shows a welcoming empty state with suggested prompts:
 if (messages.length === 0) {
   return (
     <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-      <h2 className="text-2xl font-semibold mb-4">
-        {t('chat.empty.title')}
-      </h2>
+      <h2 className="text-2xl font-semibold mb-4">{t('chat.empty.title')}</h2>
       <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
         {t('chat.empty.description')}
       </p>

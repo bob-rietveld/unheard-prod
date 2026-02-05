@@ -50,12 +50,8 @@ export function ChatInterface() {
   }, [isStreaming])
 
   const handleSendMessage = async (content: string) => {
-    const {
-      addMessage,
-      updateStreamingMessage,
-      completeStreaming,
-      setError,
-    } = useChatStore.getState()
+    const { addMessage, updateStreamingMessage, completeStreaming, setError } =
+      useChatStore.getState()
 
     // Add user message
     const userMessage: FrontendChatMessage = {

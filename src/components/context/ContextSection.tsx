@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileIcon, CheckCircle2, PlusIcon, RefreshCw } from 'lucide-react'
 import { useProjectStore } from '@/store/project-store'
-import { useContextFiles, useUploadContext, queueUploads, useConvexRetry } from '@/services/context'
+import {
+  useContextFiles,
+  useUploadContext,
+  queueUploads,
+  useConvexRetry,
+} from '@/services/context'
 import { commands } from '@/lib/tauri-bindings'
 import { logger } from '@/lib/logger'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -81,7 +86,10 @@ export function ContextSection() {
         logger.debug('Adding file to selection', { filePath })
         next.add(filePath)
       }
-      logger.debug('New selection state', { count: next.size, files: Array.from(next) })
+      logger.debug('New selection state', {
+        count: next.size,
+        files: Array.from(next),
+      })
       return next
     })
   }
@@ -95,7 +103,9 @@ export function ContextSection() {
         relativePath => `${currentProject.localPath}/${relativePath}`
       )
 
-      logger.info('Adding selected files to context', { count: filePaths.length })
+      logger.info('Adding selected files to context', {
+        count: filePaths.length,
+      })
       queueUploads(filePaths, currentProject.localPath, uploadFile)
 
       // Clear selection after queuing
@@ -148,7 +158,9 @@ export function ContextSection() {
             className="size-4 flex items-center justify-center text-foreground/40 hover:text-foreground transition-colors cursor-pointer disabled:opacity-30"
             title={t('context.folder.refresh', 'Refresh')}
           >
-            <RefreshCw className={cn('size-3.5', isScanning && 'animate-spin')} />
+            <RefreshCw
+              className={cn('size-3.5', isScanning && 'animate-spin')}
+            />
           </button>
           <button
             onClick={() => {
@@ -204,12 +216,16 @@ export function ContextSection() {
                     isProcessed
                       ? 'text-foreground/50 cursor-default'
                       : isSelected
-                      ? 'bg-foreground/8 text-foreground cursor-pointer'
-                      : 'text-foreground/70 hover:bg-foreground/4 hover:text-foreground cursor-pointer'
+                        ? 'bg-foreground/8 text-foreground cursor-pointer'
+                        : 'text-foreground/70 hover:bg-foreground/4 hover:text-foreground cursor-pointer'
                   )}
                   onClick={() => {
                     if (!isProcessed) {
-                      logger.debug('File row clicked', { path: file.path, isProcessed, isSelected })
+                      logger.debug('File row clicked', {
+                        path: file.path,
+                        isProcessed,
+                        isSelected,
+                      })
                       handleToggleFile(file.path)
                     }
                   }}
@@ -217,8 +233,11 @@ export function ContextSection() {
                   {!isProcessed && (
                     <Checkbox
                       checked={isSelected}
-                      onCheckedChange={(checked) => {
-                        logger.debug('Checkbox changed', { path: file.path, checked })
+                      onCheckedChange={checked => {
+                        logger.debug('Checkbox changed', {
+                          path: file.path,
+                          checked,
+                        })
                         handleToggleFile(file.path)
                       }}
                       className="cursor-pointer"
@@ -251,7 +270,8 @@ export function ContextSection() {
       {selectedFiles.size > 0 && (
         <div className="px-6 py-3 border-t border-border/40 bg-accent/30">
           <p className="text-xs text-foreground/60">
-            {selectedFiles.size} file{selectedFiles.size !== 1 ? 's' : ''} selected
+            {selectedFiles.size} file{selectedFiles.size !== 1 ? 's' : ''}{' '}
+            selected
           </p>
         </div>
       )}

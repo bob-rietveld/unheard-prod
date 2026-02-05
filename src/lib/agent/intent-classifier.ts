@@ -87,7 +87,10 @@ function matchesKeyword(tokens: string[], keyword: string): boolean {
  * Calculate confidence score based on keyword matches.
  * Returns a score between 0 and 1.
  */
-function calculateConfidence(matchCount: number, totalKeywords: number): number {
+function calculateConfidence(
+  matchCount: number,
+  totalKeywords: number
+): number {
   // Simple linear scoring for MVP
   // More sophisticated scoring (TF-IDF, etc.) in Phase 3+
   return Math.min(matchCount / Math.max(totalKeywords * 0.3, 1), 1)
@@ -113,10 +116,15 @@ export function classifyIntent(
   const suggestions: TemplateSuggestion[] = []
 
   // Score each template category
-  const categoryScores = new Map<string, { count: number; keywords: string[] }>()
+  const categoryScores = new Map<
+    string,
+    { count: number; keywords: string[] }
+  >()
 
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-    const matchedKeywords = keywords.filter(keyword => matchesKeyword(tokens, keyword))
+    const matchedKeywords = keywords.filter(keyword =>
+      matchesKeyword(tokens, keyword)
+    )
 
     if (matchedKeywords.length > 0) {
       categoryScores.set(category, {
@@ -151,7 +159,9 @@ export function classifyIntent(
   const topSuggestions = suggestions.slice(0, 2)
 
   // Collect all matched keywords
-  const allKeywords = Array.from(categoryScores.values()).flatMap(score => score.keywords)
+  const allKeywords = Array.from(categoryScores.values()).flatMap(
+    score => score.keywords
+  )
 
   return {
     suggestions: topSuggestions,
@@ -164,7 +174,15 @@ export function classifyIntent(
  * Returns true if message contains decision/question indicators.
  */
 export function requiresTemplateHelp(message: string): boolean {
-  const questionIndicators = ['should', 'how', 'what', 'which', 'decide', 'decision', '?']
+  const questionIndicators = [
+    'should',
+    'how',
+    'what',
+    'which',
+    'decide',
+    'decision',
+    '?',
+  ]
   const normalized = message.toLowerCase()
 
   return questionIndicators.some(indicator => normalized.includes(indicator))

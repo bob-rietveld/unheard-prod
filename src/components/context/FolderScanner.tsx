@@ -118,7 +118,10 @@ export function FolderScanner() {
       <Card className="border-border/60 shadow-sm">
         <CardContent className="py-12 text-center">
           <p className="text-sm text-muted-foreground">
-            {t('context.folder.noProject', 'Select a project to scan for files')}
+            {t(
+              'context.folder.noProject',
+              'Select a project to scan for files'
+            )}
           </p>
         </CardContent>
       </Card>

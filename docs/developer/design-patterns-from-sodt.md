@@ -9,45 +9,49 @@ Patterns extracted from [bob-rietveld/sodt-2026](https://github.com/bob-rietveld
 ## 1. Consistent Spacing Scale
 
 ### Pattern
+
 **Mobile-first responsive spacing with predictable progressions**
 
 ```tsx
 // Page/section containers
-className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
+className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8'
 
 // Large sections
-className="py-12 sm:py-16"
+className = 'py-12 sm:py-16'
 
 // Card padding
-className="p-4 sm:p-6 lg:p-8"
+className = 'p-4 sm:p-6 lg:p-8'
 
 // Flex/grid gaps
-className="gap-4 sm:gap-6 lg:gap-8"
-className="space-y-4 sm:space-y-6"
+className = 'gap-4 sm:gap-6 lg:gap-8'
+className = 'space-y-4 sm:space-y-6'
 
 // Section margins
-className="mb-6 sm:mb-8"
+className = 'mb-6 sm:mb-8'
 ```
 
 ### Application to Unheard
 
 **Current (Unheard):**
+
 ```tsx
 // Static spacing
-className="p-4"
-className="gap-4"
-className="mb-4"
+className = 'p-4'
+className = 'gap-4'
+className = 'mb-4'
 ```
 
 **Improved (SODT pattern):**
+
 ```tsx
 // Responsive spacing
-className="p-4 sm:p-5 lg:p-6"
-className="gap-4 sm:gap-5 lg:gap-6"
-className="mb-4 sm:mb-6"
+className = 'p-4 sm:p-5 lg:p-6'
+className = 'gap-4 sm:gap-5 lg:gap-6'
+className = 'mb-4 sm:mb-6'
 ```
 
 ### Benefits
+
 - Scales naturally on larger screens
 - Creates visual rhythm
 - Predictable across components
@@ -57,31 +61,33 @@ className="mb-4 sm:mb-6"
 ## 2. Typography Hierarchy with Responsive Sizes
 
 ### Pattern
+
 **All text sizes respond to screen size**
 
 ```tsx
 // H1 - Page titles
-className="text-2xl sm:text-3xl lg:text-4xl font-semibold"
+className = 'text-2xl sm:text-3xl lg:text-4xl font-semibold'
 
 // H2 - Section headers
-className="text-xl sm:text-2xl font-semibold"
+className = 'text-xl sm:text-2xl font-semibold'
 
 // H3 - Card titles
-className="text-lg sm:text-xl font-semibold"
+className = 'text-lg sm:text-xl font-semibold'
 
 // Body text
-className="text-sm sm:text-base"
+className = 'text-sm sm:text-base'
 
 // Small text
-className="text-xs sm:text-sm"
+className = 'text-xs sm:text-sm'
 
 // Labels (uppercase with tracking)
-className="text-xs sm:text-sm font-medium uppercase tracking-wide"
+className = 'text-xs sm:text-sm font-medium uppercase tracking-wide'
 ```
 
 ### Application to Unheard
 
 **Current:**
+
 ```tsx
 // Static sizes
 <h1 className="text-foreground font-semibold">  // 22px fixed
@@ -89,6 +95,7 @@ className="text-xs sm:text-sm font-medium uppercase tracking-wide"
 ```
 
 **Improved:**
+
 ```tsx
 <h1 className="text-xl sm:text-2xl font-semibold">
 <p className="text-sm sm:text-base">
@@ -99,61 +106,65 @@ className="text-xs sm:text-sm font-medium uppercase tracking-wide"
 ## 3. Color Opacity System for Depth
 
 ### Pattern
+
 **Consistent opacity variations create hierarchy**
 
 ```tsx
 // Text hierarchy
-className="text-foreground"       // 100% - Primary text
-className="text-foreground/70"    // 70% - Secondary
-className="text-foreground/50"    // 50% - Tertiary/muted
-className="text-foreground/40"    // 40% - Placeholder
-className="text-foreground/20"    // 20% - Very subtle
+className = 'text-foreground' // 100% - Primary text
+className = 'text-foreground/70' // 70% - Secondary
+className = 'text-foreground/50' // 50% - Tertiary/muted
+className = 'text-foreground/40' // 40% - Placeholder
+className = 'text-foreground/20' // 20% - Very subtle
 
 // Background hierarchy
-className="bg-primary/10"         // 10% - Subtle tint
-className="bg-primary/20"         // 20% - Hover state
-className="bg-primary/90"         // 90% - Button hover
+className = 'bg-primary/10' // 10% - Subtle tint
+className = 'bg-primary/20' // 20% - Hover state
+className = 'bg-primary/90' // 90% - Button hover
 
 // Border hierarchy
-className="border-foreground/10"  // 10% - Subtle borders
-className="border-foreground/20"  // 20% - Input borders
-className="border-foreground/40"  // 40% - Dividers
+className = 'border-foreground/10' // 10% - Subtle borders
+className = 'border-foreground/20' // 20% - Input borders
+className = 'border-foreground/40' // 40% - Dividers
 ```
 
 ### Application to Unheard
 
 **Current:**
+
 ```tsx
 // Binary approach
-className="text-muted-foreground"  // Semantic, but less flexible
-className="border-border"
+className = 'text-muted-foreground' // Semantic, but less flexible
+className = 'border-border'
 ```
 
 **Enhanced:**
+
 ```tsx
 // Add opacity variations
-className="text-foreground/60"     // More control
-className="border-border/60"       // Softer borders
-className="bg-accent/50"           // Subtle backgrounds
+className = 'text-foreground/60' // More control
+className = 'border-border/60' // Softer borders
+className = 'bg-accent/50' // Subtle backgrounds
 ```
 
 ### Pattern Usage
 
-| Opacity | Use Case | Example |
-|---------|----------|---------|
-| `/10` | Subtle tints, very light borders | Badge backgrounds, card borders |
-| `/20` | Light backgrounds, input borders | Hover states, input focus |
-| `/40` | Placeholders, disabled states | Form placeholders |
-| `/50` | Tertiary text, icons | Help text, metadata |
-| `/60` | Secondary text | Descriptions |
-| `/70` | Body text variations | Longer paragraphs |
-| `/90` | Hover darkening | Button hover states |
+| Opacity | Use Case                         | Example                         |
+| ------- | -------------------------------- | ------------------------------- |
+| `/10`   | Subtle tints, very light borders | Badge backgrounds, card borders |
+| `/20`   | Light backgrounds, input borders | Hover states, input focus       |
+| `/40`   | Placeholders, disabled states    | Form placeholders               |
+| `/50`   | Tertiary text, icons             | Help text, metadata             |
+| `/60`   | Secondary text                   | Descriptions                    |
+| `/70`   | Body text variations             | Longer paragraphs               |
+| `/90`   | Hover darkening                  | Button hover states             |
 
 ---
 
 ## 4. Card Component Pattern
 
 ### Pattern
+
 **Consistent card styling with hover feedback**
 
 ```tsx
@@ -181,6 +192,7 @@ className="bg-white rounded-xl border border-foreground/10 hover:border-primary/
 ```
 
 ### Key Elements
+
 1. **Border progression**: `border-foreground/10` → `hover:border-primary/20`
 2. **Shadow progression**: `shadow-sm` → `hover:shadow-md` or `hover:shadow-lg`
 3. **Rounded corners**: `rounded-xl` (12px) or `rounded-2xl` (16px)
@@ -191,6 +203,7 @@ className="bg-white rounded-xl border border-foreground/10 hover:border-primary/
 ### Application to Unheard
 
 **Current:**
+
 ```tsx
 <Card className="border-border/60 shadow-sm">
   <CardHeader>...</CardHeader>
@@ -199,6 +212,7 @@ className="bg-white rounded-xl border border-foreground/10 hover:border-primary/
 ```
 
 **Enhanced:**
+
 ```tsx
 <Card className="bg-card rounded-xl border border-border/40 hover:border-border hover:shadow-md transition-all group">
   <CardHeader>
@@ -220,6 +234,7 @@ className="bg-white rounded-xl border border-foreground/10 hover:border-primary/
 ## 5. Loading Skeleton Pattern
 
 ### Pattern
+
 **Skeletons match actual content layout**
 
 ```tsx
@@ -259,6 +274,7 @@ className="bg-white rounded-xl border border-foreground/10 hover:border-primary/
 ```
 
 ### Skeleton Color Hierarchy
+
 - **Foreground elements**: `bg-foreground/10` (darker placeholders)
 - **Background elements**: `bg-foreground/5` (lighter placeholders)
 - **Creates depth** even in loading state
@@ -299,6 +315,7 @@ function ProjectSelectorSkeleton() {
 ## 6. Empty State Pattern
 
 ### Pattern
+
 **Icon + Primary message + Secondary message + Optional CTA**
 
 ```tsx
@@ -309,9 +326,7 @@ function ProjectSelectorSkeleton() {
   </div>
 
   {/* Primary message */}
-  <p className="text-base sm:text-lg font-medium mb-2">
-    {primaryMessage}
-  </p>
+  <p className="text-base sm:text-lg font-medium mb-2">{primaryMessage}</p>
 
   {/* Secondary message */}
   <p className="text-sm sm:text-base text-foreground/60 max-w-md mb-6">
@@ -319,21 +334,18 @@ function ProjectSelectorSkeleton() {
   </p>
 
   {/* Optional CTA */}
-  {cta && (
-    <Button>{cta}</Button>
-  )}
+  {cta && <Button>{cta}</Button>}
 </div>
 ```
 
 ### Application to Unheard
 
 **Current:**
+
 ```tsx
 // Simple empty state
 <div className="text-center py-12">
-  <p className="text-sm text-muted-foreground">
-    No chats yet
-  </p>
+  <p className="text-sm text-muted-foreground">No chats yet</p>
   <p className="text-xs text-muted-foreground/70">
     Create a chat to get started
   </p>
@@ -341,6 +353,7 @@ function ProjectSelectorSkeleton() {
 ```
 
 **Enhanced (SODT pattern):**
+
 ```tsx
 <div className="flex flex-col items-center justify-center text-center py-12 sm:py-16">
   <MessageSquareIcon className="size-12 sm:size-16 text-foreground/20 mb-4" />
@@ -365,28 +378,31 @@ function ProjectSelectorSkeleton() {
 ## 7. Error Handling Pattern
 
 ### Pattern
+
 **Error box with icon + message + retry action**
 
 ```tsx
 // Error message
-{error && (
-  <div className="p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm sm:text-base flex items-start gap-3">
-    <AlertCircleIcon className="size-5 flex-shrink-0 mt-0.5" />
-    <div className="flex-1">
-      <p className="font-medium mb-1">Error occurred</p>
-      <p className="text-sm opacity-90">{error}</p>
+{
+  error && (
+    <div className="p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm sm:text-base flex items-start gap-3">
+      <AlertCircleIcon className="size-5 flex-shrink-0 mt-0.5" />
+      <div className="flex-1">
+        <p className="font-medium mb-1">Error occurred</p>
+        <p className="text-sm opacity-90">{error}</p>
+      </div>
+      <button
+        onClick={handleDismiss}
+        className="text-destructive/60 hover:text-destructive"
+      >
+        <XIcon className="size-4" />
+      </button>
     </div>
-    <button
-      onClick={handleDismiss}
-      className="text-destructive/60 hover:text-destructive"
-    >
-      <XIcon className="size-4" />
-    </button>
-  </div>
-)}
+  )
+}
 
 // PDF load error with retry
-<div className="absolute inset-0 flex items-center justify-center bg-foreground/5">
+;<div className="absolute inset-0 flex items-center justify-center bg-foreground/5">
   <div className="flex flex-col items-center gap-3 p-6 text-center bg-card rounded-xl border border-border/40 shadow-sm max-w-sm">
     <AlertTriangleIcon className="size-10 text-foreground/40" />
     <div>
@@ -408,6 +424,7 @@ function ProjectSelectorSkeleton() {
 ## 8. Badge/Tag Pattern
 
 ### Pattern
+
 **Semantic color coding with consistent style**
 
 ```tsx
@@ -429,15 +446,16 @@ function ProjectSelectorSkeleton() {
 ```
 
 ### Color Mapping
+
 ```tsx
 // Semantic categories
 const badgeStyles = {
-  info: "bg-info/10 text-info border-info/20",
-  success: "bg-success/10 text-success border-success/20",
-  warning: "bg-warning/10 text-warning border-warning/20",
-  danger: "bg-destructive/10 text-destructive border-destructive/20",
-  primary: "bg-primary/10 text-primary border-primary/20",
-  secondary: "bg-secondary/10 text-secondary border-secondary/20",
+  info: 'bg-info/10 text-info border-info/20',
+  success: 'bg-success/10 text-success border-success/20',
+  warning: 'bg-warning/10 text-warning border-warning/20',
+  danger: 'bg-destructive/10 text-destructive border-destructive/20',
+  primary: 'bg-primary/10 text-primary border-primary/20',
+  secondary: 'bg-secondary/10 text-secondary border-secondary/20',
 }
 ```
 
@@ -446,6 +464,7 @@ const badgeStyles = {
 ## 9. Transition & Animation Patterns
 
 ### Pattern
+
 **Smooth, purpose-driven animations**
 
 ```tsx
@@ -502,6 +521,7 @@ className="animate-fade-in"  // Custom: @keyframes fade-in { from { opacity: 0 }
 ## 10. Button Pattern
 
 ### Pattern
+
 **Clear hierarchy with consistent sizing**
 
 ```tsx
@@ -545,6 +565,7 @@ className="animate-fade-in"  // Custom: @keyframes fade-in { from { opacity: 0 }
 ## 11. Form Input Pattern
 
 ### Pattern
+
 **Consistent styling with clear focus states**
 
 ```tsx
@@ -592,6 +613,7 @@ className="animate-fade-in"  // Custom: @keyframes fade-in { from { opacity: 0 }
 ## Summary: Implementation Checklist for Unheard
 
 ### High Priority
+
 - [ ] Add responsive spacing to all components (`sm:` and `lg:` modifiers)
 - [ ] Implement loading skeletons for chat list and project selector
 - [ ] Enhance empty states with icons and better messaging
@@ -599,6 +621,7 @@ className="animate-fade-in"  // Custom: @keyframes fade-in { from { opacity: 0 }
 - [ ] Implement error states with retry actions
 
 ### Medium Priority
+
 - [ ] Add active press feedback to buttons (`active:scale-[0.99]`)
 - [ ] Implement group hover effects on cards
 - [ ] Add transition duration variations (150ms for quick, 300ms for standard)
@@ -606,6 +629,7 @@ className="animate-fade-in"  // Custom: @keyframes fade-in { from { opacity: 0 }
 - [ ] Add color opacity variations for more control
 
 ### Low Priority (Nice to have)
+
 - [ ] Add loading animations (bouncing dots, spinners)
 - [ ] Implement fade-in animations for content
 - [ ] Add icon rotation transitions
@@ -626,5 +650,5 @@ className="animate-fade-in"  // Custom: @keyframes fade-in { from { opacity: 0 }
 
 ---
 
-*Patterns extracted from: [bob-rietveld/sodt-2026](https://github.com/bob-rietveld/sodt-2026)*
-*Applied to: Unheard (Tauri Decision Support Tool)*
+_Patterns extracted from: [bob-rietveld/sodt-2026](https://github.com/bob-rietveld/sodt-2026)_
+_Applied to: Unheard (Tauri Decision Support Tool)_

@@ -32,10 +32,12 @@ Full analysis: [docs/developer/design-patterns-from-sodt.md](docs/developer/desi
 **Pattern:** Skeletons match actual content layout for seamless loading
 
 **Implementation:**
+
 - [src/components/chat/ChatListSkeleton.tsx](src/components/chat/ChatListSkeleton.tsx) - Matches ChatList layout
 - [src/components/projects/ProjectSelectorSkeleton.tsx](src/components/projects/ProjectSelectorSkeleton.tsx) - Matches ProjectSelector
 
 **Key Elements:**
+
 ```tsx
 // Darker elements
 className="bg-foreground/10"
@@ -51,6 +53,7 @@ style={{ width: `${60 + Math.random() * 30}%` }}
 ```
 
 **Applied To:**
+
 - ChatList component now shows skeleton while `chats === undefined`
 - Future: Can add to ProjectSelector, ContextLibrary, etc.
 
@@ -61,6 +64,7 @@ style={{ width: `${60 + Math.random() * 30}%` }}
 **Pattern:** Icon + Primary message + Secondary message
 
 **Before:**
+
 ```tsx
 <div>
   <MessageSquareIcon className="size-8" />
@@ -69,6 +73,7 @@ style={{ width: `${60 + Math.random() * 30}%` }}
 ```
 
 **After (SODT pattern):**
+
 ```tsx
 <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center">
   {/* Larger icon with subtle color */}
@@ -87,6 +92,7 @@ style={{ width: `${60 + Math.random() * 30}%` }}
 ```
 
 **Improvements:**
+
 - ✅ Responsive icon size (`size-12 sm:size-16`)
 - ✅ Color opacity for subtle effect (`text-foreground/20`)
 - ✅ Typography hierarchy with responsive sizes
@@ -94,6 +100,7 @@ style={{ width: `${60 + Math.random() * 30}%` }}
 - ✅ Max-width for readability
 
 **Applied To:**
+
 - ChatList empty state (no chats)
 - ChatList no project state
 
@@ -104,31 +111,34 @@ style={{ width: `${60 + Math.random() * 30}%` }}
 **Pattern:** Mobile-first spacing with predictable progressions
 
 **SODT Pattern:**
+
 ```tsx
 // Page containers
-className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
+className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8'
 
 // Sections
-className="py-12 sm:py-16"
+className = 'py-12 sm:py-16'
 
 // Cards
-className="p-4 sm:p-6 lg:p-8"
+className = 'p-4 sm:p-6 lg:p-8'
 
 // Gaps
-className="gap-4 sm:gap-6 lg:gap-8"
+className = 'gap-4 sm:gap-6 lg:gap-8'
 ```
 
 **Current Unheard:**
+
 ```tsx
 // Mostly static spacing
-className="p-4"
-className="gap-4"
-className="mb-4"
+className = 'p-4'
+className = 'gap-4'
+className = 'mb-4'
 ```
 
 **Status:** Partially applied in empty states, needs broader implementation
 
 **Recommendation:** Add responsive modifiers to:
+
 - All card padding
 - Section gaps
 - Layout spacing
@@ -141,38 +151,41 @@ className="mb-4"
 **Pattern:** Consistent opacity variations create depth
 
 **SODT Usage:**
+
 ```tsx
 // Text hierarchy
-text-foreground      // 100% - Primary
-text-foreground/70   // 70% - Secondary
-text-foreground/50   // 50% - Tertiary
-text-foreground/40   // 40% - Placeholder
-text-foreground/20   // 20% - Very subtle
+text - foreground // 100% - Primary
+text - foreground / 70 // 70% - Secondary
+text - foreground / 50 // 50% - Tertiary
+text - foreground / 40 // 40% - Placeholder
+text - foreground / 20 // 20% - Very subtle
 
 // Backgrounds
-bg-primary/10        // Subtle tint
-bg-primary/20        // Hover state
-bg-primary/90        // Button hover
+bg - primary / 10 // Subtle tint
+bg - primary / 20 // Hover state
+bg - primary / 90 // Button hover
 
 // Borders
-border-foreground/10 // Subtle
-border-foreground/20 // Input borders
+border - foreground / 10 // Subtle
+border - foreground / 20 // Input borders
 ```
 
 **Current Unheard:**
+
 ```tsx
 // Using semantic names (good)
-text-muted-foreground
-border-border
+text - muted - foreground
+border - border
 
 // Already using some opacity
-border-border/60
-text-muted-foreground/70
+border - border / 60
+text - muted - foreground / 70
 ```
 
 **Status:** Already partially implemented!
 
 **Enhancement Opportunities:**
+
 - Use `/10` for very subtle borders on cards
 - Use `/20` for stronger borders on inputs
 - Use `/50` for tertiary text
@@ -186,6 +199,7 @@ text-muted-foreground/70
 **Pattern:** Border progression + Shadow progression + Active feedback
 
 **SODT Pattern:**
+
 ```tsx
 <div className="bg-card rounded-xl border border-foreground/10 hover:border-primary/20 hover:shadow-md active:scale-[0.99] transition-all group">
   <div className="group-hover:bg-primary/20 transition-colors">
@@ -195,6 +209,7 @@ text-muted-foreground/70
 ```
 
 **Key Elements:**
+
 1. Border progression: `/10` → hover:`/20`
 2. Shadow progression: `shadow-sm` → hover:`shadow-md`
 3. Active feedback: `active:scale-[0.99]`
@@ -202,6 +217,7 @@ text-muted-foreground/70
 5. Fast transitions: `transition-all`
 
 **Recommendation:** Apply to:
+
 - FolderScanner file list items
 - ContextFileCard components
 - Chat list items (partially done)
@@ -213,6 +229,7 @@ text-muted-foreground/70
 **Pattern:** Visual feedback on button press
 
 **SODT Pattern:**
+
 ```tsx
 <button className="... active:scale-[0.99] transition-transform">
   Click me
@@ -230,6 +247,7 @@ text-muted-foreground/70
 **Pattern:** Child elements react to parent hover
 
 **SODT Pattern:**
+
 ```tsx
 <div className="group hover:bg-accent">
   <div className="group-hover:bg-primary/20 transition-colors">
@@ -244,6 +262,7 @@ text-muted-foreground/70
 **Status:** Not yet implemented
 
 **Recommendation:** Apply to:
+
 - FolderScanner file items
 - Chat list items
 - Any interactive cards
@@ -253,6 +272,7 @@ text-muted-foreground/70
 ## Implementation Checklist
 
 ### ✅ Completed
+
 - [x] ChatListSkeleton component created
 - [x] ProjectSelectorSkeleton component created
 - [x] ChatList shows skeleton during loading
@@ -260,10 +280,12 @@ text-muted-foreground/70
 - [x] Responsive spacing in empty states
 
 ### ⚠️ Partially Implemented
+
 - [ ] Responsive spacing throughout app (need to add `sm:` and `lg:` modifiers)
 - [ ] Color opacity system (some done, needs consistency)
 
 ### ❌ Not Yet Implemented (Recommended)
+
 - [ ] Card hover state refinements (border/shadow progression)
 - [ ] Button press feedback (`active:scale-[0.99]`)
 - [ ] Group hover effects on cards
@@ -278,29 +300,34 @@ text-muted-foreground/70
 ## Quick Wins (High Impact, Low Effort)
 
 ### 1. Add Button Press Feedback (5 min)
+
 ```tsx
 // Find all buttons, add:
-className="... active:scale-[0.99] transition-transform"
+className = '... active:scale-[0.99] transition-transform'
 ```
 
 ### 2. Enhance File List Hover (10 min)
+
 ```tsx
 // FolderScanner file items:
-className="... hover:border-border hover:shadow-sm transition-all"
+className = '... hover:border-border hover:shadow-sm transition-all'
 ```
 
 ### 3. Add Responsive Spacing to Cards (15 min)
+
 ```tsx
 // All Card components:
-className="p-4 sm:p-5 lg:p-6"  // Instead of p-4
+className = 'p-4 sm:p-5 lg:p-6' // Instead of p-4
 ```
 
 ### 4. Implement Loading Spinner (10 min)
+
 ```tsx
 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
 ```
 
 ### 5. Add Group Hover to Chat Items (15 min)
+
 ```tsx
 <div className="group ...">
   <MessageSquareIcon className="group-hover:text-primary transition-colors" />
@@ -313,7 +340,9 @@ className="p-4 sm:p-5 lg:p-6"  // Instead of p-4
 ## Long-Term Recommendations
 
 ### 1. Create Shared Component Library
+
 Extract common patterns:
+
 ```
 src/components/ui/
   loading-skeleton.tsx  // Reusable skeleton component
@@ -323,25 +352,28 @@ src/components/ui/
 ```
 
 ### 2. Establish Design Tokens
+
 ```tsx
 // lib/design-tokens.ts
 export const spacing = {
-  card: "p-4 sm:p-5 lg:p-6",
-  section: "py-6 sm:py-8 lg:py-12",
-  gap: "gap-4 sm:gap-5 lg:gap-6",
+  card: 'p-4 sm:p-5 lg:p-6',
+  section: 'py-6 sm:py-8 lg:py-12',
+  gap: 'gap-4 sm:gap-5 lg:gap-6',
 }
 
 export const opacity = {
-  subtle: "/10",
-  border: "/20",
-  tertiary: "/50",
-  secondary: "/70",
-  primary: "",  // 100%
+  subtle: '/10',
+  border: '/20',
+  tertiary: '/50',
+  secondary: '/70',
+  primary: '', // 100%
 }
 ```
 
 ### 3. Document Patterns
+
 Add to `docs/developer/ui-patterns.md`:
+
 - When to use loading skeletons
 - Empty state guidelines
 - Color opacity usage
@@ -352,6 +384,7 @@ Add to `docs/developer/ui-patterns.md`:
 ## Impact Summary
 
 ### Before (Current State)
+
 - Static spacing (no responsive scaling)
 - Simple empty states
 - No loading skeletons
@@ -359,6 +392,7 @@ Add to `docs/developer/ui-patterns.md`:
 - No press feedback
 
 ### After (With SODT Patterns)
+
 - ✅ Responsive spacing scales naturally
 - ✅ Polished empty states with icons
 - ✅ Smooth loading experience with skeletons
@@ -366,6 +400,7 @@ Add to `docs/developer/ui-patterns.md`:
 - ❌ Press feedback (not yet)
 
 ### Result
+
 **More polished, professional feel** that scales beautifully across screen sizes and provides clear feedback at every interaction.
 
 ---
@@ -393,6 +428,6 @@ Add to `docs/developer/ui-patterns.md`:
 
 ---
 
-*Patterns extracted from: [bob-rietveld/sodt-2026](https://github.com/bob-rietveld/sodt-2026)*
-*Applied to: Unheard Tauri App*
-*Date: February 2026*
+_Patterns extracted from: [bob-rietveld/sodt-2026](https://github.com/bob-rietveld/sodt-2026)_
+_Applied to: Unheard Tauri App_
+_Date: February 2026_

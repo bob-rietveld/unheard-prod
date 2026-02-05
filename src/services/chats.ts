@@ -8,10 +8,7 @@ import { toast } from 'sonner'
  * Returns undefined while loading, empty array if no chats.
  */
 export function useChats(projectId: Id<'projects'> | null | undefined) {
-  return useQuery(
-    api.chats.listByProject,
-    projectId ? { projectId } : 'skip'
-  )
+  return useQuery(api.chats.listByProject, projectId ? { projectId } : 'skip')
 }
 
 /**
@@ -35,10 +32,7 @@ export function useCreateChat() {
   const createChat = useMutation(api.chats.create)
 
   return {
-    mutateAsync: async (args: {
-      projectId: Id<'projects'>
-      title: string
-    }) => {
+    mutateAsync: async (args: { projectId: Id<'projects'>; title: string }) => {
       try {
         const chatId = await createChat(args)
         toast.success('Chat created')

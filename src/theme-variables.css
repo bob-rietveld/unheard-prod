@@ -68,7 +68,7 @@
 
   /* Muted - soft gray for supporting elements */
   --muted: oklch(0.95 0 0);
-  --muted-foreground: oklch(0.50 0 0);
+  --muted-foreground: oklch(0.5 0 0);
 
   /* Accent - barely perceptible blue for interactive hints */
   --accent: oklch(0.95 0.01 240);
@@ -84,9 +84,9 @@
 
   /* Chart colors - muted, sophisticated */
   --chart-1: oklch(0.65 0.08 240);
-  --chart-2: oklch(0.60 0.10 200);
+  --chart-2: oklch(0.6 0.1 200);
   --chart-3: oklch(0.55 0.12 160);
-  --chart-4: oklch(0.50 0.10 120);
+  --chart-4: oklch(0.5 0.1 120);
   --chart-5: oklch(0.45 0.08 80);
 
   /* Refined radius - subtle curves */
@@ -113,43 +113,43 @@
   --popover-foreground: oklch(0.95 0 0);
 
   /* Primary - refined light gray for dark mode */
-  --primary: oklch(0.90 0.01 60);
+  --primary: oklch(0.9 0.01 60);
   --primary-foreground: oklch(0.12 0 0);
 
   /* Secondary - subtle differentiation */
-  --secondary: oklch(0.20 0.005 60);
-  --secondary-foreground: oklch(0.90 0 0);
+  --secondary: oklch(0.2 0.005 60);
+  --secondary-foreground: oklch(0.9 0 0);
 
   /* Muted - soft contrast for supporting elements */
   --muted: oklch(0.22 0.005 60);
-  --muted-foreground: oklch(0.60 0 0);
+  --muted-foreground: oklch(0.6 0 0);
 
   /* Accent - barely visible blue hint */
   --accent: oklch(0.24 0.02 240);
-  --accent-foreground: oklch(0.90 0 0);
+  --accent-foreground: oklch(0.9 0 0);
 
   /* Destructive - softer red for dark mode */
-  --destructive: oklch(0.60 0.16 25);
+  --destructive: oklch(0.6 0.16 25);
 
   /* Borders - subtle, refined in dark mode */
   --border: oklch(0.25 0.005 60);
-  --input: oklch(0.20 0.005 60);
-  --ring: oklch(0.90 0.01 60);
+  --input: oklch(0.2 0.005 60);
+  --ring: oklch(0.9 0.01 60);
 
   /* Chart colors - muted for dark mode */
   --chart-1: oklch(0.65 0.08 240);
-  --chart-2: oklch(0.60 0.10 200);
+  --chart-2: oklch(0.6 0.1 200);
   --chart-3: oklch(0.55 0.12 160);
-  --chart-4: oklch(0.50 0.10 120);
+  --chart-4: oklch(0.5 0.1 120);
   --chart-5: oklch(0.45 0.08 80);
 
   /* Sidebar - subtle differentiation in dark mode */
   --sidebar: oklch(0.14 0.005 60);
-  --sidebar-foreground: oklch(0.90 0 0);
-  --sidebar-primary: oklch(0.90 0.01 60);
+  --sidebar-foreground: oklch(0.9 0 0);
+  --sidebar-primary: oklch(0.9 0.01 60);
   --sidebar-primary-foreground: oklch(0.14 0 0);
   --sidebar-accent: oklch(0.24 0.02 240);
-  --sidebar-accent-foreground: oklch(0.90 0 0);
+  --sidebar-accent-foreground: oklch(0.9 0 0);
   --sidebar-border: oklch(0.25 0.005 60);
-  --sidebar-ring: oklch(0.90 0.01 60);
+  --sidebar-ring: oklch(0.9 0.01 60);
 }

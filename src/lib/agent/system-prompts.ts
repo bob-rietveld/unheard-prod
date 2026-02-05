@@ -75,7 +75,9 @@ Assistant: "Great! Let's configure the experiment. First, what funding stage are
  *   const prompt = buildSystemPrompt(templates)
  *   // Use with Claude API: { role: "system", content: prompt }
  */
-export function buildSystemPrompt(templates: Doc<'experimentTemplates'>[]): string {
+export function buildSystemPrompt(
+  templates: Doc<'experimentTemplates'>[]
+): string {
   // Build template list section
   const templateList = templates
     .map(
@@ -99,9 +101,12 @@ Match templates based on:
 When recommending, explain briefly why this template fits their decision.`
 
   // Combine all sections
-  return [ROLE_DEFINITION, templatesSection, CONVERSATION_GUIDELINES, OUTPUT_FORMAT].join(
-    '\n\n---\n\n'
-  )
+  return [
+    ROLE_DEFINITION,
+    templatesSection,
+    CONVERSATION_GUIDELINES,
+    OUTPUT_FORMAT,
+  ].join('\n\n---\n\n')
 }
 
 /**

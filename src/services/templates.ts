@@ -12,7 +12,9 @@ import type { Id } from '../../convex/_generated/dataModel'
 export const templateKeys = {
   all: ['templates'] as const,
   list: (category?: string) =>
-    category ? [...templateKeys.all, 'list', category] : [...templateKeys.all, 'list'] as const,
+    category
+      ? [...templateKeys.all, 'list', category]
+      : ([...templateKeys.all, 'list'] as const),
   detail: (id: string) => [...templateKeys.all, id] as const,
   bySlug: (slug: string) => [...templateKeys.all, 'slug', slug] as const,
 }
@@ -128,7 +130,9 @@ export function useUpdateTemplate() {
     },
     onSuccess: (_, variables) => {
       // Invalidate the specific template and all lists
-      queryClient.invalidateQueries({ queryKey: templateKeys.detail(variables.id) })
+      queryClient.invalidateQueries({
+        queryKey: templateKeys.detail(variables.id),
+      })
       queryClient.invalidateQueries({ queryKey: templateKeys.all })
       logger.info('Template updated successfully')
       toast.success('Template updated')

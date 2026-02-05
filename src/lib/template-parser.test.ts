@@ -317,8 +317,9 @@ configurationFlow:
 
     const template = parseTemplateYaml(yaml)
     expect(template).not.toBeNull()
+    if (!template) return
 
-    const question = getQuestionById(template!, 'q2')
+    const question = getQuestionById(template, 'q2')
     expect(question).not.toBeNull()
     expect(question?.id).toBe('q2')
     expect(question?.question).toBe('Question 2')
@@ -338,8 +339,9 @@ configurationFlow:
 
     const template = parseTemplateYaml(yaml)
     expect(template).not.toBeNull()
+    if (!template) return
 
-    const question = getQuestionById(template!, 'non-existent')
+    const question = getQuestionById(template, 'non-existent')
     expect(question).toBeNull()
   })
 })

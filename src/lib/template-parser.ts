@@ -18,9 +18,7 @@ import { logger } from '@/lib/logger'
  * @param yamlContent - Raw YAML string from template.yamlContent
  * @returns Parsed template or null if invalid
  */
-export function parseTemplateYaml(
-  yamlContent: string
-): ParsedTemplate | null {
+export function parseTemplateYaml(yamlContent: string): ParsedTemplate | null {
   try {
     const parsed = load(yamlContent) as Record<string, unknown>
 
@@ -112,7 +110,9 @@ export function parseTemplateYaml(
         options,
         validation,
         maxLength:
-          typeof question.maxLength === 'number' ? question.maxLength : undefined,
+          typeof question.maxLength === 'number'
+            ? question.maxLength
+            : undefined,
         min: typeof question.min === 'number' ? question.min : undefined,
         max: typeof question.max === 'number' ? question.max : undefined,
         unit: typeof question.unit === 'string' ? question.unit : undefined,

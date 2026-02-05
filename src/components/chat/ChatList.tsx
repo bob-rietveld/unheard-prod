@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PlusIcon, MessageSquareIcon, MoreHorizontalIcon, Trash2Icon, Edit2Icon } from 'lucide-react'
+import {
+  PlusIcon,
+  MessageSquareIcon,
+  MoreHorizontalIcon,
+  Trash2Icon,
+  Edit2Icon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -10,7 +16,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useChats, useCreateChat, useArchiveChat, useUpdateChat } from '@/services/chats'
+import {
+  useChats,
+  useCreateChat,
+  useArchiveChat,
+  useUpdateChat,
+} from '@/services/chats'
 import { useProjectStore } from '@/store/project-store'
 import { useChatStore } from '@/store/chat-store'
 import { ChatListSkeleton } from './ChatListSkeleton'

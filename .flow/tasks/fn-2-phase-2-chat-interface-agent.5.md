@@ -100,11 +100,8 @@ configuration_flow:
 - [ ] Documentation: Update `docs/developer/ui-patterns.md` with wizard pattern
 
 ## Done summary
-
-TBD
-
+Implemented template configuration wizard UI with sequential question flow, type-specific validation, and summary review. Includes comprehensive unit tests for validator and YAML parser.
 ## Evidence
-
-- Commits:
-- Tests:
+- Commits: 4ea0c265a8bbb85c6e62c657f0ba5456a23e92fc
+- Tests: npm run test -- src/lib/config-validator.test.ts src/lib/template-parser.test.ts src/components/chat/ConfigWizard.test.tsx --run, npm run ast:lint
 - PRs:

@@ -64,17 +64,21 @@ messages
 ## User Flow
 
 ### 1. Select/Create Project
+
 User selects a project from the dropdown in the left sidebar.
 
 ### 2. Create Chat
+
 Click "New Chat" button → Creates a chat with title "New Chat"
 
 ### 3. Chat Management
+
 - **Select**: Click on a chat → Loads chat in main area
 - **Rename**: Click ⋮ menu → Rename → Type new title → Enter/Blur to save
 - **Archive**: Click ⋮ menu → Archive → Chat is soft-deleted
 
 ### 4. Chat vs Context Toggle
+
 - **Chat selected**: Shows ChatInterface with messages
 - **No chat selected**: Shows FolderScanner + ContextLibrary for context management
 
@@ -143,13 +147,16 @@ Click "New Chat" button → Creates a chat with title "New Chat"
 ## Key Features
 
 ### 1. **Persistent Chats**
+
 - All chats stored in Convex
 - Messages persisted with chat
 - Automatic timestamps
 - Real-time updates via Convex subscriptions
 
 ### 2. **Refined UI Design**
+
 Following our Dieter Rams principles:
+
 - Minimalist chat list
 - Subtle hover states
 - Clear visual hierarchy
@@ -158,17 +165,20 @@ Following our Dieter Rams principles:
 - Dropdown menu for actions
 
 ### 3. **Inline Editing**
+
 - Click rename → Input appears in place
 - Enter or blur to save
 - Escape to cancel
 - No modal interruption
 
 ### 4. **Empty States**
+
 - No project: Shows icon + helpful message
 - No chats: Shows icon + "Create a chat to get started"
 - Refined, non-intrusive design
 
 ### 5. **Chat Actions**
+
 - **Rename**: Edit pencil icon
 - **Archive**: Trash icon with destructive color
 - Menu appears on hover (refined opacity transition)
@@ -178,30 +188,35 @@ Following our Dieter Rams principles:
 ## Design Principles Applied
 
 ### Minimalism
+
 - No unnecessary chrome
 - Clean, functional list
 - Subtle borders (60% opacity)
 - Generous spacing
 
 ### Functional Placement
+
 - New Chat button at top (primary action)
 - Chat list scrollable (many chats)
 - Actions hidden until hover (reduce noise)
 - Current chat highlighted subtly
 
 ### Typography
+
 - Chat titles: 14px
 - Current chat: font-medium (600)
 - Inactive chats: font-normal (400)
 - Refined letter-spacing
 
 ### Colors
+
 - Current chat: `bg-accent` with `border-border`
 - Hover: `bg-accent/50` with transparent border
 - Icons: `text-muted-foreground/70`
 - Destructive: `text-destructive` for archive
 
 ### Interactions
+
 - 150ms transitions (smooth, not slow)
 - Hover opacity changes
 - Border color transitions
@@ -212,17 +227,20 @@ Following our Dieter Rams principles:
 ## Integration with Existing Features
 
 ### Chat Store
+
 - `currentChatId` tracks active chat
 - `messages` array still used for local state
 - `setCurrentChat` switches between chats
 - `resetConversation` clears messages when switching
 
 ### Project Store
+
 - Projects remain at top level
 - Each project can have many chats
 - Project selection preserved
 
 ### Context Management
+
 - Available when no chat selected
 - Users can toggle between chat and context
 - FolderScanner + ContextLibrary remain unchanged
@@ -238,7 +256,7 @@ Following our Dieter Rams principles:
 const createChat = useCreateChat()
 const result = await createChat.mutateAsync({
   projectId: currentProject._id,
-  title: 'New Chat'
+  title: 'New Chat',
 })
 
 // Automatically switch to new chat
@@ -251,13 +269,15 @@ setCurrentChat(result.chatId)
 const chats = useChats(currentProject?._id)
 
 // Renders list
-{chats?.map(chat => (
-  <ChatListItem
-    key={chat._id}
-    chat={chat}
-    isActive={currentChatId === chat._id}
-  />
-))}
+{
+  chats?.map(chat => (
+    <ChatListItem
+      key={chat._id}
+      chat={chat}
+      isActive={currentChatId === chat._id}
+    />
+  ))
+}
 ```
 
 ### Rename Chat
@@ -266,7 +286,7 @@ const chats = useChats(currentProject?._id)
 const updateChat = useUpdateChat()
 await updateChat.mutateAsync({
   id: chat._id,
-  title: 'New Title'
+  title: 'New Title',
 })
 ```
 
@@ -368,5 +388,5 @@ The system is ready for users to create, manage, and switch between multiple dec
 
 ---
 
-*Implemented: February 2026*
-*Design System: Refined Functional Minimalism*
+_Implemented: February 2026_
+_Design System: Refined Functional Minimalism_

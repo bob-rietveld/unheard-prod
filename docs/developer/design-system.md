@@ -22,6 +22,7 @@ Following Dieter Rams' 10 Principles:
 ### Inspiration
 
 **Attio CRM** aesthetic qualities:
+
 - Clean, fast, intuitive
 - Modern Notion-inspired interface
 - Apple-like product quality
@@ -39,62 +40,47 @@ Refined neutral palette with barely perceptible warmth and sophistication. Uses 
 
 ```css
 /* Backgrounds - Refined neutrals with subtle warmth */
---background: oklch(0.99 0 0)           /* Off-white, reduces eye strain */
---card: oklch(1 0 0)                    /* Pure white for elevation */
---sidebar: oklch(0.98 0 0)              /* Subtle differentiation */
-
-/* Text - Charcoal with slight warmth */
---foreground: oklch(0.18 0 0)           /* Primary text */
---muted-foreground: oklch(0.50 0 0)     /* Secondary text */
-
-/* Interactive - Refined charcoal */
---primary: oklch(0.22 0.01 60)          /* Actions, slightly warm */
---primary-foreground: oklch(0.99 0 0)   /* Text on primary */
-
-/* Supporting colors */
---muted: oklch(0.95 0 0)                /* Subtle backgrounds */
---accent: oklch(0.95 0.01 240)          /* Interactive hints, barely blue */
---destructive: oklch(0.55 0.18 25)      /* Refined red */
-
-/* Borders - Subtle separation */
---border: oklch(0.91 0 0)               /* Standard borders */
---input: oklch(0.94 0 0)                /* Input backgrounds */
+--background: oklch(0.99 0 0) /* Off-white, reduces eye strain */
+  --card: oklch(1 0 0) /* Pure white for elevation */ --sidebar: oklch(0.98 0 0)
+  /* Subtle differentiation */ /* Text - Charcoal with slight warmth */
+  --foreground: oklch(0.18 0 0) /* Primary text */
+  --muted-foreground: oklch(0.5 0 0) /* Secondary text */
+  /* Interactive - Refined charcoal */ --primary: oklch(0.22 0.01 60)
+  /* Actions, slightly warm */ --primary-foreground: oklch(0.99 0 0)
+  /* Text on primary */ /* Supporting colors */ --muted: oklch(0.95 0 0)
+  /* Subtle backgrounds */ --accent: oklch(0.95 0.01 240)
+  /* Interactive hints, barely blue */ --destructive: oklch(0.55 0.18 25)
+  /* Refined red */ /* Borders - Subtle separation */ --border: oklch(0.91 0 0)
+  /* Standard borders */ --input: oklch(0.94 0 0) /* Input backgrounds */;
 ```
 
 ### Dark Mode Palette
 
 ```css
 /* Backgrounds - True black with subtle warmth */
---background: oklch(0.12 0.005 60)      /* Warm black */
---card: oklch(0.16 0.005 60)            /* Elevated surface */
---sidebar: oklch(0.14 0.005 60)         /* Subtle sidebar */
-
-/* Text - Refined light gray */
---foreground: oklch(0.95 0 0)           /* Primary text */
---muted-foreground: oklch(0.60 0 0)     /* Secondary text */
-
-/* Interactive - Light gray */
---primary: oklch(0.90 0.01 60)          /* Actions */
---primary-foreground: oklch(0.12 0 0)   /* Text on primary */
-
-/* Supporting colors */
---muted: oklch(0.22 0.005 60)           /* Subtle backgrounds */
---accent: oklch(0.24 0.02 240)          /* Interactive hints */
---destructive: oklch(0.60 0.16 25)      /* Softer red for dark mode */
-
-/* Borders - Refined in darkness */
---border: oklch(0.25 0.005 60)          /* Subtle borders */
---input: oklch(0.20 0.005 60)           /* Input backgrounds */
+--background: oklch(0.12 0.005 60) /* Warm black */ --card: oklch(0.16 0.005 60)
+  /* Elevated surface */ --sidebar: oklch(0.14 0.005 60) /* Subtle sidebar */
+  /* Text - Refined light gray */ --foreground: oklch(0.95 0 0)
+  /* Primary text */ --muted-foreground: oklch(0.6 0 0) /* Secondary text */
+  /* Interactive - Light gray */ --primary: oklch(0.9 0.01 60) /* Actions */
+  --primary-foreground: oklch(0.12 0 0) /* Text on primary */
+  /* Supporting colors */ --muted: oklch(0.22 0.005 60) /* Subtle backgrounds */
+  --accent: oklch(0.24 0.02 240) /* Interactive hints */
+  --destructive: oklch(0.6 0.16 25) /* Softer red for dark mode */
+  /* Borders - Refined in darkness */ --border: oklch(0.25 0.005 60)
+  /* Subtle borders */ --input: oklch(0.2 0.005 60) /* Input backgrounds */;
 ```
 
 ### Usage Guidelines
 
 **Do:**
+
 - Use semantic tokens (`bg-background`, `text-foreground`)
 - Trust the subtle warmth in neutrals
 - Embrace the refined contrast ratios
 
 **Don't:**
+
 - Use raw color values
 - Add saturated colors without purpose
 - Override the subtle border opacities
@@ -106,7 +92,9 @@ Refined neutral palette with barely perceptible warmth and sophistication. Uses 
 ### Font Stack
 
 ```css
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+font-family:
+  -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text',
+  'Helvetica Neue', sans-serif;
 ```
 
 **Rationale:** System fonts provide native feel, excellent readability, and zero load time.
@@ -139,17 +127,20 @@ h4: 14px, weight 600, line-height 1.45, letter-spacing -0.005em  /* Labels */
 ### Usage Guidelines
 
 **Hierarchy Rules:**
+
 1. One h1 per view (page title)
 2. h2 for major sections
 3. h3 for card/component titles
 4. h4 for form labels and small headers
 
 **Do:**
+
 - Use the defined scale consistently
 - Pair font weights intentionally (400 for body, 600 for emphasis)
 - Trust the letter-spacing values
 
 **Don't:**
+
 - Create custom font sizes
 - Use font weight 500 or 700
 - Override line-heights without consideration
@@ -179,21 +170,25 @@ Based on 4px base unit with refined progression:
 ### Component Spacing Guidelines
 
 **Cards:**
+
 - Padding: `p-5` (20px) for content
 - Gap between elements: `gap-2.5` (10px)
 - Title to description: `space-y-1.5` (6px)
 
 **Layouts:**
+
 - Sidebar padding: `p-5` (20px)
 - Main content padding: `p-6` (24px)
 - Section gaps: `gap-6` (24px)
 
 **Forms:**
+
 - Label to input: `gap-2.5` (10px)
 - Field groups: `gap-5` (20px)
 - Form to actions: `py-6` (24px padding)
 
 **Chat Interface:**
+
 - Message gaps: `mb-6` (24px)
 - Input padding: `px-6 py-4` (24px/16px)
 - Empty state: `px-8 py-16` (32px/64px)
@@ -209,16 +204,19 @@ Generous whitespace is a design element. Each component should have space to "br
 ### Buttons
 
 **Variants:**
+
 - **Default** - Primary actions, high contrast
 - **Outline** - Secondary actions, refined borders
 - **Ghost** - Tertiary actions (if needed)
 
 **Refinements:**
+
 ```tsx
-className="cursor-pointer border-border/60 hover:bg-accent transition-colors"
+className = 'cursor-pointer border-border/60 hover:bg-accent transition-colors'
 ```
 
 **Typography:**
+
 ```tsx
 <span className="text-sm font-medium">{label}</span>
 ```
@@ -226,11 +224,14 @@ className="cursor-pointer border-border/60 hover:bg-accent transition-colors"
 ### Inputs
 
 **Refinements:**
+
 ```tsx
-className="border-border/60 bg-background focus:border-border transition-colors"
+className =
+  'border-border/60 bg-background focus:border-border transition-colors'
 ```
 
 **States:**
+
 - Default: `border-border/60` - subtle, refined
 - Focus: `border-border` - full opacity for clarity
 - Disabled: `bg-muted/30` - clearly non-interactive
@@ -238,19 +239,21 @@ className="border-border/60 bg-background focus:border-border transition-colors"
 ### Cards
 
 **Structure:**
+
 ```tsx
 <Card className="border-border/60 shadow-sm">
   <CardHeader>
     <CardTitle className="text-base font-semibold">Title</CardTitle>
-    <CardDescription className="text-sm leading-relaxed">Description</CardDescription>
+    <CardDescription className="text-sm leading-relaxed">
+      Description
+    </CardDescription>
   </CardHeader>
-  <CardContent>
-    {/* content */}
-  </CardContent>
+  <CardContent>{/* content */}</CardContent>
 </Card>
 ```
 
 **Refinements:**
+
 - Subtle borders: `border-border/60`
 - Light shadows: `shadow-sm` (never `shadow-lg`)
 - Generous padding: `p-5` or `p-6`
@@ -258,6 +261,7 @@ className="border-border/60 bg-background focus:border-border transition-colors"
 ### Dialogs
 
 **Modal refinements:**
+
 ```tsx
 <DialogContent className="border-border/60">
   <DialogHeader>
@@ -273,17 +277,20 @@ className="border-border/60 bg-background focus:border-border transition-colors"
 ### Chat Components
 
 **Message Bubbles:**
+
 - User: `bg-primary text-primary-foreground`
 - Assistant: `bg-card border border-border`
 - Error: `border-destructive bg-destructive/5`
 - Streaming indicator: `w-1.5 h-4 rounded-sm animate-pulse`
 
 **Empty State:**
+
 - Centered, generous padding
 - Clear hierarchy with subtle prompt arrows
 - Max-width for readability
 
 **Input Area:**
+
 - Backdrop blur: `bg-background/50 backdrop-blur-sm`
 - Centered with max-width
 - Refined borders: `border-border/60`
@@ -310,6 +317,7 @@ hover:bg-accent/50 hover:border-border transition-all
 ### Focus
 
 **Accessibility-first:**
+
 ```css
 :focus-visible {
   outline: 2px solid var(--ring);
@@ -320,6 +328,7 @@ hover:bg-accent/50 hover:border-border transition-all
 ### Disabled
 
 **Clear but refined:**
+
 ```css
 disabled:opacity-50 disabled:cursor-not-allowed
 ```
@@ -327,6 +336,7 @@ disabled:opacity-50 disabled:cursor-not-allowed
 ### Transitions
 
 **Standard timing:**
+
 ```css
 transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 ```
@@ -342,20 +352,22 @@ transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 Minimal, functional shadows for depth. Never decorative.
 
 **Scale:**
+
 - `shadow-sm` - Cards, elevated elements (most common)
 - `shadow-md` - Floating actions (rare)
 - `shadow-lg` - Reserved, almost never used
 
 **Usage:**
+
 ```tsx
 // Cards
-className="shadow-sm"
+className = 'shadow-sm'
 
 // Floating buttons (scroll to bottom)
-className="shadow-sm hover:shadow-md transition-all"
+className = 'shadow-sm hover:shadow-md transition-all'
 
 // Toasts
-className="shadow-sm"
+className = 'shadow-sm'
 ```
 
 ---
@@ -365,10 +377,11 @@ className="shadow-sm"
 ### Scale
 
 ```css
---radius: 0.5rem (8px) - subtle, refined curves
+--radius: 0.5rem (8px) - subtle, refined curves;
 ```
 
 **Derived values:**
+
 - `rounded-sm`: 4px
 - `rounded-md`: 6px
 - `rounded-lg`: 8px (most common)
@@ -377,12 +390,14 @@ className="shadow-sm"
 ### Usage
 
 **Standard components:**
+
 - Cards: `rounded-lg`
 - Buttons: `rounded-lg`
 - Inputs: `rounded-lg`
 - Dialogs: `rounded-lg`
 
 **Refinements:**
+
 - Streaming cursor: `rounded-sm` (more precise)
 - Message bubbles: `rounded-lg`
 
@@ -395,11 +410,13 @@ className="shadow-sm"
 All color combinations meet **WCAG AAA** standards:
 
 **Light mode:**
+
 - Foreground on background: 14:1
 - Muted foreground on background: 4.7:1
 - Primary on primary-foreground: 12:1
 
 **Dark mode:**
+
 - Foreground on background: 11:1
 - Muted foreground on background: 3.8:1
 - Primary on primary-foreground: 10:1
@@ -411,6 +428,7 @@ Clear, 2px solid ring with 2px offset on all interactive elements.
 ### ARIA Support
 
 All interactive components include:
+
 - Proper `aria-label` for icon buttons
 - `aria-live` regions for dynamic content
 - Semantic HTML structure
@@ -426,6 +444,7 @@ Class-based dark mode using `.dark` class on root element.
 ### Switching
 
 Handled by `ThemeProvider`:
+
 - `light` - Force light mode
 - `dark` - Force dark mode
 - `system` - Follow OS preference (default)
@@ -492,16 +511,12 @@ When creating new components:
 ```tsx
 <Card className="border-border/60 shadow-sm">
   <CardHeader>
-    <CardTitle className="text-base font-semibold">
-      Project Files
-    </CardTitle>
+    <CardTitle className="text-base font-semibold">Project Files</CardTitle>
     <CardDescription className="text-sm leading-relaxed">
       Select files from your project folder
     </CardDescription>
   </CardHeader>
-  <CardContent className="space-y-4">
-    {/* content */}
-  </CardContent>
+  <CardContent className="space-y-4">{/* content */}</CardContent>
 </Card>
 ```
 
@@ -520,9 +535,7 @@ When creating new components:
 
 ```tsx
 <div className="grid gap-2.5">
-  <Label className="text-sm font-medium text-foreground">
-    Field Name
-  </Label>
+  <Label className="text-sm font-medium text-foreground">Field Name</Label>
   <Input
     className="border-border/60 bg-background focus:border-border transition-colors"
     placeholder="Enter value"
@@ -545,6 +558,7 @@ Reference `docs/developer/ui-patterns.md` for shadcn/ui component additions.
 ### Design Decisions
 
 All design decisions should align with:
+
 1. Dieter Rams' 10 Principles
 2. Functional minimalism aesthetic
 3. Attio-inspired refinement
@@ -562,4 +576,4 @@ All design decisions should align with:
 
 ---
 
-*Last updated: February 2026*
+_Last updated: February 2026_

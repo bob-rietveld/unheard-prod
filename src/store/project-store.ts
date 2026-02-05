@@ -1,16 +1,6 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import type { Id } from '../../convex/_generated/dataModel'
-
-interface Project {
-  _id: Id<'projects'>
-  name: string
-  description?: string
-  localPath: string
-  clerkUserId: string
-  archived: boolean
-  createdAt: number
-}
+import type { Project } from '@/types/project'
 
 interface ProjectState {
   currentProject: Project | null
