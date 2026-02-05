@@ -21,18 +21,31 @@ Enable founders to make decisions through conversational AI. Users describe thei
 - **State Management**: New `useChatStore` (Zustand) for ephemeral conversation state
 - **Context Integration**: Agent accesses uploaded context files from Phase 1
 - **Error Handling**: API failures, rate limits, offline mode, validation errors
+- **Internationalization**: UI strings use i18n keys (English translations only for Phase 2)
 
-### Out of Scope
+### Out of Scope (Phase 3+)
 
-- Multi-user conversations (future phase)
-- Conversation persistence in Convex (Phase 4 - see Key Assumptions #3)
-- Voice input (future)
-- Advanced markdown rendering (code syntax highlighting, LaTeX) - basic markdown only
+- Multi-user conversations
+- Conversation persistence in Convex (Phase 4)
+- Voice input
+- Advanced markdown rendering (code syntax highlighting, LaTeX)
 - Template marketplace or custom template builder (Phase 5)
-- Conversation search (future)
-- Export to formats other than markdown (future)
-- Mobile-optimized chat UI (future)
-- Multi-language agent responses (English only for Phase 2)
+- Conversation search
+- Export to formats other than markdown
+- Mobile-optimized chat UI
+- Multi-language translations (English only in Phase 2, infrastructure ready for Phase 3)
+- E2E test automation (manual scripts only in Phase 2)
+- Debug mode UI (logs only)
+- **Template customization UI** (Phase 3)
+- **Conditional template logic** (Phase 3)
+- **Configuration resume after crashes** (Phase 3)
+- **Ambiguous input interpretation options** (Phase 3)
+- **Sensitive data scanning** (Phase 3)
+- **Conversation export** (Phase 4 with persistence)
+- **Context file summary on demand** (Phase 3)
+- **Configuration history sidebar** (Phase 3)
+- **Filename conflict prompts** (Phase 3 - auto-append for Phase 2)
+- **Manual file edit detection** (Phase 3)
 
 ### Key Assumptions (from Gap Analysis)
 
@@ -41,7 +54,7 @@ Enable founders to make decisions through conversational AI. Users describe thei
 3. **Conversation Persistence**: Ephemeral for Phase 2 (Zustand only). **No `conversations` table** in Phase 2. Convex persistence deferred to Phase 4.
 4. **Template Count**: 3 templates for MVP (Investor, Pricing, Roadmap). Others in Phase 5.
 5. **Streaming Responses**: Yes, stream token-by-token for better UX via Rust SSE parser
-6. **Context Access**: Agent automatically accesses ALL uploaded context files
+6. **Context Access**: Agent automatically accesses ALL uploaded context files (full content, not summarized)
 7. **Error Recovery**: "Try Again" button inline in chat messages
 8. **Configuration Progress**: No back-button - users confirm each step before proceeding
 
@@ -108,13 +121,15 @@ Agent: "Decision log created! View at decisions/2026-02-04-investor-evaluation.m
 
 7. **Error Boundaries**: React error boundaries catch rendering errors. API errors shown inline with retry.
 
-8. **Agent Prompts**: Modular system prompt with 4 sections:
+8. **Agent Prompts**: Modular system prompt in separate version-controlled file (`prompts/agent-system.md`) with 4 sections:
    - Role definition (decision support assistant)
    - Available templates (dynamic from Convex)
    - Conversation guidelines (clarifying questions, validation)
    - Output format (JSON for tool calls, natural language for chat)
 
 9. **Command Registration**: All Tauri commands registered in `src-tauri/src/bindings.rs` using `tauri-specta` pattern.
+
+10. **Internationalization**: All UI strings use i18n keys via `useTranslation()` hook and `locales/en.json`. English-only translations in Phase 2, infrastructure ready for Phase 3+ languages.
 
 **Reuse Patterns** (from repo-scout):
 
@@ -123,6 +138,54 @@ Agent: "Decision log created! View at decisions/2026-02-04-investor-evaluation.m
 - **Tauri commands**: Register in `src-tauri/src/bindings.rs`, use `tauri-specta` bindings from `src/lib/tauri-bindings.ts`
 - **Git commands**: Extend `git_auto_commit` from Phase 1 for decision logs
 - **Convex mutations**: Follow `convex/schema.ts` patterns with indexes
+- **i18n**: Follow existing `src/i18n/config.ts` pattern with `useTranslation()` hook
+
+## Key Decisions (from Interview) - Phase 2 Core
+
+### User Experience (Core MVP)
+
+1. **Concurrent Input**: Allow typing while streaming, queue message for after stream completes
+2. **Stream Cancellation**: Discard partial response and clear (simple approach for Phase 2)
+3. **Progress Indication**: Show typing indicator (animated dots) + estimated time remaining during streaming
+4. **Stream Recovery**: On errors, discard partial response and auto-retry
+5. **Template Flexibility**: Allow free-form decisions without selecting a template
+6. **Template Presentation**: Agent suggests 1-2 best matches based on user description
+7. **Empty State**: Greeting with suggested prompts: "Hello! I can help you with decisions. Try asking about..."
+8. **Conversation Reset**: Confirm before clearing if unsaved changes exist
+
+### Configuration Flow (Core MVP)
+
+9. **Simple Linear Wizard**: Questions asked sequentially, no edit-previous capability in Phase 2
+10. **Validation Errors**: Agent explains conversationally with specific examples
+11. **No Resume Support**: If app crashes, conversation lost (ephemeral Zustand only)
+
+### Security & Data (Core MVP)
+
+12. **Context Passing**: Pass full context file content to Claude API (simple approach for Phase 2, summarization deferred to Phase 3)
+
+### Error Handling & Resilience (Core MVP)
+
+13. **API Rate Limits**: Auto-retry with exponential backoff (1s, 2s, 4s...)
+14. **Opaque Errors**: Show generic retry prompt without technical details
+15. **Offline Mode**: Block decision creation with clear error (queuing deferred to Phase 3)
+16. **Git Failures**: Show error message, decision log file saved but not committed (degraded mode)
+17. **Filename Conflicts**: Auto-append numeric suffix silently (e.g., "Investor Evaluation 2")
+18. **Duplicate Titles**: Auto-append numeric suffix (e.g., "Investor Evaluation 2")
+19. **Large Files**: No size limit in Phase 2 (trust Git, warn deferred to Phase 3)
+20. **Template YAML Errors**: Validate on seed, block publish of malformed templates
+
+### Quality & Testing (Core MVP)
+
+21. **Test Coverage**: >80% unit test coverage for chat store, agent logic, and utilities
+22. **Test Strategy**: Use real APIs (Claude, Convex) in integration tests with test accounts
+23. **E2E Tests**: Manual test script only (defer automated E2E to Phase 3+)
+
+### Localization & Accessibility (Core MVP)
+
+24. **i18n**: Use i18n keys for all UI strings, English translations only for Phase 2
+25. **Keyboard Navigation**: Arrow keys navigate message history, Tab through fields, Escape cancels streaming, Cmd/Ctrl+Enter sends
+26. **Screen Readers**: Full ARIA annotations for proper screen reader support
+27. **Performance**: Initial agent response < 3 seconds (show loading indicator)
 
 ## Data Model Changes
 
@@ -149,7 +212,6 @@ experimentTemplates: defineTable({
 // Conversations are ephemeral in Zustand only
 
 // EXTEND existing decisions table (backward compatible)
-// Existing schema uses clerkUserId (from Phase 1) - keep it consistent
 decisions: defineTable({
   title: v.string(),
   description: v.optional(v.string()),
@@ -163,7 +225,7 @@ decisions: defineTable({
     v.literal('completed')
   ),
   projectId: v.optional(v.id('projects')),
-  clerkUserId: v.string(), // Existing field from Phase 1 - preserved
+  clerkUserId: v.string(), // Existing field from Phase 1 - preserved for Clerk auth
   createdAt: v.number(),
   // NEW Phase 2 fields:
   templateId: v.optional(v.id('experimentTemplates')),
@@ -241,6 +303,7 @@ interface ChatState {
   currentTemplateId: string | null
   configAnswers: Record<string, any>
   error: string | null
+  queuedMessage: string | null // For concurrent input handling
 
   // Actions
   addMessage: (message: ChatMessage) => void
@@ -250,6 +313,8 @@ interface ChatState {
   setTemplate: (templateId: string | null) => void
   updateConfigAnswer: (key: string, value: any) => void
   resetConversation: () => void
+  queueMessage: (message: string) => void
+  dequeueMessage: () => string | null
 }
 
 export const useChatStore = create<ChatState>()(
@@ -261,6 +326,7 @@ export const useChatStore = create<ChatState>()(
       currentTemplateId: null,
       configAnswers: {},
       error: null,
+      queuedMessage: null,
 
       addMessage: message =>
         set(s => ({
@@ -273,6 +339,19 @@ export const useChatStore = create<ChatState>()(
   )
 )
 ```
+
+## Edge Cases Discovered (Phase 2 Scope)
+
+1. **Concurrent Input**: User types while agent streams → queue message in `useChatStore`, send after stream completes
+2. **Stream Interruption**: Network drops mid-stream → discard partial, show auto-retry with exponential backoff
+3. **Template Rejection**: User rejects template → allow free-form decision creation
+4. **Filename Collision**: Two decisions with same title → append numeric suffix automatically (Title 2, Title 3)
+5. **Offline Decision Creation**: No network during creation → show clear error, block action (no queueing in Phase 2)
+6. **Rate Limit Cascade**: Multiple requests hit rate limit → exponential backoff per request, don't cascade
+7. **Template YAML Corruption**: Admin uploads malformed YAML → validate on seed, block publish with clear error
+8. **Git Commit Failure**: .git directory missing or locked → show error, file saved but not committed
+9. **Context File Access**: Agent needs context → pass all files to API in system prompt (no summarization in Phase 2)
+10. **Empty State Navigation**: First-time user clicks chat → show greeting + 3 example prompts
 
 ## Quick commands
 
@@ -304,37 +383,54 @@ npm run tauri:dev
 # 8. Check Convex dashboard: decisions table has new entry
 ```
 
-## Acceptance
+## Acceptance (Phase 2 MVP)
 
 **Phase 2 Complete When**:
 
 - [ ] Chat UI renders with message list and input area
 - [ ] User can type message and send (Enter key or button)
+- [ ] Cmd/Ctrl+Enter keyboard shortcut sends message
+- [ ] Arrow keys navigate message history for editing
 - [ ] Rust command `send_chat_message` calls Claude API (API key from env)
 - [ ] Streaming responses render token-by-token via Tauri Channel
+- [ ] Progress indicator: typing dots + estimated time remaining
+- [ ] Concurrent input: typing while streaming queues message
+- [ ] Escape key cancels streaming, discards partial response
 - [ ] Agent analyzes user input and suggests template
 - [ ] Template library displays 3 core templates from Convex
 - [ ] User can select template from agent suggestion
-- [ ] Configuration wizard renders questions one-by-one
+- [ ] User can skip template and create free-form decision
+- [ ] Configuration wizard renders questions sequentially
+- [ ] Validation errors explained conversationally with specific examples
 - [ ] User answers validated before proceeding to next question
 - [ ] All questions answered → decision summary generated
 - [ ] Decision log markdown file created in `/decisions`
+- [ ] Duplicate titles auto-append numeric suffix silently (Title 2, Title 3)
 - [ ] Git auto-commits decision log (reuses Phase 1 `git_auto_commit`)
+- [ ] Git failures: show error message (degraded mode)
 - [ ] Convex mutation updates `decisions` table with new fields
-- [ ] Error states: API failure shows "Try Again" button
-- [ ] Error states: Rate limit shows clear message with retry countdown
-- [ ] Error states: Network offline shows queued state
+- [ ] Offline mode: clear error blocks decision creation
+- [ ] Empty state: greeting with suggested example prompts
+- [ ] "New Decision" button confirms if unsaved changes exist
+- [ ] Error states: API failure shows "Try Again" button (generic message)
+- [ ] Error states: Rate limit auto-retries with exponential backoff
 - [ ] Conversation resets with "New Decision" button
+- [ ] Full ARIA annotations for screen reader support
+- [ ] Performance: initial agent response < 3 seconds
+- [ ] Template YAML validation on seed (blocks malformed templates)
+- [ ] System prompt in version-controlled file (`prompts/agent-system.md`)
+- [ ] Context files passed fully to API (no summarization in Phase 2)
+- [ ] All UI strings use i18n keys from `locales/en.json`
 - [ ] ast-grep passes (Zustand selectors enforced)
 - [ ] All unit tests pass (>80% coverage for chat logic)
 - [ ] Manual E2E test passes: full flow from greeting to decision log
-- [ ] Documentation: 3 new docs created (see docs-gap-scout findings)
-- [ ] Documentation: 10 docs updated with Phase 2 patterns
+- [ ] Documentation: Chat UI patterns added to `docs/developer/`
+- [ ] Documentation: i18n keys documented for Phase 2 strings
 
 **Demo Script** (for stakeholder review):
 
 ```
-1. Open Unheard → Chat is primary view
+1. Open Unheard → Chat is primary view with greeting
 2. Type: "I need to decide if I should raise seed funding or bootstrap"
 3. Agent streams response: "I can help with that..."
 4. Agent suggests: "Investor Evaluation template"
@@ -358,15 +454,16 @@ Total time: <3 minutes
 
 | Risk                           | Impact                                  | Mitigation                                                                 |
 | ------------------------------ | --------------------------------------- | -------------------------------------------------------------------------- |
-| **Claude API rate limits**     | Users blocked mid-conversation          | Implement exponential backoff, show retry countdown, cache responses       |
+| **Claude API rate limits**     | Users blocked mid-conversation          | Auto-retry with exponential backoff, no user-facing countdown              |
 | **SSE parsing complexity**     | Streaming bugs, missed tokens           | Use battle-tested `eventsource-stream` crate, comprehensive tests          |
 | **Token context overflow**     | Long conversations exceed Claude limits | Implement sliding window (keep last 20 messages), summarize older context  |
-| **Streaming interruptions**    | Partial responses, corrupted state      | Implement abort controller, retry logic, partial content recovery          |
-| **Template YAML errors**       | Agent cannot parse templates            | Validate YAML on seed, unit tests for parser, fallback to default template |
+| **Streaming interruptions**    | Partial responses, corrupted state      | Discard partial, auto-retry                                                |
+| **Template YAML errors**       | Agent cannot parse templates            | Validate YAML on seed, unit tests for parser, block publish                |
 | **Git conflicts**              | Concurrent decision log writes          | Use unique filenames (timestamp + slug), atomic file writes                |
 | **Convex schema migration**    | Breaking existing decisions             | Backward compatible fields (all new fields optional), migration plan       |
 | **UI freeze during streaming** | Poor UX, app feels slow                 | Mandatory Tauri Channels, debounced React re-renders                       |
 | **ast-grep violations**        | Destructuring Zustand in new code       | Pre-commit hook runs ast-grep, CI gate blocks PRs                          |
+| **i18n key conflicts**         | Duplicate or missing keys               | Validate i18n keys in tests, lint check for missing translations           |
 
 ## References
 
@@ -379,6 +476,7 @@ Total time: <3 minutes
 - Error handling: `docs/developer/error-handling.md`
 - State management: `docs/developer/state-management.md`
 - Convex schema: `convex/schema.ts` (existing decisions table)
+- i18n patterns: `src/i18n/config.ts`, `locales/en.json`
 
 **External Docs**:
 
@@ -396,10 +494,22 @@ Total time: <3 minutes
 - Enhanced agent spec: `.claude/plans/enhanced-assistant-spec.md`
 - Data models: `.claude/plans/data-models-spec.md`
 
-## Open Questions
+## Phase 3 Features (Deferred from Interview)
 
-1. **Multi-tab behavior**: If user opens 2 tabs, should conversations sync via Convex real-time or stay independent? (Deferred to Phase 4)
-2. **Template seeding**: Should templates be code-committed or admin-only via Convex dashboard?
-3. **Conversation limits**: Should there be max messages per conversation (e.g., 100) before archival?
-4. **Keyboard shortcuts**: Should Cmd+Enter send message, Escape cancel streaming?
-5. **Context visibility**: Should context files appear in a sidebar during chat, or hidden until agent uses them?
+These features were identified in the interview but are out of scope for Phase 2 MVP:
+
+1. **Template Customization**: AI agent-guided template customization UI
+2. **Conditional Questions**: `depends_on` logic in template YAML
+3. **Configuration Resume**: localStorage persistence across crashes
+4. **Ambiguous Input Options**: Multiple interpretation buttons
+5. **Sensitive Data Scanning**: Detect and warn about API keys/secrets
+6. **Conversation Export**: JSON export for reimport
+7. **Context File Summarization**: Metadata-only passing with on-demand fetch
+8. **Configuration History Sidebar**: Collapsible panel showing previous answers with edit capability
+9. **Filename Conflict Prompts**: User choice to rename or overwrite
+10. **Manual File Edit Detection**: Git status check with re-sync option
+11. **Large File Warnings**: Truncate prompt for >10K line decision logs
+12. **Offline Queueing**: localStorage queue with sync when connection restored
+13. **Answer Editing**: Edit previous configuration answers during wizard
+14. **Template Rejection Tracking**: Offer free-form after 2 rejections
+15. **Context Hints**: Subtle template suggestions based on uploaded files

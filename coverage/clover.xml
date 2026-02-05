@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1770278469368" clover="3.2.0">
+  <project timestamp="1770278469368" name="All files">
+    <metrics statements="20" coveredstatements="20" conditionals="4" coveredconditionals="4" methods="16" coveredmethods="16" elements="40" coveredelements="40" complexity="0" loc="20" ncloc="20" packages="1" files="1" classes="1"/>
+    <file name="chat-store.ts" path="/Users/bob/Documents/PROJECTS/unheard-prod/src/store/chat-store.ts">
+      <metrics statements="20" coveredstatements="20" conditionals="4" coveredconditionals="4" methods="16" coveredmethods="16"/>
+      <line num="27" count="1" type="stmt"/>
+      <line num="29" count="1" type="stmt"/>
+      <line num="42" count="13" type="stmt"/>
+      <line num="43" count="13" type="stmt"/>
+      <line num="51" count="8" type="stmt"/>
+      <line num="52" count="8" type="stmt"/>
+      <line num="54" count="9" type="cond" truecount="2" falsecount="0"/>
+      <line num="64" count="3" type="stmt"/>
+      <line num="65" count="3" type="stmt"/>
+      <line num="67" count="4" type="cond" truecount="2" falsecount="0"/>
+      <line num="76" count="4" type="stmt"/>
+      <line num="79" count="4" type="stmt"/>
+      <line num="82" count="9" type="stmt"/>
+      <line num="83" count="9" type="stmt"/>
+      <line num="94" count="1" type="stmt"/>
+      <line num="109" count="7" type="stmt"/>
+      <line num="112" count="5" type="stmt"/>
+      <line num="113" count="5" type="stmt"/>
+      <line num="114" count="5" type="stmt"/>
+      <line num="115" count="5" type="stmt"/>
+    </file>
+  </project>
+</coverage>

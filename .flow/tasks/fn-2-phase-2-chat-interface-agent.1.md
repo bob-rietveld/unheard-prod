@@ -42,20 +42,22 @@ Follow existing Zustand pattern from `src/store/ui-store.ts:1-86`:
 ## References
 
 - Pattern: `src/store/ui-store.ts:1-86`
-- Testing pattern: follow `src/store/ui-store.test.ts` if it exists
+- Testing: Follow existing Vitest patterns in `src/**/*.test.ts` files
 - Architecture: `docs/developer/state-management.md`
 
 ## Acceptance
 
 - [ ] `useChatStore` created with devtools middleware
-- [ ] Store exports: messages, isStreaming, streamingMessageId, currentTemplateId, configAnswers, error
-- [ ] Actions: addMessage, updateStreamingMessage, completeStreaming, setError, setTemplate, updateConfigAnswer, resetConversation
+- [ ] Store exports: messages, isStreaming, streamingMessageId, currentTemplateId, configAnswers, error, queuedMessage
+- [ ] Actions: addMessage, updateStreamingMessage, completeStreaming, setError, setTemplate, updateConfigAnswer, resetConversation, queueMessage, dequeueMessage
 - [ ] TypeScript types exported from `src/types/chat.ts`
 - [ ] Types include: ChatMessage, ChatRole, MessageStatus, ChatState
 - [ ] Unit tests cover all actions (>80% coverage)
 - [ ] Test: Adding message appends to array
 - [ ] Test: Updating streaming message replaces content at correct ID
 - [ ] Test: resetConversation clears all state
+- [ ] Test: queueMessage stores message for later
+- [ ] Test: dequeueMessage retrieves and clears queued message
 - [ ] ast-grep passes (no destructuring in store usage)
 - [ ] Documentation: Update `docs/developer/state-management.md` with chat store example
 

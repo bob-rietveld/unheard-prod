@@ -155,6 +155,13 @@ This app uses React Compiler which automatically handles memoization. You do **n
 - Command palette state
 - UI modes and navigation
 
+**ChatStore** - Use for:
+
+- Chat conversation messages
+- Streaming message state
+- Template configuration answers
+- Queued messages during streaming
+
 **Feature-specific stores** - Use for:
 
 - Domain-specific state (e.g., `useDocumentStore`)
@@ -173,3 +180,78 @@ rule:
     - pattern: const { $$$PROPS } = useUIStore($$$ARGS)
     - pattern: const { $$$PROPS } = useNewStore($$$ARGS) # Add new store
 ```
+
+## Example: Chat Store
+
+The `useChatStore` demonstrates ephemeral conversation state management with streaming support:
+
+```typescript
+// src/store/chat-store.ts
+import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
+import type { ChatMessage, ChatState } from '../types/chat'
+
+export const useChatStore = create<ChatState>()(
+  devtools(
+    set => ({
+      messages: [],
+      isStreaming: false,
+      streamingMessageId: null,
+      currentTemplateId: null,
+      configAnswers: {},
+      error: null,
+      queuedMessage: null,
+
+      addMessage: message =>
+        set(
+          state => ({ messages: [...state.messages, message] }),
+          undefined,
+          'addMessage'
+        ),
+
+      updateStreamingMessage: (id, content) =>
+        set(
+          state => ({
+            messages: state.messages.map(msg =>
+              msg.id === id ? { ...msg, content, status: 'streaming' } : msg
+            ),
+          }),
+          undefined,
+          'updateStreamingMessage'
+        ),
+
+      // ... other actions
+    }),
+    { name: 'chat-store' }
+  )
+)
+```
+
+**Usage in components:**
+
+```typescript
+// ✅ GOOD: Selector syntax for individual values
+const messages = useChatStore(state => state.messages)
+const isStreaming = useChatStore(state => state.isStreaming)
+
+// ✅ GOOD: Use getState() in callbacks
+const handleSend = () => {
+  const { addMessage, messages } = useChatStore.getState()
+  addMessage({
+    id: crypto.randomUUID(),
+    role: 'user',
+    content: 'Hello',
+    timestamp: Date.now(),
+  })
+}
+
+// ❌ BAD: Destructuring (banned by ast-grep)
+const { messages, isStreaming } = useChatStore()
+```
+
+**Key patterns:**
+
+- **Streaming state**: Track `streamingMessageId` separately from messages array
+- **Message updates**: `updateStreamingMessage()` accumulates tokens without full re-render
+- **Queued input**: Allow typing during streaming, queue message for after completion
+- **getState() in actions**: `dequeueMessage()` uses `getState()` to access current state

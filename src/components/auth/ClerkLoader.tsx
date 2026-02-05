@@ -2,8 +2,8 @@ import React from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
-import { ConvexReactClient } from 'convex/react'
-import { ClerkProvider, SignedIn, SignedOut, useAuth } from '@clerk/clerk-react'
+import { ConvexReactClient, Authenticated, Unauthenticated } from 'convex/react'
+import { ClerkProvider, useAuth } from '@clerk/clerk-react'
 import { initClerk } from 'tauri-plugin-clerk'
 import type { Clerk } from '@clerk/clerk-js'
 import App from '@/App'
@@ -33,14 +33,30 @@ export function ClerkLoader() {
       return
     }
 
-    // Initialize Clerk - the plugin gets the key from Rust side
-    // but we override it with the JS-side ClerkProvider publishableKey prop
+    console.log('Starting Clerk initialization...')
+
+    // Add timeout to detect hanging initialization
+    const timeoutId = setTimeout(() => {
+      console.error('Clerk initialization timeout after 10 seconds')
+      setError(
+        'Clerk initialization timed out. Check network and configuration.'
+      )
+    }, 10000)
+
+    // Initialize Clerk with Tauri-specific configuration
     initClerk()
-      .then(setClerk)
+      .then(clerkInstance => {
+        clearTimeout(timeoutId)
+        console.log('Clerk initialized successfully')
+        setClerk(clerkInstance)
+      })
       .catch(err => {
+        clearTimeout(timeoutId)
         console.error('Failed to initialize Clerk:', err)
         setError(err?.message || 'Failed to initialize authentication')
       })
+
+    return () => clearTimeout(timeoutId)
   }, [publishableKey])
 
   if (error) {
@@ -65,18 +81,25 @@ export function ClerkLoader() {
 
   return (
     // publishableKey must match the one used by the Rust plugin
-    <ClerkProvider publishableKey={publishableKey} Clerk={clerk}>
+    <ClerkProvider
+      publishableKey={publishableKey}
+      Clerk={clerk}
+      afterSignOutUrl="/"
+      signInFallbackRedirectUrl="/"
+      signUpFallbackRedirectUrl="/"
+    >
       <ConvexAuthProvider>
         <QueryClientProvider client={queryClient}>
-          <SignedIn>
+          {/* Use Convex's authentication components per Clerk docs */}
+          <Authenticated>
             <App />
             {import.meta.env.DEV && (
               <ReactQueryDevtools initialIsOpen={false} />
             )}
-          </SignedIn>
-          <SignedOut>
+          </Authenticated>
+          <Unauthenticated>
             <SignInPage />
-          </SignedOut>
+          </Unauthenticated>
         </QueryClientProvider>
       </ConvexAuthProvider>
     </ClerkProvider>
