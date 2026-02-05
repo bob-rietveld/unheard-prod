@@ -3,6 +3,7 @@
 //! Each submodule contains related commands and their helper functions.
 //! Import specific commands via their submodule (e.g., `commands::preferences::greet`).
 
+pub mod chat;
 pub mod context;
 pub mod git;
 pub mod notifications;

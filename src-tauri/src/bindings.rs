@@ -2,7 +2,7 @@ use tauri_specta::{collect_commands, Builder};
 
 pub fn generate_bindings() -> Builder<tauri::Wry> {
     use crate::commands::{
-        context, git, notifications, preferences, projects, quick_pane, recovery,
+        chat, context, git, notifications, preferences, projects, quick_pane, recovery,
     };
 
     Builder::<tauri::Wry>::new().commands(collect_commands![
@@ -22,6 +22,7 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         projects::detect_git_lfs,
         context::upload_context_file,
         git::git_auto_commit,
+        chat::send_chat_message,
     ])
 }
 

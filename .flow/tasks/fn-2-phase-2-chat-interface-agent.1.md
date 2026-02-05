@@ -62,11 +62,8 @@ Follow existing Zustand pattern from `src/store/ui-store.ts:1-86`:
 - [ ] Documentation: Update `docs/developer/state-management.md` with chat store example
 
 ## Done summary
-
-TBD
-
+Implemented Zustand chat store with TypeScript types for AI-powered chat interface. Created useChatStore with full streaming support, message state tracking, template configuration, and concurrent input queuing. All 25 unit tests pass with 100% coverage. Fixed ClerkLoader timeout race condition during code review.
 ## Evidence
-
-- Commits:
-- Tests:
+- Commits: 877be2e949b4ef13c3cdae7a34f15f86c5c05feb, 40649f8d1128ba3fcb45a7f842f7af3871fcab87
+- Tests: npm run test src/store/chat-store.test.ts, npm run test:coverage -- src/store/chat-store.test.ts
 - PRs:

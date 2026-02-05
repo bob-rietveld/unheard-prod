@@ -209,6 +209,31 @@ async gitAutoCommit(repoPath: string, files: string[], message: string) : Promis
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Sends a chat message to Claude API with streaming responses.
+ * 
+ * # Arguments
+ * * `message` - The user's message
+ * * `history` - Previous conversation messages
+ * * `system_prompt` - Optional system prompt for context
+ * * `channel` - Tauri channel for streaming token events
+ * 
+ * # Streaming Events
+ * - `StreamEvent::Token { content }` - Each token as received
+ * - `StreamEvent::Done` - Stream completed successfully
+ * - `StreamEvent::Error { message }` - Error occurred during streaming
+ * 
+ * # Errors
+ * Returns `ChatError` for API failures, configuration issues, or network errors.
+ */
+async sendChatMessage(message: string, history: ChatMessage[], systemPrompt: string | null, channel: TAURI_CHANNEL<StreamEvent>) : Promise<Result<ChatResponse, ChatError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("send_chat_message", { message, history, systemPrompt, channel }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -237,6 +262,42 @@ quick_pane_shortcut: string | null;
  * If None, uses system locale detection
  */
 language: string | null }
+/**
+ * Error types for chat operations
+ */
+export type ChatError = 
+/**
+ * API key not configured in environment
+ */
+{ type: "ConfigError"; message: string } | 
+/**
+ * Rate limit exceeded (429)
+ */
+{ type: "RateLimitError"; retry_after: number | null } | 
+/**
+ * API server error (5xx)
+ */
+{ type: "ApiError"; message: string } | 
+/**
+ * Request timeout
+ */
+{ type: "TimeoutError" } | 
+/**
+ * Network or HTTP error
+ */
+{ type: "NetworkError"; message: string } | 
+/**
+ * SSE parsing error
+ */
+{ type: "ParseError"; message: string }
+/**
+ * A single chat message in the conversation history
+ */
+export type ChatMessage = { role: string; content: string }
+/**
+ * Response from the chat command
+ */
+export type ChatResponse = { success: boolean }
 /**
  * Record of an uploaded context file with parsed metadata.
  */
@@ -318,6 +379,10 @@ export type RecoveryError =
  * JSON serialization/deserialization error
  */
 { type: "ParseError"; message: string }
+/**
+ * Progress event emitted during streaming
+ */
+export type StreamEvent = { type: "Token"; content: string } | { type: "Done" } | { type: "Error"; message: string }
 export type TAURI_CHANNEL<TSend> = null
 /**
  * Progress updates during file upload.

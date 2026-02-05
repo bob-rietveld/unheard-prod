@@ -96,12 +96,68 @@ const handleSave = async () => {
 }
 ```
 
+## Streaming Commands
+
+For commands that need to stream data in real-time (e.g., AI responses, file processing), use Tauri Channels.
+
+### Pattern
+
+```rust
+use tauri::ipc::Channel;
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(tag = "type")]
+pub enum StreamEvent {
+    Progress { content: String },
+    Done,
+    Error { message: String },
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn stream_command(
+    input: String,
+    channel: Channel<StreamEvent>,
+) -> Result<Response, Error> {
+    // Emit progress events
+    channel.send(StreamEvent::Progress { content: "Processing...".to_string() })?;
+
+    // Do work...
+
+    // Signal completion
+    channel.send(StreamEvent::Done)?;
+    Ok(Response { success: true })
+}
+```
+
+### Frontend Usage
+
+```typescript
+import { commands } from '@/lib/tauri-bindings'
+import { Channel } from '@tauri-apps/api/core'
+
+const channel = new Channel<StreamEvent>()
+channel.onmessage = event => {
+  if (event.type === 'Progress') {
+    console.log('Progress:', event.content)
+  } else if (event.type === 'Done') {
+    console.log('Complete')
+  } else if (event.type === 'Error') {
+    console.error('Error:', event.message)
+  }
+}
+
+const result = await commands.streamCommand('input', channel)
+```
+
+**Real-world example**: See `src-tauri/src/commands/chat.rs` for Claude API streaming with SSE parsing.
+
 ## Adding New Commands
 
 ### 1. Define the Rust command
 
 ```rust
-// src-tauri/src/lib.rs
+// src-tauri/src/commands/your_module.rs
 
 #[tauri::command]
 #[specta::specta]  // Add this attribute
@@ -221,15 +277,16 @@ vi.mock('@/lib/tauri-bindings', () => ({
 
 ## Available Commands
 
-| Command                   | Parameters                            | Returns                          | Description         |
-| ------------------------- | ------------------------------------- | -------------------------------- | ------------------- |
-| `greet`                   | `name: string`                        | `string`                         | Simple greeting     |
-| `loadPreferences`         | none                                  | `Result<AppPreferences, string>` | Load preferences    |
-| `savePreferences`         | `preferences: AppPreferences`         | `Result<null, string>`           | Save preferences    |
-| `sendNativeNotification`  | `title: string, body: string \| null` | `Result<null, string>`           | System notification |
-| `saveEmergencyData`       | `filename: string, data: JsonValue`   | `Result<null, string>`           | Save recovery data  |
-| `loadEmergencyData`       | `filename: string`                    | `Result<JsonValue, string>`      | Load recovery data  |
-| `cleanupOldRecoveryFiles` | none                                  | `Result<number, string>`         | Cleanup old files   |
+| Command                   | Parameters                                                                                             | Returns                           | Description                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------- | -------------------------- |
+| `greet`                   | `name: string`                                                                                         | `string`                          | Simple greeting            |
+| `loadPreferences`         | none                                                                                                   | `Result<AppPreferences, string>`  | Load preferences           |
+| `savePreferences`         | `preferences: AppPreferences`                                                                          | `Result<null, string>`            | Save preferences           |
+| `sendNativeNotification`  | `title: string, body: string \| null`                                                                  | `Result<null, string>`            | System notification        |
+| `saveEmergencyData`       | `filename: string, data: JsonValue`                                                                    | `Result<null, string>`            | Save recovery data         |
+| `loadEmergencyData`       | `filename: string`                                                                                     | `Result<JsonValue, string>`       | Load recovery data         |
+| `cleanupOldRecoveryFiles` | none                                                                                                   | `Result<number, string>`          | Cleanup old files          |
+| `sendChatMessage`         | `message: string, history: ChatMessage[], systemPrompt: string \| null, channel: Channel<StreamEvent>` | `Result<ChatResponse, ChatError>` | Stream Claude API response |
 
 ## Dependencies
 
