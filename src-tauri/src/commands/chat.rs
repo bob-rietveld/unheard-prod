@@ -117,6 +117,17 @@ struct DeltaContent {
 }
 
 // ============================================================================
+// Helper Functions
+// ============================================================================
+
+/// Helper to emit an error event on the channel before returning an error.
+/// Best-effort: ignores channel send failures.
+fn emit_error(channel: &Channel<StreamEvent>, error: &ChatError) {
+    let message = error.to_string();
+    let _ = channel.send(StreamEvent::Error { message });
+}
+
+// ============================================================================
 // Command
 // ============================================================================
 
@@ -146,8 +157,12 @@ pub async fn send_chat_message(
     log::info!("Sending chat message to Claude API");
 
     // Get API key from environment
-    let api_key = env::var("ANTHROPIC_API_KEY").map_err(|_| ChatError::ConfigError {
-        message: "ANTHROPIC_API_KEY not configured".to_string(),
+    let api_key = env::var("ANTHROPIC_API_KEY").map_err(|_| {
+        let error = ChatError::ConfigError {
+            message: "ANTHROPIC_API_KEY not configured".to_string(),
+        };
+        emit_error(&channel, &error);
+        error
     })?;
 
     // Build message history with new message
@@ -170,8 +185,12 @@ pub async fn send_chat_message(
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(CLAUDE_API_TIMEOUT_SECS))
         .build()
-        .map_err(|e| ChatError::NetworkError {
-            message: format!("Failed to create HTTP client: {e}"),
+        .map_err(|e| {
+            let error = ChatError::NetworkError {
+                message: format!("Failed to create HTTP client: {e}"),
+            };
+            emit_error(&channel, &error);
+            error
         })?;
 
     // Send request
@@ -184,19 +203,21 @@ pub async fn send_chat_message(
         .send()
         .await
         .map_err(|e| {
-            if e.is_timeout() {
+            let error = if e.is_timeout() {
                 ChatError::TimeoutError
             } else {
                 ChatError::NetworkError {
                     message: format!("HTTP request failed: {e}"),
                 }
-            }
+            };
+            emit_error(&channel, &error);
+            error
         })?;
 
     // Check status code
     let status = response.status();
     if !status.is_success() {
-        return Err(match status.as_u16() {
+        let error = match status.as_u16() {
             429 => {
                 // Try to extract retry-after header
                 let retry_after = response
@@ -218,7 +239,9 @@ pub async fn send_chat_message(
                     message: format!("API error ({}): {error_text}", status.as_u16()),
                 }
             }
-        });
+        };
+        emit_error(&channel, &error);
+        return Err(error);
     }
 
     // Parse SSE stream
