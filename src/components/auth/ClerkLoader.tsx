@@ -35,28 +35,38 @@ export function ClerkLoader() {
 
     console.log('Starting Clerk initialization...')
 
+    let isPending = true
+
     // Add timeout to detect hanging initialization
     const timeoutId = setTimeout(() => {
-      console.error('Clerk initialization timeout after 10 seconds')
-      setError(
-        'Clerk initialization timed out. Check network and configuration.'
-      )
+      if (isPending) {
+        console.error('Clerk initialization timeout after 10 seconds')
+        setError(
+          'Clerk initialization timed out. Check network and configuration.'
+        )
+      }
     }, 10000)
 
     // Initialize Clerk with Tauri-specific configuration
     initClerk()
       .then(clerkInstance => {
+        isPending = false
         clearTimeout(timeoutId)
         console.log('Clerk initialized successfully')
+        setError(null) // Clear any timeout error
         setClerk(clerkInstance)
       })
       .catch(err => {
+        isPending = false
         clearTimeout(timeoutId)
         console.error('Failed to initialize Clerk:', err)
         setError(err?.message || 'Failed to initialize authentication')
       })
 
-    return () => clearTimeout(timeoutId)
+    return () => {
+      isPending = false
+      clearTimeout(timeoutId)
+    }
   }, [publishableKey])
 
   if (error) {
