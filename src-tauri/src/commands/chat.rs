@@ -261,6 +261,7 @@ async fn stream_response(
     use futures::stream::StreamExt;
 
     let mut stream = response.bytes_stream().eventsource();
+    let mut sent_done = false;
 
     while let Some(event) = stream.next().await {
         match event {
@@ -273,6 +274,7 @@ async fn stream_response(
                         .map_err(|e| ChatError::ParseError {
                             message: format!("Failed to send done event: {e}"),
                         })?;
+                    sent_done = true;
                     break;
                 }
 
@@ -299,6 +301,7 @@ async fn stream_response(
                                 .map_err(|e| ChatError::ParseError {
                                     message: format!("Failed to send done event: {e}"),
                                 })?;
+                            sent_done = true;
                             break;
                         }
                     }
@@ -320,6 +323,12 @@ async fn stream_response(
                 });
             }
         }
+    }
+
+    // If stream ended without explicit done event, send one now (best-effort)
+    if !sent_done {
+        log::debug!("Stream ended without explicit done event, sending fallback");
+        let _ = channel.send(StreamEvent::Done);
     }
 
     Ok(())
