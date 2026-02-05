@@ -101,11 +101,8 @@ const { messages, isStreaming } = useChatStore()
 - [ ] Documentation: Create `docs/developer/chat-system.md` (new)
 
 ## Done summary
-
-TBD
-
+Chat UI components were already fully implemented in previous work. Fixed 3 failing tests by using correct test selectors (getByRole instead of getByText for buttons). All 22 component tests now pass with proper Zustand selector pattern validation.
 ## Evidence
-
-- Commits:
-- Tests:
+- Commits: 7a8a78c99800f4cfadd33d4bce6e3b7ff5113534
+- Tests: npm run test -- src/components/chat/ChatInterface.test.tsx --run, npx ast-grep scan --rule .ast-grep/rules/zustand/no-destructure.yml src/components/chat/
 - PRs:

@@ -17,14 +17,22 @@ export default defineSchema({
     status: v.union(
       v.literal('draft'),
       v.literal('analyzing'),
-      v.literal('decided')
+      v.literal('decided'),
+      v.literal('ready'),
+      v.literal('running'),
+      v.literal('completed')
     ),
     projectId: v.optional(v.id('projects')),
     clerkUserId: v.string(),
     createdAt: v.number(),
+    templateId: v.optional(v.id('experimentTemplates')),
+    configData: v.optional(v.any()),
+    markdownFilePath: v.optional(v.string()),
+    updatedAt: v.optional(v.number()),
   })
     .index('by_user', ['clerkUserId'])
-    .index('by_project', ['projectId']),
+    .index('by_project', ['projectId'])
+    .index('by_template', ['templateId']),
 
   analyses: defineTable({
     decisionId: v.id('decisions'),
@@ -95,4 +103,18 @@ export default defineSchema({
     ),
     metadata: v.optional(v.any()),
   }).index('by_chat', ['chatId']),
+
+  experimentTemplates: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    category: v.string(),
+    description: v.string(),
+    yamlContent: v.string(),
+    version: v.string(),
+    isPublished: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_slug', ['slug'])
+    .index('by_category', ['category', 'isPublished']),
 })
