@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useConvex } from 'convex/react'
-import { api } from '@/convex/_generated/api'
+import { api } from '../../convex/_generated/api'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
-import type { Id } from '@/convex/_generated/dataModel'
+import type { Id } from '../../convex/_generated/dataModel'
 
 /**
  * Query keys for templates.

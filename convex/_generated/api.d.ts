@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as chats from "../chats.js";
 import type * as contexts from "../contexts.js";
 import type * as projects from "../projects.js";
+import type * as seed_templates from "../seed_templates.js";
 import type * as templates from "../templates.js";
 
 import type {
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   chats: typeof chats;
   contexts: typeof contexts;
   projects: typeof projects;
+  seed_templates: typeof seed_templates;
   templates: typeof templates;
 }>;
 

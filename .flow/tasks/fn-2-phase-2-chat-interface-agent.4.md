@@ -102,3 +102,10 @@ export function useTemplates() {
 - [ ] Documentation: Update `docs/developer/convex-setup.md` with template schema
 - [ ] Documentation: Update `docs/developer/data-persistence.md` with template patterns
 - [ ] Documentation: Create `docs/developer/agent-system.md` (new)
+
+## Done summary
+Implemented Convex-based experiment template library with 3 core templates (investor evaluation, pricing strategy, product roadmap), keyword-based intent classification for template recommendation, and modular system prompt generation for Claude agent. All unit tests passing (24 tests).
+## Evidence
+- Commits: e473bd7ac3852ef60bd29ed40f92814bf27bb520
+- Tests: npm run test -- src/lib/agent --run
+- PRs:

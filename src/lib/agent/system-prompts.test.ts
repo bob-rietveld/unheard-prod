@@ -4,8 +4,8 @@ import {
   buildGreetingMessage,
   buildErrorMessage,
 } from './system-prompts'
-import type { Doc } from '@/convex/_generated/dataModel'
-import type { Id } from '@/convex/_generated/dataModel'
+import type { Doc } from '../../../convex/_generated/dataModel'
+import type { Id } from '../../../convex/_generated/dataModel'
 
 describe('System Prompts', () => {
   const mockTemplates: Doc<'experimentTemplates'>[] = [

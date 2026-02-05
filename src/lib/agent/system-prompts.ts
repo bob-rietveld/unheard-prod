@@ -1,4 +1,4 @@
-import type { Doc } from '@/convex/_generated/dataModel'
+import type { Doc } from '../../../convex/_generated/dataModel'
 
 /**
  * System prompt configuration for the Claude agent.

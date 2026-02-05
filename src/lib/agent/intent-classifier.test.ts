@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { classifyIntent, requiresTemplateHelp } from './intent-classifier'
-import type { Doc } from '@/convex/_generated/dataModel'
-import type { Id } from '@/convex/_generated/dataModel'
+import type { Doc } from '../../../convex/_generated/dataModel'
+import type { Id } from '../../../convex/_generated/dataModel'
 
 describe('Intent Classifier', () => {
   const mockTemplates: Doc<'experimentTemplates'>[] = [
@@ -52,10 +52,12 @@ describe('Intent Classifier', () => {
       const result = classifyIntent(message, mockTemplates)
 
       expect(result.suggestions.length).toBeGreaterThan(0)
-      expect(result.suggestions[0].template.slug).toBe('investor-evaluation')
-      expect(result.suggestions[0].confidence).toBeGreaterThan(0)
+      const firstSuggestion = result.suggestions[0]
+      expect(firstSuggestion).toBeDefined()
+      expect(firstSuggestion?.template.slug).toBe('investor-evaluation')
+      expect(firstSuggestion?.confidence).toBeGreaterThan(0)
       // Check that some investor-related keywords were matched
-      expect(result.suggestions[0].matchedKeywords.length).toBeGreaterThan(0)
+      expect(firstSuggestion?.matchedKeywords.length).toBeGreaterThan(0)
       // Could be 'seed', 'vc', 'angel', etc. - all are valid matches
     })
 
@@ -64,9 +66,11 @@ describe('Intent Classifier', () => {
       const result = classifyIntent(message, mockTemplates)
 
       expect(result.suggestions.length).toBeGreaterThan(0)
-      expect(result.suggestions[0].template.slug).toBe('pricing-strategy')
-      expect(result.suggestions[0].confidence).toBeGreaterThan(0)
-      expect(result.suggestions[0].matchedKeywords).toContain('pric')
+      const firstSuggestion = result.suggestions[0]
+      expect(firstSuggestion).toBeDefined()
+      expect(firstSuggestion?.template.slug).toBe('pricing-strategy')
+      expect(firstSuggestion?.confidence).toBeGreaterThan(0)
+      expect(firstSuggestion?.matchedKeywords).toContain('pric')
     })
 
     it('identifies roadmap-related intent', () => {
@@ -74,9 +78,11 @@ describe('Intent Classifier', () => {
       const result = classifyIntent(message, mockTemplates)
 
       expect(result.suggestions.length).toBeGreaterThan(0)
-      expect(result.suggestions[0].template.slug).toBe('product-roadmap')
-      expect(result.suggestions[0].confidence).toBeGreaterThan(0)
-      expect(result.suggestions[0].matchedKeywords.length).toBeGreaterThan(0)
+      const firstSuggestion = result.suggestions[0]
+      expect(firstSuggestion).toBeDefined()
+      expect(firstSuggestion?.template.slug).toBe('product-roadmap')
+      expect(firstSuggestion?.confidence).toBeGreaterThan(0)
+      expect(firstSuggestion?.matchedKeywords.length).toBeGreaterThan(0)
     })
 
     it('returns empty suggestions for unrelated messages', () => {
