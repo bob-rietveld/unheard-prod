@@ -177,5 +177,24 @@
   "project.settings.name": "Project Name",
   "project.settings.description": "Description",
   "project.settings.location": "Location",
-  "project.settings.created": "Created"
+  "project.settings.created": "Created",
+
+  "config.loading": "Loading template...",
+  "config.error.loadFailed": "Failed to load template",
+  "config.error.parseFailed": "Failed to parse template configuration",
+  "config.cancel": "Cancel",
+  "config.next": "Next",
+  "config.review": "Review Answers",
+  "config.progress": "Question {{current}} of {{total}}",
+  "config.fixErrorToContinue": "Please fix the error to continue",
+  "config.selectPlaceholder": "Select an option",
+  "config.unsupportedType": "Unsupported question type: {{type}}",
+  "config.summary.title": "Review Your Answers",
+  "config.summary.description": "Please review your configuration before continuing",
+  "config.summary.notAnswered": "Not answered",
+  "config.summary.back": "Back to Questions",
+  "config.summary.confirm": "Confirm Configuration",
+
+  "common.yes": "Yes",
+  "common.no": "No"
 }
