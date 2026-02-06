@@ -5,6 +5,7 @@
 
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
+import { getCurrentUserClerkId } from './auth'
 
 /**
  * Update an existing decision with decision log metadata.
@@ -20,15 +21,15 @@ export const updateWithLog = mutation({
     configData: v.optional(v.any()),
     markdownFilePath: v.optional(v.string()),
     projectId: v.optional(v.id('projects')),
-    clerkUserId: v.string(),
   },
   handler: async (ctx, args) => {
+    const clerkUserId = await getCurrentUserClerkId(ctx)
     const now = Date.now()
 
     // Try to find existing decision by title and user
     const existing = await ctx.db
       .query('decisions')
-      .withIndex('by_user', q => q.eq('clerkUserId', args.clerkUserId))
+      .withIndex('by_user', q => q.eq('clerkUserId', clerkUserId))
       .filter(q => q.eq(q.field('title'), args.title))
       .first()
 
@@ -52,7 +53,7 @@ export const updateWithLog = mutation({
       description: args.description,
       status: 'ready',
       projectId: args.projectId,
-      clerkUserId: args.clerkUserId,
+      clerkUserId,
       createdAt: now,
       templateId: args.templateId,
       configData: args.configData,
@@ -68,13 +69,13 @@ export const updateWithLog = mutation({
  * Get all decisions for a user.
  */
 export const list = query({
-  args: {
-    clerkUserId: v.string(),
-  },
-  handler: async (ctx, args) => {
+  args: {},
+  handler: async (ctx) => {
+    const clerkUserId = await getCurrentUserClerkId(ctx)
+
     return await ctx.db
       .query('decisions')
-      .withIndex('by_user', q => q.eq('clerkUserId', args.clerkUserId))
+      .withIndex('by_user', q => q.eq('clerkUserId', clerkUserId))
       .order('desc')
       .collect()
   },
@@ -88,6 +89,14 @@ export const byProject = query({
     projectId: v.id('projects'),
   },
   handler: async (ctx, args) => {
+    const clerkUserId = await getCurrentUserClerkId(ctx)
+
+    // Verify user owns the project
+    const project = await ctx.db.get(args.projectId)
+    if (!project || project.clerkUserId !== clerkUserId) {
+      throw new Error('Unauthorized: Project not found or not owned by user')
+    }
+
     return await ctx.db
       .query('decisions')
       .withIndex('by_project', q => q.eq('projectId', args.projectId))
@@ -104,11 +113,16 @@ export const byTemplate = query({
     templateId: v.id('experimentTemplates'),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const clerkUserId = await getCurrentUserClerkId(ctx)
+
+    // Only return decisions owned by the authenticated user
+    const decisions = await ctx.db
       .query('decisions')
       .withIndex('by_template', q => q.eq('templateId', args.templateId))
       .order('desc')
       .collect()
+
+    return decisions.filter(d => d.clerkUserId === clerkUserId)
   },
 })
 
@@ -120,6 +134,16 @@ export const get = query({
     id: v.id('decisions'),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id)
+    const clerkUserId = await getCurrentUserClerkId(ctx)
+
+    const decision = await ctx.db.get(args.id)
+    if (!decision) {
+      throw new Error('Decision not found')
+    }
+    if (decision.clerkUserId !== clerkUserId) {
+      throw new Error('Unauthorized: You do not own this decision')
+    }
+
+    return decision
   },
 })

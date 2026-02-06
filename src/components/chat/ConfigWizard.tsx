@@ -18,7 +18,7 @@
  * - Confirm button to finalize configuration
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTemplate } from '@/services/templates'
 import { useChatStore } from '@/store/chat-store'
@@ -68,13 +68,10 @@ export function ConfigWizard({
     }
   }, [template])
 
-  const handleValidationChange = useCallback(
-    (isValid: boolean, error?: string) => {
-      setIsCurrentValid(isValid)
-      setCurrentError(error)
-    },
-    []
-  )
+  const handleValidationChange = (isValid: boolean, error?: string) => {
+    setIsCurrentValid(isValid)
+    setCurrentError(error)
+  }
 
   const handleNext = () => {
     if (!parsedTemplate) return

@@ -8,7 +8,7 @@
   "id": "fn-1-phase-1-context-upload-git-integration.6",
   "priority": null,
   "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.6.md",
-  "status": "todo",
+  "status": "done",
   "title": "Context library UI for browsing files",
   "updated_at": "2026-02-04T11:58:30.148166Z"
 }

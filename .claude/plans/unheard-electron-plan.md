@@ -1,3 +1,5 @@
+> **LEGACY DOCUMENT** - This references superseded architecture (Electron/Mastra/GPT-4o). See README.md for current architecture.
+
 # Unheard Engine: Complete Requirements & Build Document
 
 ## Desktop + Parallelization-First Architecture

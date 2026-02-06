@@ -5,8 +5,6 @@ import { executeCommand, useCommandContext } from '@/lib/commands'
 import {
   PanelLeft,
   PanelLeftClose,
-  PanelRight,
-  PanelRightClose,
   Settings,
 } from 'lucide-react'
 
@@ -48,8 +46,6 @@ export function TitleBarLeftActions() {
  */
 export function TitleBarRightActions() {
   const { t } = useTranslation()
-  const rightSidebarVisible = useUIStore(state => state.rightSidebarVisible)
-  const toggleRightSidebar = useUIStore(state => state.toggleRightSidebar)
   const commandContext = useCommandContext()
 
   const handleOpenPreferences = async () => {
@@ -71,23 +67,7 @@ export function TitleBarRightActions() {
         <Settings className="h-3 w-3" />
       </Button>
 
-      <Button
-        onClick={toggleRightSidebar}
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6 text-foreground/70 hover:text-foreground"
-        title={t(
-          rightSidebarVisible
-            ? 'titlebar.hideRightSidebar'
-            : 'titlebar.showRightSidebar'
-        )}
-      >
-        {rightSidebarVisible ? (
-          <PanelRightClose className="h-3 w-3" />
-        ) : (
-          <PanelRight className="h-3 w-3" />
-        )}
-      </Button>
+      {/* TODO: Re-enable when right sidebar has content (Phase 4) */}
     </div>
   )
 }
@@ -100,7 +80,7 @@ interface TitleBarTitleProps {
  * Centered title for the title bar.
  * Uses absolute positioning to stay centered regardless of other content.
  */
-export function TitleBarTitle({ title = 'Tauri App' }: TitleBarTitleProps) {
+export function TitleBarTitle({ title = 'Unheard' }: TitleBarTitleProps) {
   return (
     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
       <span className="text-sm font-medium text-foreground/80">{title}</span>
@@ -114,7 +94,7 @@ export function TitleBarTitle({ title = 'Tauri App' }: TitleBarTitleProps) {
  *
  * For more control, use TitleBarLeftActions, TitleBarRightActions, and TitleBarTitle separately.
  */
-export function TitleBarContent({ title = 'Tauri App' }: TitleBarTitleProps) {
+export function TitleBarContent({ title = 'Unheard' }: TitleBarTitleProps) {
   return (
     <>
       <TitleBarLeftActions />

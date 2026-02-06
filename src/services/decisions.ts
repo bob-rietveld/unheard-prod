@@ -5,7 +5,6 @@
 
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '../../convex/_generated/api'
-import { useConvexMutation } from '@convex-dev/react-query'
 import { useConvex } from 'convex/react'
 import type { Id } from '../../convex/_generated/dataModel'
 
@@ -16,7 +15,6 @@ import type { Id } from '../../convex/_generated/dataModel'
 export const decisionsKeys = {
   all: ['decisions'] as const,
   lists: () => [...decisionsKeys.all, 'list'] as const,
-  list: (userId: string) => [...decisionsKeys.lists(), userId] as const,
   byProject: (projectId: Id<'projects'>) =>
     [...decisionsKeys.all, 'byProject', projectId] as const,
   byTemplate: (templateId: Id<'experimentTemplates'>) =>
@@ -25,15 +23,14 @@ export const decisionsKeys = {
 }
 
 /**
- * Hook to fetch all decisions for a user.
+ * Hook to fetch all decisions for the authenticated user.
  */
-export function useDecisions(clerkUserId: string) {
+export function useDecisions() {
   const convex = useConvex()
 
   return useQuery({
-    queryKey: decisionsKeys.list(clerkUserId),
-    queryFn: () => convex.query(api.decisions.list, { clerkUserId }),
-    enabled: !!clerkUserId,
+    queryKey: decisionsKeys.lists(),
+    queryFn: () => convex.query(api.decisions.list, {}),
   })
 }
 
@@ -89,7 +86,6 @@ export interface UpdateDecisionWithLogInput {
   configData?: Record<string, unknown>
   markdownFilePath?: string
   projectId?: Id<'projects'>
-  clerkUserId: string
 }
 
 /**
@@ -99,18 +95,17 @@ export interface UpdateDecisionWithLogInput {
  * Returns the decision ID (creates new or updates existing).
  */
 export function useUpdateDecisionWithLog() {
-  const convexMutation = useConvexMutation(api.decisions.updateWithLog)
+  const convex = useConvex()
 
   return useMutation({
     mutationFn: async (input: UpdateDecisionWithLogInput) => {
-      return await convexMutation({
+      return await convex.mutation(api.decisions.updateWithLog, {
         title: input.title,
         description: input.description,
         templateId: input.templateId,
         configData: input.configData,
         markdownFilePath: input.markdownFilePath,
         projectId: input.projectId,
-        clerkUserId: input.clerkUserId,
       })
     },
   })

@@ -8,7 +8,7 @@
   "id": "fn-1-phase-1-context-upload-git-integration.3",
   "priority": null,
   "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.3.md",
-  "status": "todo",
+  "status": "done",
   "title": "Rust file parsing commands (CSV, PDF, Excel)",
   "updated_at": "2026-02-04T11:58:29.928739Z"
 }

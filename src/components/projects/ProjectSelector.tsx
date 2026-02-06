@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FolderIcon, PlusIcon, AlertTriangleIcon } from 'lucide-react'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -42,6 +42,25 @@ export function ProjectSelector() {
   const createProject = useCreateProject()
   const currentProject = useProjectStore(state => state.currentProject)
   const setCurrentProject = useProjectStore(state => state.setCurrentProject)
+
+  // Restore persisted project selection on load
+  const persistedProjectId = useProjectStore(
+    state => state._persistedProjectId
+  )
+  useEffect(() => {
+    if (projects && !currentProject && persistedProjectId) {
+      const project = projects.find(
+        (p: { _id: string }) => p._id === persistedProjectId
+      )
+      if (project) {
+        setCurrentProject(project)
+        logger.info('Restored persisted project', {
+          projectId: persistedProjectId,
+          name: project.name,
+        })
+      }
+    }
+  }, [projects, currentProject, persistedProjectId, setCurrentProject])
 
   const handleSelectProject = (projectId: string) => {
     const project = projects?.find((p: { _id: string }) => p._id === projectId)

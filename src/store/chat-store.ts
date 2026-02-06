@@ -77,6 +77,19 @@ export const useChatStore = create<ChatState>()(
           'completeStreaming'
         ),
 
+      updateMessageStatus: (id, status, metadata) =>
+        set(
+          state => ({
+            messages: state.messages.map(msg =>
+              msg.id === id
+                ? { ...msg, status, ...(metadata !== undefined && { metadata }) }
+                : msg
+            ),
+          }),
+          undefined,
+          'updateMessageStatus'
+        ),
+
       setError: error => set({ error }, undefined, 'setError'),
 
       setTemplate: templateId =>

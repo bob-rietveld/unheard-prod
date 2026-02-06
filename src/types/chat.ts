@@ -116,6 +116,9 @@ export interface ChatState {
   /** Mark a streaming message as complete */
   completeStreaming: (id: string) => void
 
+  /** Update a message's status and optional metadata */
+  updateMessageStatus: (id: string, status: MessageStatus, metadata?: Record<string, unknown>) => void
+
   /** Set or clear the current error state */
   setError: (error: string | null) => void
 

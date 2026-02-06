@@ -14,7 +14,7 @@
   "plan_review_status": "unknown",
   "plan_reviewed_at": null,
   "spec_path": ".flow/specs/fn-2-phase-2-chat-interface-agent.md",
-  "status": "open",
+  "status": "done",
   "title": "Phase 2: Chat Interface + Agent",
-  "updated_at": "2026-02-05T07:29:16.064506Z"
+  "updated_at": "2026-02-06T08:28:55.096527Z"
 }

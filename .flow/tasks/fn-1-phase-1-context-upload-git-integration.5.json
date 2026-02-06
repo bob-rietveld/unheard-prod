@@ -8,7 +8,7 @@
   "id": "fn-1-phase-1-context-upload-git-integration.5",
   "priority": null,
   "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.5.md",
-  "status": "todo",
+  "status": "done",
   "title": "Git auto-commit implementation",
   "updated_at": "2026-02-04T12:18:18.062167Z"
 }

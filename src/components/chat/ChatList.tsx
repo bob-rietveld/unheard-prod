@@ -26,6 +26,7 @@ import { useProjectStore } from '@/store/project-store'
 import { useChatStore } from '@/store/chat-store'
 import { ChatListSkeleton } from './ChatListSkeleton'
 import type { Chat } from '@/types/chat'
+import type { Id } from '../../../convex/_generated/dataModel'
 import { logger } from '@/lib/logger'
 
 /**
@@ -89,7 +90,7 @@ export function ChatList() {
     setEditTitle(chat.title)
   }
 
-  const handleSaveRename = async (chatId: string) => {
+  const handleSaveRename = async (chatId: Id<'chats'>) => {
     if (!editTitle.trim()) {
       setEditingChatId(null)
       return
@@ -97,7 +98,7 @@ export function ChatList() {
 
     try {
       await updateChat.mutateAsync({
-        id: chatId as any, // Type will be fixed by Convex
+        id: chatId,
         title: editTitle.trim(),
       })
       setEditingChatId(null)
@@ -106,11 +107,11 @@ export function ChatList() {
     }
   }
 
-  const handleArchiveChat = async (chatId: string, e: React.MouseEvent) => {
+  const handleArchiveChat = async (chatId: Id<'chats'>, e: React.MouseEvent) => {
     e.stopPropagation()
 
     try {
-      await archiveChat.mutateAsync(chatId as any)
+      await archiveChat.mutateAsync(chatId)
 
       // If we archived the current chat, clear selection
       if (currentChatId === chatId) {

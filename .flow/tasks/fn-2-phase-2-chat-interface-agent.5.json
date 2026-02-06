@@ -11,7 +11,7 @@
   "id": "fn-2-phase-2-chat-interface-agent.5",
   "priority": null,
   "spec_path": ".flow/tasks/fn-2-phase-2-chat-interface-agent.5.md",
-  "status": "todo",
+  "status": "done",
   "title": "Template configuration wizard UI",
   "updated_at": "2026-02-04T14:59:03.052030Z"
 }

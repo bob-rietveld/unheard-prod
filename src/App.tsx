@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { check } from '@tauri-apps/plugin-updater'
 import { relaunch } from '@tauri-apps/plugin-process'
+import { toast } from 'sonner'
+import i18n from './i18n/config'
 import { initializeCommandSystem } from './lib/commands'
 import { buildAppMenu, setupMenuLanguageListener } from './lib/menu'
 import { initializeLanguage } from './i18n/language-init'
@@ -54,48 +56,67 @@ function App() {
 
     // Auto-updater logic - check for updates 5 seconds after app loads
     const checkForUpdates = async () => {
+      const t = i18n.t.bind(i18n)
       try {
         const update = await check()
         if (update) {
           logger.info(`Update available: ${update.version}`)
 
-          // Show confirmation dialog
-          const shouldUpdate = confirm(
-            `Update available: ${update.version}\n\nWould you like to install this update now?`
-          )
+          // Show toast with action button instead of confirm()
+          toast.info(t('updater.available', { version: update.version }), {
+            description: t('updater.availableDescription'),
+            duration: 0, // Don't auto-dismiss
+            action: {
+              label: t('updater.updateNow'),
+              onClick: async () => {
+                try {
+                  const downloadToastId = toast.loading(
+                    t('updater.downloading')
+                  )
 
-          if (shouldUpdate) {
-            try {
-              // Download and install with progress logging
-              await update.downloadAndInstall(event => {
-                switch (event.event) {
-                  case 'Started':
-                    logger.info(`Downloading ${event.data.contentLength} bytes`)
-                    break
-                  case 'Progress':
-                    logger.info(`Downloaded: ${event.data.chunkLength} bytes`)
-                    break
-                  case 'Finished':
-                    logger.info('Download complete, installing...')
-                    break
+                  // Download and install with progress logging
+                  await update.downloadAndInstall(event => {
+                    switch (event.event) {
+                      case 'Started':
+                        logger.info(
+                          `Downloading ${event.data.contentLength} bytes`
+                        )
+                        break
+                      case 'Progress':
+                        logger.info(
+                          `Downloaded: ${event.data.chunkLength} bytes`
+                        )
+                        break
+                      case 'Finished':
+                        logger.info('Download complete, installing...')
+                        break
+                    }
+                  })
+
+                  toast.dismiss(downloadToastId)
+
+                  // Show restart toast with action button
+                  toast.success(t('updater.installed'), {
+                    description: t('updater.installedDescription'),
+                    duration: 0,
+                    action: {
+                      label: t('updater.restartNow'),
+                      onClick: () => {
+                        relaunch()
+                      },
+                    },
+                  })
+                } catch (updateError) {
+                  logger.error(
+                    `Update installation failed: ${String(updateError)}`
+                  )
+                  toast.error(t('toast.error.updateFailed'), {
+                    description: String(updateError),
+                  })
                 }
-              })
-
-              // Ask if user wants to restart now
-              const shouldRestart = confirm(
-                'Update completed successfully!\n\nWould you like to restart the app now to use the new version?'
-              )
-
-              if (shouldRestart) {
-                await relaunch()
-              }
-            } catch (updateError) {
-              logger.error(`Update installation failed: ${String(updateError)}`)
-              alert(
-                `Update failed: There was a problem with the automatic download.\n\n${String(updateError)}`
-              )
-            }
-          }
+              },
+            },
+          })
         }
       } catch (checkError) {
         logger.error(`Update check failed: ${String(checkError)}`)

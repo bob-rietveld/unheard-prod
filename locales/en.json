@@ -1,5 +1,5 @@
 {
-  "app.name": "Tauri Template",
+  "app.name": "Unheard",
 
   "menu.about": "About {{appName}}",
   "menu.checkForUpdates": "Check for Updates...",
@@ -21,13 +21,6 @@
   "preferences.general.keyboardShortcuts": "Keyboard Shortcuts",
   "preferences.general.quickPaneShortcut": "Quick Pane Shortcut",
   "preferences.general.quickPaneShortcutDescription": "Global keyboard shortcut to toggle the quick pane from any application",
-  "preferences.general.exampleSettings": "Example Settings",
-  "preferences.general.exampleText": "Example Text Setting",
-  "preferences.general.exampleTextDescription": "This is an example text input setting (not persisted)",
-  "preferences.general.exampleTextPlaceholder": "Enter example text",
-  "preferences.general.exampleToggle": "Example Toggle Setting",
-  "preferences.general.exampleToggleDescription": "This is an example switch/toggle setting (not persisted)",
-
   "preferences.appearance.theme": "Theme",
   "preferences.appearance.colorTheme": "Color Theme",
   "preferences.appearance.colorThemeDescription": "Choose your preferred color theme",
@@ -39,14 +32,8 @@
   "preferences.appearance.languageDescription": "Choose your preferred display language",
   "preferences.appearance.language.system": "System Default",
 
-  "preferences.advanced.title": "Example Advanced Settings",
-  "preferences.advanced.toggle": "Example Advanced Toggle",
-  "preferences.advanced.toggleDescription": "This is an example advanced toggle setting (not persisted)",
-  "preferences.advanced.dropdown": "Example Dropdown Setting",
-  "preferences.advanced.dropdownDescription": "This is an example dropdown/select setting (not persisted)",
-  "preferences.advanced.option1": "Example Option 1",
-  "preferences.advanced.option2": "Example Option 2",
-  "preferences.advanced.option3": "Example Option 3",
+  "preferences.advanced.title": "Advanced Settings",
+  "preferences.advanced.comingSoon": "Advanced settings coming soon.",
 
   "common.enabled": "Enabled",
   "common.disabled": "Disabled",
@@ -88,7 +75,7 @@
   "commandPalette.placeholder": "Type a command or search...",
   "commandPalette.noResults": "No results found.",
 
-  "titlebar.default": "Tauri App",
+  "titlebar.default": "Unheard",
   "titlebar.showLeftSidebar": "Show Left Sidebar",
   "titlebar.hideLeftSidebar": "Hide Left Sidebar",
   "titlebar.showRightSidebar": "Show Right Sidebar",
@@ -107,6 +94,16 @@
   "toast.error.windowMaximizeFailed": "Failed to toggle maximize: {{message}}",
   "toast.error.fullscreenEnterFailed": "Failed to enter fullscreen: {{message}}",
   "toast.error.fullscreenExitFailed": "Failed to exit fullscreen: {{message}}",
+  "toast.error.updateFailed": "Update failed. Please try again later.",
+
+  "updater.available": "Update available: v{{version}}",
+  "updater.availableDescription": "A new version is available. Would you like to install it?",
+  "updater.updateNow": "Update Now",
+  "updater.later": "Later",
+  "updater.downloading": "Downloading update...",
+  "updater.installed": "Update installed",
+  "updater.installedDescription": "Restart the app to use the new version.",
+  "updater.restartNow": "Restart Now",
 
   "context.upload.title": "Upload Context Files",
   "context.upload.dropZone": "Drag files or click to upload",

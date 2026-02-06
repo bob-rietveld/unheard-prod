@@ -5,7 +5,7 @@
   "id": "fn-1-phase-1-context-upload-git-integration.1",
   "priority": null,
   "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.1.md",
-  "status": "todo",
+  "status": "done",
   "title": "Day 0: Dependencies & Convex schema setup",
   "updated_at": "2026-02-04T15:44:11.927472Z"
 }

@@ -11,7 +11,7 @@
   "id": "fn-1-phase-1-context-upload-git-integration.4",
   "priority": null,
   "spec_path": ".flow/tasks/fn-1-phase-1-context-upload-git-integration.4.md",
-  "status": "todo",
+  "status": "done",
   "title": "File upload UI with drag-and-drop",
   "updated_at": "2026-02-04T11:58:30.001245Z"
 }

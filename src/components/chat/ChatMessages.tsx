@@ -20,7 +20,11 @@ import { useChatStore } from '@/store/chat-store'
  * - Button click scrolls to bottom and hides button
  */
 
-export function ChatMessages() {
+interface ChatMessagesProps {
+  onSendPrompt?: (message: string) => void
+}
+
+export function ChatMessages({ onSendPrompt }: ChatMessagesProps) {
   const { t } = useTranslation()
   const messages = useChatStore(state => state.messages)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
@@ -74,20 +78,19 @@ export function ChatMessages() {
             <p className="text-xs uppercase tracking-wider font-medium text-muted-foreground/70">
               {t('chat.empty.suggestedPrompts')}
             </p>
-            <ul className="space-y-2 text-sm text-muted-foreground text-start">
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">→</span>
-                <span>{t('chat.empty.prompt1')}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">→</span>
-                <span>{t('chat.empty.prompt2')}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-primary mt-0.5">→</span>
-                <span>{t('chat.empty.prompt3')}</span>
-              </li>
-            </ul>
+            <div className="space-y-2 text-sm text-start">
+              {(['chat.empty.prompt1', 'chat.empty.prompt2', 'chat.empty.prompt3'] as const).map(key => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => onSendPrompt?.(t(key))}
+                  className="flex w-full items-start gap-2 rounded-lg border border-border/50 px-3 py-2.5 text-start text-muted-foreground transition-colors hover:border-border hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span className="text-primary mt-0.5 shrink-0">→</span>
+                  <span>{t(key)}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

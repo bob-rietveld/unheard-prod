@@ -1,3 +1,5 @@
+> **LEGACY DOCUMENT** - This references superseded architecture (Electron/Mastra/GPT-4o). See README.md for current architecture.
+
 # Context Pipeline Implementation Specification
 
 ## Complete Technical Implementation Guide

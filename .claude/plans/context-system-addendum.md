@@ -1,3 +1,5 @@
+> **LEGACY DOCUMENT** - This references superseded architecture (Electron/Mastra/GPT-4o). See README.md for current architecture.
+
 # Context Management System - Addendum to UX-First Plan
 
 **Date**: 2026-01-29

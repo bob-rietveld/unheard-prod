@@ -1,3 +1,5 @@
+> **LEGACY DOCUMENT** - This references superseded architecture (Electron/Mastra/GPT-4o). See README.md for current architecture.
+
 # Unheard V2: Architecture Diagrams
 
 **Date**: 2026-01-29

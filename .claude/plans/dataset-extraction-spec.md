@@ -1,3 +1,5 @@
+> **LEGACY DOCUMENT** - This references superseded architecture (Electron/Mastra/GPT-4o). See README.md for current architecture.
+
 # Dataset Extraction System Specification
 
 ## From Unstructured Responses to AutoDS-Ready Datasets

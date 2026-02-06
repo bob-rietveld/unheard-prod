@@ -118,11 +118,8 @@ interface QueuedMessage {
 - [ ] Documentation: Update `docs/developer/README.md` index with new guides
 
 ## Done summary
-
-TBD
-
+Implemented comprehensive error handling, retry logic, and UX polish for the chat interface. Added React error boundary, inline/banner error messages with retry capabilities, offline queue with localStorage persistence, automatic retry with exponential backoff, rate limit countdown, and loading states (typing indicator, skeletons, overlays). All features fully tested with 41 new tests achieving >80% coverage.
 ## Evidence
-
-- Commits:
-- Tests:
+- Commits: 603682fa5fcd1bf9c08d79fa3de9ff719e2e2819
+- Tests: npm run test:run src/lib/error-handlers.test.ts src/lib/retry-queue.test.ts src/components/chat/ErrorBoundary.test.tsx
 - PRs:

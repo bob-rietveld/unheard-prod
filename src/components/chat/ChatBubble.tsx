@@ -63,7 +63,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
           </div>
 
           {/* Error state */}
-          {isError && message.metadata?.error && (
+          {isError && !!message.metadata?.error && (
             <div className="mt-3 pt-3 border-t border-destructive/20 text-sm text-destructive">
               {typeof message.metadata.error === 'string'
                 ? message.metadata.error

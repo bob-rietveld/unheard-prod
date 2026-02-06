@@ -8,7 +8,7 @@
   "id": "fn-2-phase-2-chat-interface-agent.3",
   "priority": null,
   "spec_path": ".flow/tasks/fn-2-phase-2-chat-interface-agent.3.md",
-  "status": "todo",
+  "status": "done",
   "title": "Chat UI components (messages, input, bubbles)",
   "updated_at": "2026-02-04T14:59:02.899841Z"
 }

@@ -8,7 +8,7 @@
   "id": "fn-2-phase-2-chat-interface-agent.1",
   "priority": null,
   "spec_path": ".flow/tasks/fn-2-phase-2-chat-interface-agent.1.md",
-  "status": "todo",
+  "status": "done",
   "title": "Zustand chat store + TypeScript types",
   "updated_at": "2026-02-05T07:29:30.618806Z"
 }

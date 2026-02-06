@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Channel } from '@tauri-apps/api/core'
 import { commands, type StreamEvent, type ChatError } from '@/lib/bindings'
 import { useChatStore } from '@/store/chat-store'
@@ -6,6 +6,10 @@ import { ChatMessages } from './ChatMessages'
 import { ChatInput } from './ChatInput'
 import { ErrorMessage, OfflineBanner } from './ErrorMessage'
 import type { ChatMessage as FrontendChatMessage } from '@/types/chat'
+import {
+  useChatMessages,
+  useAddMessage,
+} from '@/services/chats'
 import {
   analyzeChatError,
   withRetry,
@@ -22,34 +26,62 @@ import { logger } from '@/lib/logger'
 /**
  * ChatInterface is the main container for the chat UI.
  *
- * Component Structure:
- * ```
- * ChatInterface (container)
- * ├── ChatMessages (scroll area with message list)
- * │   └── ChatBubble (individual message bubble)
- * └── ChatInput (textarea + send button)
- * ```
- *
- * State Connection:
- * - Uses useChatStore with selector pattern (ast-grep enforced)
- * - Manages streaming state via Tauri Channel
- * - Accumulates tokens in real-time
- *
- * Flow:
- * 1. User types message in ChatInput
- * 2. addMessage (user role) added to store
- * 3. sendChatMessage Tauri command called with Channel
- * 4. Streaming tokens accumulated via StreamEvent::Token
- * 5. StreamEvent::Done completes message
- * 6. StreamEvent::Error shows error state
+ * Persistence flow:
+ * - On chat selection, messages are loaded from Convex into the Zustand store
+ * - User messages are saved to Convex immediately when sent
+ * - Assistant messages are saved to Convex after streaming completes
+ * - Zustand store serves as the real-time cache for streaming
  */
 
 export function ChatInterface() {
   const messages = useChatStore(state => state.messages)
   const isStreaming = useChatStore(state => state.isStreaming)
+  const currentChatId = useChatStore(state => state.currentChatId)
   const [chatError, setChatError] = useState<ChatError | null>(null)
   const [retrying, setRetrying] = useState(false)
   const [queuedCount, setQueuedCount] = useState(0)
+
+  // Convex persistence hooks
+  const persistedMessages = useChatMessages(currentChatId)
+  const addMessageToConvex = useAddMessage()
+
+  // Track which chat's history we last loaded to avoid re-loading on every render
+  const loadedChatIdRef = useRef<string | null>(null)
+
+  // When the chat changes, reset the loaded ref so we reload from Convex
+  useEffect(() => {
+    loadedChatIdRef.current = null
+  }, [currentChatId])
+
+  // Load persisted messages into the Zustand store when Convex data arrives
+  useEffect(() => {
+    if (!currentChatId || persistedMessages === undefined) return
+    if (loadedChatIdRef.current === currentChatId) return
+
+    loadedChatIdRef.current = currentChatId
+
+    const { addMessage } = useChatStore.getState()
+    // Only populate if the store was already reset (ChatList calls resetConversation on switch)
+    // and Convex has messages to load
+    if (persistedMessages.length === 0) return
+
+    for (const msg of persistedMessages) {
+      const frontendMsg: FrontendChatMessage = {
+        id: msg._id,
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp,
+        status: msg.status ?? 'complete',
+        metadata: msg.metadata as Record<string, unknown> | undefined,
+      }
+      addMessage(frontendMsg)
+    }
+
+    logger.info('Loaded chat history from Convex', {
+      chatId: currentChatId,
+      messageCount: persistedMessages.length,
+    })
+  }, [currentChatId, persistedMessages])
 
   // Update queued message count
   useEffect(() => {
@@ -103,8 +135,13 @@ export function ChatInterface() {
   }, [isStreaming])
 
   const handleSendMessage = async (content: string) => {
-    const { addMessage, updateStreamingMessage, completeStreaming } =
-      useChatStore.getState()
+    const {
+      addMessage,
+      updateStreamingMessage,
+      completeStreaming,
+      updateMessageStatus,
+      currentChatId: chatId,
+    } = useChatStore.getState()
 
     // Check if offline - queue message
     if (!isOnline()) {
@@ -114,7 +151,7 @@ export function ChatInterface() {
       return
     }
 
-    // Add user message
+    // Add user message to store
     const userMessage: FrontendChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
@@ -123,6 +160,20 @@ export function ChatInterface() {
       status: 'complete',
     }
     addMessage(userMessage)
+
+    // Persist user message to Convex
+    if (chatId) {
+      try {
+        await addMessageToConvex({
+          chatId,
+          role: 'user',
+          content,
+          status: 'complete',
+        })
+      } catch (err) {
+        logger.error('Failed to persist user message to Convex', { error: err })
+      }
+    }
 
     // Create assistant message placeholder for streaming
     const assistantMessageId = `assistant-${Date.now()}`
@@ -148,17 +199,39 @@ export function ChatInterface() {
         updateStreamingMessage(assistantMessageId, accumulatedContent)
       } else if (event.type === 'Done') {
         completeStreaming(assistantMessageId)
-      } else if (event.type === 'Error') {
-        // Update message with error status
-        const { messages: currentMessages } = useChatStore.getState()
-        const errorMessage = currentMessages.find(
-          m => m.id === assistantMessageId
-        )
-        if (errorMessage) {
-          errorMessage.status = 'error'
-          errorMessage.metadata = { error: event.message }
+
+        // Persist completed assistant message to Convex
+        if (chatId) {
+          addMessageToConvex({
+            chatId,
+            role: 'assistant',
+            content: accumulatedContent,
+            status: 'complete',
+          }).catch(err => {
+            logger.error('Failed to persist assistant message to Convex', {
+              error: err,
+            })
+          })
         }
+      } else if (event.type === 'Error') {
+        // Update message with error status via store action
+        updateMessageStatus(assistantMessageId, 'error', { error: event.message })
         completeStreaming(assistantMessageId)
+
+        // Persist error message to Convex
+        if (chatId && accumulatedContent) {
+          addMessageToConvex({
+            chatId,
+            role: 'assistant',
+            content: accumulatedContent,
+            status: 'error',
+            metadata: { error: event.message },
+          }).catch(err => {
+            logger.error('Failed to persist error message to Convex', {
+              error: err,
+            })
+          })
+        }
       }
     }
 
@@ -208,17 +281,10 @@ export function ChatInterface() {
       logger.error('Chat error after retries', { error: err })
       completeStreaming(assistantMessageId)
 
-      // Update message with error
-      const { messages: currentMessages } = useChatStore.getState()
-      const errorMessage = currentMessages.find(
-        m => m.id === assistantMessageId
-      )
-      if (errorMessage) {
-        errorMessage.status = 'error'
-        errorMessage.metadata = {
-          error: err instanceof Error ? err.message : 'Unknown error',
-        }
-      }
+      // Update message with error via store action
+      updateMessageStatus(assistantMessageId, 'error', {
+        error: err instanceof Error ? err.message : 'Unknown error',
+      })
     }
   }
 
@@ -260,7 +326,7 @@ export function ChatInterface() {
       )}
 
       {/* Messages area */}
-      <ChatMessages />
+      <ChatMessages onSendPrompt={handleSendMessage} />
 
       {/* Input area */}
       <ChatInput
