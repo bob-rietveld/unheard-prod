@@ -225,6 +225,121 @@ const handleChange = async (newValue: string) => {
 }
 ```
 
+## Chat-Specific Error Handling (Phase 2)
+
+### Error Analysis and Retry Logic
+
+Use `analyzeChatError()` to classify errors and determine retry strategy:
+
+```typescript
+import { analyzeChatError } from '@/lib/error-handlers'
+
+const result = await commands.sendChatMessage(/* ... */)
+if (result.status === 'error') {
+  const analysis = analyzeChatError(result.error)
+
+  if (analysis.canRetry) {
+    // Show retry button
+  } else {
+    // Show error message only
+  }
+}
+```
+
+### Automatic Retry with Exponential Backoff
+
+Use `withRetry()` for automatic retries on transient errors:
+
+```typescript
+import { withRetry } from '@/lib/error-handlers'
+
+await withRetry(
+  async () => {
+    const result = await commands.sendChatMessage(/* ... */)
+    if (result.status === 'error') {
+      throw new Error(result.error.message)
+    }
+    return result
+  },
+  {
+    maxRetries: 5,
+    onRetry: (attempt, delay) => {
+      console.log(`Retry attempt ${attempt} in ${delay}ms`)
+    }
+  }
+)
+```
+
+Backoff schedule: 1s, 2s, 4s, 8s, 16s
+
+### Offline Queue
+
+Messages sent while offline are queued in localStorage:
+
+```typescript
+import { enqueueMessage, peekMessage, dequeueMessage } from '@/lib/retry-queue'
+
+if (!navigator.onLine) {
+  enqueueMessage('Hello, world!')
+}
+
+// Process queue when back online
+window.addEventListener('online', async () => {
+  const message = peekMessage()
+  if (message) {
+    await sendMessage(message.message)
+    dequeueMessage(message.id)
+  }
+})
+```
+
+Queue features:
+- Max 50 messages
+- 24-hour expiration
+- Persists across restarts
+
+### Error Display Patterns
+
+**Banner errors** (persistent, dismissible):
+```tsx
+{chatError && (
+  <ErrorMessage
+    error={chatError}
+    onRetry={handleRetry}
+    banner={true}
+  />
+)}
+```
+
+**Inline errors** (message-specific):
+```tsx
+{message.status === 'error' && message.metadata?.error && (
+  <ErrorMessage
+    error={message.metadata.error as ChatError}
+    onRetry={() => retryMessage(message.id)}
+  />
+)}
+```
+
+**Offline banner** (network status):
+```tsx
+<OfflineBanner queuedCount={queuedCount} />
+```
+
+### React Error Boundary
+
+Wrap chat interface with error boundary:
+
+```tsx
+import { ErrorBoundary } from '@/components/chat/ErrorBoundary'
+
+<ErrorBoundary>
+  <ChatInterface />
+</ErrorBoundary>
+```
+
+The boundary catches rendering errors and provides a "Reset Chat" button.
+
 ## Quick Reference
 
 | Scenario               | Rust Error Type | TypeScript Pattern   | User Feedback    |
@@ -234,5 +349,8 @@ const handleChange = async (newValue: string) => {
 | Data fetching          | Either          | `unwrapResult`       | Query error UI   |
 | Optional feature       | Either          | Graceful degradation | Silent fallback  |
 | Critical operation     | Structured enum | Explicit + rollback  | Toast + recovery |
+| Chat errors            | `ChatError`     | `analyzeChatError()` | ErrorMessage component |
+| Transient errors       | Any             | `withRetry()`        | Auto-retry with backoff |
+| Offline messages       | N/A             | Offline queue        | Banner + queue count |
 
 See also: [tauri-commands.md](./tauri-commands.md) for Result type patterns, [logging.md](./logging.md) for logging best practices.

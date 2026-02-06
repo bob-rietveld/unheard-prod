@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import { ProjectTabs } from '@/components/projects/ProjectTabs'
 import { ChatInterface } from '@/components/chat/ChatInterface'
+import { ErrorBoundary } from '@/components/chat/ErrorBoundary'
 import { useProjectStore } from '@/store/project-store'
 import { useChatStore } from '@/store/chat-store'
 import { MessageSquareIcon } from 'lucide-react'
@@ -28,7 +29,9 @@ export function MainWindowContent({
         <>
           {currentChatId ? (
             // Show chat interface when a chat is selected
-            <ChatInterface />
+            <ErrorBoundary>
+              <ChatInterface />
+            </ErrorBoundary>
           ) : currentProject ? (
             // Show project tabs when project selected but no chat
             <ProjectTabs />

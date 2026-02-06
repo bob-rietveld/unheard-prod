@@ -1,11 +1,23 @@
-import { useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useEffect, useState } from 'react'
 import { Channel } from '@tauri-apps/api/core'
-import { commands, type StreamEvent } from '@/lib/bindings'
+import { commands, type StreamEvent, type ChatError } from '@/lib/bindings'
 import { useChatStore } from '@/store/chat-store'
 import { ChatMessages } from './ChatMessages'
 import { ChatInput } from './ChatInput'
+import { ErrorMessage, OfflineBanner } from './ErrorMessage'
 import type { ChatMessage as FrontendChatMessage } from '@/types/chat'
+import {
+  analyzeChatError,
+  withRetry,
+  isOnline,
+} from '@/lib/error-handlers'
+import {
+  enqueueMessage,
+  peekMessage,
+  dequeueMessage as removeFromQueue,
+  getQueueSize,
+} from '@/lib/retry-queue'
+import { logger } from '@/lib/logger'
 
 /**
  * ChatInterface is the main container for the chat UI.
@@ -33,12 +45,53 @@ import type { ChatMessage as FrontendChatMessage } from '@/types/chat'
  */
 
 export function ChatInterface() {
-  const { t } = useTranslation()
   const messages = useChatStore(state => state.messages)
   const isStreaming = useChatStore(state => state.isStreaming)
-  const error = useChatStore(state => state.error)
+  const [chatError, setChatError] = useState<ChatError | null>(null)
+  const [retrying, setRetrying] = useState(false)
+  const [queuedCount, setQueuedCount] = useState(0)
 
-  // Process queued messages after streaming completes
+  // Update queued message count
+  useEffect(() => {
+    const updateCount = () => setQueuedCount(getQueueSize())
+    updateCount()
+
+    // Listen for online/offline events
+    window.addEventListener('online', updateCount)
+    window.addEventListener('offline', updateCount)
+
+    return () => {
+      window.removeEventListener('online', updateCount)
+      window.removeEventListener('offline', updateCount)
+    }
+  }, [])
+
+  // Process offline queue when coming back online
+  useEffect(() => {
+    const handleOnline = async () => {
+      logger.info('Browser is back online, processing queue')
+
+      // Process all queued messages
+      while (getQueueSize() > 0) {
+        const queued = peekMessage()
+        if (!queued) break
+
+        try {
+          await handleSendMessage(queued.message)
+          removeFromQueue(queued.id)
+          setQueuedCount(getQueueSize())
+        } catch (error) {
+          logger.error('Failed to send queued message', { error, queued })
+          break // Stop processing on error
+        }
+      }
+    }
+
+    window.addEventListener('online', handleOnline)
+    return () => window.removeEventListener('online', handleOnline)
+  }, [])
+
+  // Process in-memory queued messages after streaming completes
   useEffect(() => {
     if (!isStreaming) {
       const { dequeueMessage } = useChatStore.getState()
@@ -50,8 +103,16 @@ export function ChatInterface() {
   }, [isStreaming])
 
   const handleSendMessage = async (content: string) => {
-    const { addMessage, updateStreamingMessage, completeStreaming, setError } =
+    const { addMessage, updateStreamingMessage, completeStreaming } =
       useChatStore.getState()
+
+    // Check if offline - queue message
+    if (!isOnline()) {
+      logger.info('Offline detected, queueing message')
+      enqueueMessage(content)
+      setQueuedCount(getQueueSize())
+      return
+    }
 
     // Add user message
     const userMessage: FrontendChatMessage = {
@@ -74,6 +135,9 @@ export function ChatInterface() {
     }
     addMessage(assistantMessage)
 
+    // Clear previous error
+    setChatError(null)
+
     // Set up streaming channel
     const channel = new Channel<StreamEvent>()
     let accumulatedContent = ''
@@ -85,7 +149,6 @@ export function ChatInterface() {
       } else if (event.type === 'Done') {
         completeStreaming(assistantMessageId)
       } else if (event.type === 'Error') {
-        setError(event.message)
         // Update message with error status
         const { messages: currentMessages } = useChatStore.getState()
         const errorMessage = currentMessages.find(
@@ -105,31 +168,70 @@ export function ChatInterface() {
       content: msg.content,
     }))
 
-    // Call Tauri command
+    // Send with retry logic
     try {
-      const result = await commands.sendChatMessage(
-        content,
-        historyForBackend,
-        null, // system_prompt (will be added in later task)
-        channel
-      )
-
-      if (result.status === 'error') {
-        setError(
-          result.error.type === 'RateLimitError'
-            ? t('chat.error.rateLimit')
-            : result.error.type === 'TimeoutError'
-              ? t('chat.error.timeout')
-              : result.error.type === 'NetworkError'
-                ? t('chat.error.network')
-                : t('chat.error.generic')
+      const sendWithRetry = async () => {
+        const result = await commands.sendChatMessage(
+          content,
+          historyForBackend,
+          null, // system_prompt (will be added in later task)
+          channel
         )
-        completeStreaming(assistantMessageId)
+
+        if (result.status === 'error') {
+          const analysis = analyzeChatError(result.error)
+
+          // Store error for display
+          setChatError(result.error)
+
+          // Throw for retry logic
+          if (analysis.canRetry) {
+            throw new Error(analysis.userMessage)
+          }
+        }
+
+        return result
       }
+
+      // Attempt with retry for transient errors
+      await withRetry(sendWithRetry, {
+        maxRetries: 5,
+        onRetry: (attempt, delay) => {
+          logger.info('Retrying message send', { attempt, delay })
+          setRetrying(true)
+        },
+      })
+
+      setRetrying(false)
     } catch (err) {
-      setError(t('chat.error.generic'))
+      setRetrying(false)
+      logger.error('Chat error after retries', { error: err })
       completeStreaming(assistantMessageId)
-      console.error('Chat error:', err)
+
+      // Update message with error
+      const { messages: currentMessages } = useChatStore.getState()
+      const errorMessage = currentMessages.find(
+        m => m.id === assistantMessageId
+      )
+      if (errorMessage) {
+        errorMessage.status = 'error'
+        errorMessage.metadata = {
+          error: err instanceof Error ? err.message : 'Unknown error',
+        }
+      }
+    }
+  }
+
+  const handleRetry = () => {
+    if (!chatError) return
+
+    // Find the last user message and retry
+    const lastUserMessage = [...messages]
+      .reverse()
+      .find(m => m.role === 'user')
+
+    if (lastUserMessage) {
+      handleSendMessage(lastUserMessage.content)
     }
   }
 
@@ -144,20 +246,17 @@ export function ChatInterface() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Error banner - refined, minimal */}
-      {error && (
-        <div className="border-b border-destructive/20 bg-destructive/5 px-6 py-3">
-          <div className="flex items-center justify-between max-w-4xl mx-auto">
-            <p className="text-sm text-destructive">{error}</p>
-            <button
-              onClick={() => useChatStore.getState().setError(null)}
-              className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
-              aria-label={t('chat.error.dismiss')}
-            >
-              <span className="text-lg leading-none">×</span>
-            </button>
-          </div>
-        </div>
+      {/* Offline banner */}
+      <OfflineBanner queuedCount={queuedCount} />
+
+      {/* Error banner with retry */}
+      {chatError && (
+        <ErrorMessage
+          error={chatError}
+          onRetry={handleRetry}
+          retrying={retrying}
+          banner={true}
+        />
       )}
 
       {/* Messages area */}
