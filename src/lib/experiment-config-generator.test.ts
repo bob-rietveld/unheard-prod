@@ -417,12 +417,12 @@ describe('generateExperimentConfig', () => {
     expect(config.personas.generationType).toBe('standard')
     expect(config.personas.count).toBe(10)
     expect(config.personas.archetypes).toHaveLength(4)
-    expect(config.personas.archetypes[0]).toEqual({
+    expect(config.personas.archetypes![0]).toEqual({
       id: 'seed_vc_partner',
       name: 'Seed VC Partner',
       count: 3,
     })
-    expect(config.personas.archetypes[1]).toEqual({
+    expect(config.personas.archetypes![1]).toEqual({
       id: 'angel_investor',
       name: 'Angel Investor',
       count: 3,
@@ -762,7 +762,7 @@ describe('YAML validity', () => {
     expect(typeof config.personas.generationType).toBe('string')
     expect(typeof config.personas.count).toBe('number')
     expect(Array.isArray(config.personas.archetypes)).toBe(true)
-    for (const arch of config.personas.archetypes) {
+    for (const arch of config.personas.archetypes!) {
       expect(typeof arch.id).toBe('string')
       expect(typeof arch.name).toBe('string')
       expect(typeof arch.count).toBe('number')

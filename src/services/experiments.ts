@@ -81,12 +81,14 @@ export function useRunExperiment() {
       projectPath: string
       projectId: Id<'projects'>
       decisionId?: Id<'decisions'>
+      cohortId?: Id<'cohorts'>
     }) => {
       await executeExperiment({
         yamlFilename: params.yamlFilename,
         projectPath: params.projectPath,
         projectId: params.projectId,
         decisionId: params.decisionId,
+        cohortId: params.cohortId,
         convex,
       })
     },

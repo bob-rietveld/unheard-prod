@@ -9,6 +9,48 @@
 
 export const commands = {
 /**
+ * Save an Attio CRM record as a JSON file and commit it to Git.
+ * 
+ * # Arguments
+ * * `project_path` - Path to the project root (Git repository)
+ * * `object_type` - Attio object type: "company", "person", or "list_entry"
+ * * `record_id` - Attio record UUID (for logging)
+ * * `filename` - Filename without extension (e.g., "acme-corp")
+ * * `json_content` - JSON content to write
+ * 
+ * # Returns
+ * The relative file path on success (e.g., "attio/company/acme-corp.json")
+ */
+async saveAttioImport(projectPath: string, objectType: string, recordId: string, filename: string, jsonContent: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("save_attio_import", { projectPath, objectType, recordId, filename, jsonContent }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Save multiple Attio CRM records as JSON files in a single batch operation.
+ * 
+ * Validates all entries first, writes all files, then creates a single Git commit.
+ * If git fails, returns the paths anyway (files are still saved).
+ * 
+ * # Arguments
+ * * `project_path` - Path to the project root (Git repository)
+ * * `imports` - Vector of import entries to save
+ * 
+ * # Returns
+ * A vector of relative file paths on success (e.g., ["attio/company/acme.json", ...])
+ */
+async batchSaveAttioImports(projectPath: string, imports: AttioImportEntry[]) : Promise<Result<string[], string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("batch_save_attio_imports", { projectPath, imports }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
  * Simple greeting command for demonstration purposes.
  */
 async greet(name: string) : Promise<Result<string, string>> {
@@ -332,6 +374,10 @@ quick_pane_shortcut: string | null;
  * If None, uses system locale detection
  */
 language: string | null }
+/**
+ * A single entry in a batch Attio import operation.
+ */
+export type AttioImportEntry = { object_type: string; record_id: string; filename: string; json_content: string }
 /**
  * Error types for chat operations
  */

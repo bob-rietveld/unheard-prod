@@ -27,6 +27,18 @@ export interface ContextFileInfo {
   sizeBytes: number
 }
 
+/** Cohort data for real persona sourcing. */
+export interface CohortData {
+  cohortId: string
+  cohortName: string
+  members: {
+    importId: string
+    name: string
+    objectType: 'company' | 'person' | 'list_entry'
+    attributes: Record<string, unknown>
+  }[]
+}
+
 /** Input required to generate an experiment config YAML. */
 export interface ExperimentConfigInput {
   /** Parsed template from template-parser.ts */
@@ -45,6 +57,8 @@ export interface ExperimentConfigInput {
   markdownPath: string
   /** Context files from Convex */
   contextFiles: ContextFileInfo[]
+  /** Optional cohort data for real persona sourcing */
+  cohortData?: CohortData
 }
 
 /** Persona archetype within the experiment config. */
@@ -97,7 +111,10 @@ export interface ExperimentConfig {
   personas: {
     generationType: string
     count: number
-    archetypes: Archetype[]
+    archetypes?: Archetype[]
+    cohortId?: string
+    cohortName?: string
+    members?: { id: string; name: string; type: string; attributes: Record<string, unknown> }[]
   }
   stimulus: {
     template: string
@@ -412,6 +429,7 @@ export function generateExperimentConfig(input: ExperimentConfigInput): string {
     decisionId,
     markdownPath,
     contextFiles,
+    cohortData,
   } = input
 
   const date = new Date().toISOString().split('T')[0]
@@ -487,11 +505,25 @@ export function generateExperimentConfig(input: ExperimentConfigInput): string {
     }
   }
 
-  const personas = {
-    generationType,
-    count: personaCount,
-    archetypes,
-  }
+  // If cohort is provided, use real data instead of archetypes
+  const personas: ExperimentConfig['personas'] = cohortData
+    ? {
+        generationType: 'cohort',
+        count: cohortData.members.length,
+        cohortId: cohortData.cohortId,
+        cohortName: cohortData.cohortName,
+        members: cohortData.members.map(m => ({
+          id: m.importId,
+          name: m.name,
+          type: m.objectType,
+          attributes: m.attributes,
+        })),
+      }
+    : {
+        generationType,
+        count: personaCount,
+        archetypes,
+      }
 
   // --- Stimulus ---
   const rawStimulus = templateRaw.stimulusTemplate

@@ -8,8 +8,10 @@
  * @module
  */
 
+import type * as attio from "../attio.js";
 import type * as auth from "../auth.js";
 import type * as chats from "../chats.js";
+import type * as cohorts from "../cohorts.js";
 import type * as contexts from "../contexts.js";
 import type * as decisions from "../decisions.js";
 import type * as experiments from "../experiments.js";
@@ -24,8 +26,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  attio: typeof attio;
   auth: typeof auth;
   chats: typeof chats;
+  cohorts: typeof cohorts;
   contexts: typeof contexts;
   decisions: typeof decisions;
   experiments: typeof experiments;
