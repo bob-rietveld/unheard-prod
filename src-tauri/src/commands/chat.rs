@@ -17,7 +17,7 @@ const CLAUDE_API_URL: &str = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION: &str = "2023-06-01";
 
 /// Default model to use
-const DEFAULT_MODEL: &str = "claude-3-5-sonnet-20241022";
+const DEFAULT_MODEL: &str = "claude-sonnet-4-5-20250929";
 
 /// Default max tokens
 const DEFAULT_MAX_TOKENS: u32 = 4096;
@@ -385,7 +385,7 @@ mod tests {
     #[test]
     fn test_claude_request_serialization() {
         let request = ClaudeRequest {
-            model: "claude-3-5-sonnet-20241022".to_string(),
+            model: "claude-sonnet-4-5-20250929".to_string(),
             max_tokens: 1024,
             messages: vec![ChatMessage {
                 role: "user".to_string(),
@@ -396,7 +396,7 @@ mod tests {
         };
 
         let json = serde_json::to_string(&request).unwrap();
-        assert!(json.contains("claude-3-5-sonnet"));
+        assert!(json.contains("claude-sonnet-4-5"));
         assert!(json.contains("Hello"));
         assert!(json.contains("helpful"));
     }
