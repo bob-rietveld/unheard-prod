@@ -32,6 +32,42 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
+// Mock services that require QueryClient/Convex providers
+vi.mock('@/services/templates', () => ({
+  useTemplates: () => ({ data: undefined, isLoading: false }),
+}))
+
+vi.mock('@/services/experiments', () => ({
+  useRunExperiment: () => ({ mutate: vi.fn(), isPending: false }),
+}))
+
+vi.mock('@/services/chats', () => ({
+  useChatMessages: () => undefined,
+  useAddMessage: () => vi.fn(),
+}))
+
+vi.mock('@/services/context', () => ({
+  useContextFiles: () => undefined,
+}))
+
+vi.mock('@/services/decisions', () => ({
+  useUpdateDecisionWithLog: () => ({ mutateAsync: vi.fn() }),
+}))
+
+vi.mock('@/hooks/useExperimentEvents', () => ({
+  useExperimentEvents: () => {},
+}))
+
+// Mock agent modules
+vi.mock('@/lib/agent/system-prompts', () => ({
+  buildSystemPrompt: vi.fn().mockReturnValue('mock system prompt'),
+}))
+
+vi.mock('@/lib/agent/intent-classifier', () => ({
+  classifyIntent: vi.fn().mockReturnValue({ suggestions: [], keywords: [] }),
+  requiresTemplateHelp: vi.fn().mockReturnValue(false),
+}))
+
 describe('ChatBubble', () => {
   it('renders user message with correct styling', () => {
     const message: ChatMessage = {

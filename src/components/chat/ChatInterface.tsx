@@ -7,6 +7,7 @@ import { useExperimentStore } from '@/store/experiment-store'
 import { ChatMessages } from './ChatMessages'
 import { ChatInput } from './ChatInput'
 import { ConfigWizard, type WizardCompletionData } from './ConfigWizard'
+import { TemplateSuggestion } from './TemplateSuggestion'
 import { DecisionSavingOverlay } from './LoadingStates'
 import { ErrorMessage, OfflineBanner } from './ErrorMessage'
 import { RunExperimentButton } from '@/components/experiments/RunExperimentButton'
@@ -14,6 +15,10 @@ import { ExperimentProgress } from '@/components/experiments/ExperimentProgress'
 import { ExperimentSummary } from '@/components/experiments/ExperimentSummary'
 import { useExperimentEvents } from '@/hooks/useExperimentEvents'
 import { useRunExperiment } from '@/services/experiments'
+import { useTemplates } from '@/services/templates'
+import { buildSystemPrompt } from '@/lib/agent/system-prompts'
+import { classifyIntent, requiresTemplateHelp } from '@/lib/agent/intent-classifier'
+import type { TemplateSuggestion as TemplateSuggestionType } from '@/lib/agent/intent-classifier'
 import type { ChatMessage as FrontendChatMessage } from '@/types/chat'
 import {
   useChatMessages,
@@ -87,6 +92,9 @@ export function ChatInterface() {
     decisionId?: Id<'decisions'>
   } | null>(null)
 
+  // Template suggestion shown after intent classification
+  const [templateSuggestion, setTemplateSuggestion] = useState<TemplateSuggestionType | null>(null)
+
   const experimentStatus = useExperimentStore(state => state.status)
 
   // Listen for experiment events from Tauri
@@ -94,6 +102,9 @@ export function ChatInterface() {
 
   // Experiment execution mutation
   const runExperiment = useRunExperiment()
+
+  // Fetch published templates for system prompt and intent classification
+  const { data: templates } = useTemplates()
 
   // Project context
   const currentProject = useProjectStore(state => state.currentProject)
@@ -402,6 +413,16 @@ export function ChatInterface() {
     useExperimentStore.getState().reset()
   }
 
+  const handleAcceptTemplate = (templateId: string) => {
+    const { setTemplate } = useChatStore.getState()
+    setTemplate(templateId)
+    setTemplateSuggestion(null)
+  }
+
+  const handleDismissSuggestion = () => {
+    setTemplateSuggestion(null)
+  }
+
   const handleSendMessage = async (content: string) => {
     const {
       addMessage,
@@ -481,6 +502,14 @@ export function ChatInterface() {
             })
           })
         }
+
+        // Run intent classification on the user message to suggest templates
+        if (templates?.length && requiresTemplateHelp(content)) {
+          const classification = classifyIntent(content, templates)
+          if (classification.suggestions.length > 0 && classification.suggestions[0]!.confidence >= 0.3) {
+            setTemplateSuggestion(classification.suggestions[0]!)
+          }
+        }
       } else if (event.type === 'Error') {
         // Update message with error status via store action
         updateMessageStatus(assistantMessageId, 'error', { error: event.message })
@@ -509,13 +538,16 @@ export function ChatInterface() {
       content: msg.content,
     }))
 
+    // Build system prompt from available templates
+    const systemPrompt = templates?.length ? buildSystemPrompt(templates) : null
+
     // Send with retry logic
     try {
       const sendWithRetry = async () => {
         const result = await commands.sendChatMessage(
           content,
           historyForBackend,
-          null, // system_prompt (will be added in later task)
+          systemPrompt,
           channel
         )
 
@@ -634,6 +666,15 @@ export function ChatInterface() {
         <>
           {/* Messages area */}
           <ChatMessages onSendPrompt={handleSendMessage} />
+
+          {/* Template suggestion (shown after intent classification) */}
+          {templateSuggestion && (
+            <TemplateSuggestion
+              suggestion={templateSuggestion}
+              onAccept={handleAcceptTemplate}
+              onDismiss={handleDismissSuggestion}
+            />
+          )}
 
           {/* Input area */}
           <ChatInput
