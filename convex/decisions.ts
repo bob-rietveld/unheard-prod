@@ -127,6 +127,39 @@ export const byTemplate = query({
 })
 
 /**
+ * Update a decision's status (e.g., to 'running' or 'completed').
+ */
+export const updateStatus = mutation({
+  args: {
+    id: v.id('decisions'),
+    status: v.union(
+      v.literal('draft'),
+      v.literal('analyzing'),
+      v.literal('decided'),
+      v.literal('ready'),
+      v.literal('running'),
+      v.literal('completed')
+    ),
+  },
+  handler: async (ctx, args) => {
+    const clerkUserId = await getCurrentUserClerkId(ctx)
+
+    const decision = await ctx.db.get(args.id)
+    if (!decision) {
+      throw new Error('Decision not found')
+    }
+    if (decision.clerkUserId !== clerkUserId) {
+      throw new Error('Unauthorized: You do not own this decision')
+    }
+
+    await ctx.db.patch(args.id, {
+      status: args.status,
+      updatedAt: Date.now(),
+    })
+  },
+})
+
+/**
  * Get a single decision by ID.
  */
 export const get = query({

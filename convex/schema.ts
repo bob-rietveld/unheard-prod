@@ -117,4 +117,34 @@ export default defineSchema({
   })
     .index('by_slug', ['slug'])
     .index('by_category', ['category', 'isPublished']),
+
+  experiments: defineTable({
+    clerkUserId: v.string(),
+    projectId: v.id('projects'),
+    decisionId: v.optional(v.id('decisions')),
+    name: v.string(),
+    status: v.union(
+      v.literal('pending'),
+      v.literal('generating_personas'),
+      v.literal('running'),
+      v.literal('completed'),
+      v.literal('failed')
+    ),
+    templateSlug: v.optional(v.string()),
+    configYamlPath: v.optional(v.string()),
+    resultsJsonPath: v.optional(v.string()),
+    personaCount: v.number(),
+    completedPersonas: v.number(),
+    results: v.optional(v.any()),
+    insights: v.optional(v.any()),
+    executionTimeMs: v.optional(v.number()),
+    error: v.optional(v.string()),
+    startedAt: v.optional(v.number()),
+    completedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_user', ['clerkUserId'])
+    .index('by_project', ['projectId'])
+    .index('by_decision', ['decisionId'])
+    .index('by_status', ['status']),
 })

@@ -112,5 +112,20 @@
   "context.library.uploadedAt": "تم التحميل {{date}}",
   "context.library.syncStatus.synced": "متزامن",
   "context.library.syncStatus.pending": "قيد الانتظار",
-  "context.library.syncStatus.error": "خطأ في المزامنة"
+  "context.library.syncStatus.error": "خطأ في المزامنة",
+
+  "experiment.runExperiment": "تشغيل التجربة",
+  "experiment.running": "التجربة قيد التشغيل",
+  "experiment.generatingPersonas": "جاري إنشاء الشخصيات...",
+  "experiment.personasResponded": "{{completed}}/{{total}} شخصيات استجابت",
+  "experiment.complete": "اكتملت التجربة",
+  "experiment.failed": "فشلت التجربة",
+  "experiment.positive": "إيجابي",
+  "experiment.neutral": "محايد",
+  "experiment.negative": "سلبي",
+  "experiment.viewResults": "عرض جميع النتائج",
+  "experiment.askFollowUp": "طرح سؤال متابعة",
+  "experiment.retryExperiment": "إعادة المحاولة",
+  "experiment.executionTime": "اكتمل في {{seconds}} ثانية",
+  "experiment.sentimentBreakdown": "توزيع المشاعر"
 }

@@ -103,6 +103,41 @@ fn resolve_unique_filename(dir: &PathBuf, filename: &str) -> String {
     }
 }
 
+/// Read an experiment config YAML file from the experiments/ directory.
+///
+/// # Arguments
+/// * `project_path` - Path to the project root (Git repository)
+/// * `filename` - Filename (e.g., "2026-02-06-seed-fundraising.yaml")
+///
+/// # Returns
+/// The YAML content as a string
+#[tauri::command]
+#[specta::specta]
+pub fn read_experiment_config(project_path: String, filename: String) -> Result<String, String> {
+    log::info!("Reading experiment config: {filename} in {project_path}");
+
+    if filename.trim().is_empty() {
+        return Err("Filename cannot be empty".to_string());
+    }
+
+    if !filename.ends_with(".yaml") {
+        return Err("Filename must end with .yaml".to_string());
+    }
+
+    let file_path = PathBuf::from(&project_path)
+        .join("experiments")
+        .join(&filename);
+
+    if !file_path.exists() {
+        return Err(format!("Experiment config not found: experiments/{filename}"));
+    }
+
+    fs::read_to_string(&file_path).map_err(|e| {
+        log::error!("Failed to read experiment config: {e}");
+        format!("Failed to read experiment config: {e}")
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -313,6 +348,67 @@ mod tests {
         // Verify file was still created
         let file_path = non_repo_path.join("experiments/test.yaml");
         assert!(file_path.exists());
+    }
+
+    #[test]
+    fn test_read_experiment_config_success() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = temp_dir.path().to_path_buf();
+        let experiments_dir = repo_path.join("experiments");
+        fs::create_dir_all(&experiments_dir).unwrap();
+
+        let yaml_content = "metadata:\n  id: exp-test\n  version: \"1.0\"\n";
+        fs::write(experiments_dir.join("test.yaml"), yaml_content).unwrap();
+
+        let result = read_experiment_config(
+            repo_path.to_string_lossy().to_string(),
+            "test.yaml".to_string(),
+        );
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), yaml_content);
+    }
+
+    #[test]
+    fn test_read_experiment_config_not_found() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = temp_dir.path().to_path_buf();
+
+        let result = read_experiment_config(
+            repo_path.to_string_lossy().to_string(),
+            "nonexistent.yaml".to_string(),
+        );
+
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("not found"));
+    }
+
+    #[test]
+    fn test_read_experiment_config_empty_filename() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = temp_dir.path().to_path_buf();
+
+        let result = read_experiment_config(
+            repo_path.to_string_lossy().to_string(),
+            "".to_string(),
+        );
+
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Filename cannot be empty"));
+    }
+
+    #[test]
+    fn test_read_experiment_config_invalid_extension() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = temp_dir.path().to_path_buf();
+
+        let result = read_experiment_config(
+            repo_path.to_string_lossy().to_string(),
+            "test.yml".to_string(),
+        );
+
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must end with .yaml"));
     }
 
     #[test]

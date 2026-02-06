@@ -27,6 +27,7 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         chat::send_chat_message,
         decisions::create_decision_log,
         experiments::write_experiment_config,
+        experiments::read_experiment_config,
     ])
 }
 

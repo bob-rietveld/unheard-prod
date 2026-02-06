@@ -3,11 +3,17 @@ import { Channel } from '@tauri-apps/api/core'
 import { commands, type StreamEvent, type ChatError } from '@/lib/bindings'
 import { useChatStore } from '@/store/chat-store'
 import { useProjectStore } from '@/store/project-store'
+import { useExperimentStore } from '@/store/experiment-store'
 import { ChatMessages } from './ChatMessages'
 import { ChatInput } from './ChatInput'
 import { ConfigWizard, type WizardCompletionData } from './ConfigWizard'
 import { DecisionSavingOverlay } from './LoadingStates'
 import { ErrorMessage, OfflineBanner } from './ErrorMessage'
+import { RunExperimentButton } from '@/components/experiments/RunExperimentButton'
+import { ExperimentProgress } from '@/components/experiments/ExperimentProgress'
+import { ExperimentSummary } from '@/components/experiments/ExperimentSummary'
+import { useExperimentEvents } from '@/hooks/useExperimentEvents'
+import { useRunExperiment } from '@/services/experiments'
 import type { ChatMessage as FrontendChatMessage } from '@/types/chat'
 import {
   useChatMessages,
@@ -63,6 +69,31 @@ export function ChatInterface() {
   const [retrying, setRetrying] = useState(false)
   const [queuedCount, setQueuedCount] = useState(0)
   const [isSavingDecision, setIsSavingDecision] = useState(false)
+
+  // Experiment state: tracks YAML filename and config after wizard completion
+  const [pendingExperiment, setPendingExperiment] = useState<{
+    yamlFilename: string
+    personaCount: number
+    model: string
+    templateName: string
+    decisionId?: Id<'decisions'>
+  } | null>(null)
+
+  // Last experiment run params - kept for retry after failure
+  const lastRunParamsRef = useRef<{
+    yamlFilename: string
+    projectPath: string
+    projectId: Id<'projects'>
+    decisionId?: Id<'decisions'>
+  } | null>(null)
+
+  const experimentStatus = useExperimentStore(state => state.status)
+
+  // Listen for experiment events from Tauri
+  useExperimentEvents()
+
+  // Experiment execution mutation
+  const runExperiment = useRunExperiment()
 
   // Project context
   const currentProject = useProjectStore(state => state.currentProject)
@@ -224,6 +255,10 @@ export function ChatInterface() {
       logger.info('Decision log written', { path: decisionResult.data })
 
       // --- 3. Generate experiment config YAML (non-blocking) ---
+      let savedConfigFilename: string | null = null
+      let experimentPersonaCount = 10
+      let experimentModel = 'claude-sonnet-4-5-20250929'
+
       try {
         const templateRaw = loadYaml(data.yamlContent) as Record<string, unknown>
 
@@ -252,6 +287,17 @@ export function ChatInterface() {
         const yamlContent = generateExperimentConfig(configInput)
         const configFilename = generateExperimentFilename(decisionTitle)
 
+        // Extract persona count and model from the generated YAML
+        try {
+          const parsedConfig = loadYaml(yamlContent) as Record<string, unknown>
+          const personas = parsedConfig.personas as Record<string, unknown> | undefined
+          const execution = parsedConfig.execution as Record<string, unknown> | undefined
+          if (personas?.count) experimentPersonaCount = personas.count as number
+          if (execution?.model) experimentModel = execution.model as string
+        } catch {
+          // Use defaults
+        }
+
         const configResult = await commands.writeExperimentConfig(
           projectPath,
           configFilename,
@@ -265,6 +311,7 @@ export function ChatInterface() {
           })
         } else {
           logger.info('Experiment config written', { path: configResult.data })
+          savedConfigFilename = configFilename
         }
       } catch (configErr) {
         // Experiment config failure should NOT block decision log creation
@@ -277,25 +324,39 @@ export function ChatInterface() {
       }
 
       // --- 4. Update Convex with decision metadata ---
+      let convexDecisionId: Id<'decisions'> | undefined
       try {
-        await updateDecisionWithLog.mutateAsync({
+        const result = await updateDecisionWithLog.mutateAsync({
           title: decisionTitle,
           templateId: data.templateId,
           configData: answers,
           markdownFilePath: markdownPath,
           projectId: currentProject._id,
         })
+        convexDecisionId = result as Id<'decisions'> | undefined
       } catch (convexErr) {
         logger.error('Failed to update Convex decision', {
           error: convexErr instanceof Error ? convexErr.message : String(convexErr),
         })
       }
 
-      // --- 5. Clear wizard state ---
+      // --- 5. Clear wizard state, show experiment run prompt ---
       const { setTemplate } = useChatStore.getState()
       setTemplate(null)
 
-      toast.success('Decision log and experiment config saved')
+      if (savedConfigFilename) {
+        // Transition to experiment-ready state
+        setPendingExperiment({
+          yamlFilename: savedConfigFilename,
+          personaCount: experimentPersonaCount,
+          model: experimentModel,
+          templateName: decisionTitle,
+          decisionId: convexDecisionId,
+        })
+        toast.success('Decision log and experiment config saved. Ready to run experiment.')
+      } else {
+        toast.success('Decision log saved')
+      }
     } catch (err) {
       logger.error('Failed to save decision', {
         error: err instanceof Error ? err.message : String(err),
@@ -311,6 +372,34 @@ export function ChatInterface() {
   const handleWizardCancel = () => {
     const { setTemplate } = useChatStore.getState()
     setTemplate(null)
+  }
+
+  const handleRunExperiment = () => {
+    if (!pendingExperiment || !currentProject || !projectId) return
+
+    const params = {
+      yamlFilename: pendingExperiment.yamlFilename,
+      projectPath: currentProject.localPath,
+      projectId,
+      decisionId: pendingExperiment.decisionId,
+    }
+    lastRunParamsRef.current = params
+    runExperiment.mutate(params)
+    // Clear pending state - progress is now driven by experiment store
+    setPendingExperiment(null)
+  }
+
+  const handleRetryExperiment = () => {
+    const params = lastRunParamsRef.current
+    if (!params) return
+    useExperimentStore.getState().reset()
+    runExperiment.mutate(params)
+  }
+
+  const handleDismissExperiment = () => {
+    setPendingExperiment(null)
+    lastRunParamsRef.current = null
+    useExperimentStore.getState().reset()
   }
 
   const handleSendMessage = async (content: string) => {
@@ -515,6 +604,31 @@ export function ChatInterface() {
             onComplete={handleWizardComplete}
             onCancel={handleWizardCancel}
           />
+        </div>
+      ) : pendingExperiment ? (
+        /* Experiment ready to run - show config summary and run button */
+        <div className="flex-1 overflow-y-auto px-4 py-6 flex items-center justify-center">
+          <RunExperimentButton
+            config={{
+              personaCount: pendingExperiment.personaCount,
+              model: pendingExperiment.model,
+              templateName: pendingExperiment.templateName,
+            }}
+            onRun={handleRunExperiment}
+          />
+        </div>
+      ) : experimentStatus !== 'idle' ? (
+        /* Experiment in progress / complete / error */
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+          {experimentStatus === 'complete' ? (
+            <ExperimentSummary
+              onAskFollowUp={handleDismissExperiment}
+            />
+          ) : (
+            <ExperimentProgress
+              onRetry={lastRunParamsRef.current ? handleRetryExperiment : undefined}
+            />
+          )}
         </div>
       ) : (
         <>

@@ -203,5 +203,20 @@
   "config.summary.confirm": "Confirm Configuration",
 
   "common.yes": "Yes",
-  "common.no": "No"
+  "common.no": "No",
+
+  "experiment.runExperiment": "Run Experiment",
+  "experiment.running": "Running Experiment",
+  "experiment.generatingPersonas": "Generating personas...",
+  "experiment.personasResponded": "{{completed}}/{{total}} personas responded",
+  "experiment.complete": "Experiment Complete",
+  "experiment.failed": "Experiment Failed",
+  "experiment.positive": "Positive",
+  "experiment.neutral": "Neutral",
+  "experiment.negative": "Negative",
+  "experiment.viewResults": "View Full Results",
+  "experiment.askFollowUp": "Ask Follow-up",
+  "experiment.retryExperiment": "Retry",
+  "experiment.executionTime": "Completed in {{seconds}}s",
+  "experiment.sentimentBreakdown": "Sentiment Breakdown"
 }

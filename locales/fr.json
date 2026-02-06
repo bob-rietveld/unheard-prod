@@ -112,5 +112,20 @@
   "context.library.uploadedAt": "Téléchargé {{date}}",
   "context.library.syncStatus.synced": "Synchronisé",
   "context.library.syncStatus.pending": "En attente",
-  "context.library.syncStatus.error": "Erreur de synchronisation"
+  "context.library.syncStatus.error": "Erreur de synchronisation",
+
+  "experiment.runExperiment": "Lancer l'exp\u00e9rience",
+  "experiment.running": "Exp\u00e9rience en cours",
+  "experiment.generatingPersonas": "G\u00e9n\u00e9ration des personas...",
+  "experiment.personasResponded": "{{completed}}/{{total}} personas ont r\u00e9pondu",
+  "experiment.complete": "Exp\u00e9rience termin\u00e9e",
+  "experiment.failed": "\u00c9chec de l'exp\u00e9rience",
+  "experiment.positive": "Positif",
+  "experiment.neutral": "Neutre",
+  "experiment.negative": "N\u00e9gatif",
+  "experiment.viewResults": "Voir tous les r\u00e9sultats",
+  "experiment.askFollowUp": "Poser une question",
+  "experiment.retryExperiment": "R\u00e9essayer",
+  "experiment.executionTime": "Termin\u00e9 en {{seconds}}s",
+  "experiment.sentimentBreakdown": "R\u00e9partition des sentiments"
 }

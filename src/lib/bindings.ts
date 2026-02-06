@@ -286,6 +286,24 @@ async writeExperimentConfig(projectPath: string, filename: string, yamlContent: 
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Read an experiment config YAML file from the experiments/ directory.
+ * 
+ * # Arguments
+ * * `project_path` - Path to the project root (Git repository)
+ * * `filename` - Filename (e.g., "2026-02-06-seed-fundraising.yaml")
+ * 
+ * # Returns
+ * The YAML content as a string
+ */
+async readExperimentConfig(projectPath: string, filename: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("read_experiment_config", { projectPath, filename }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
