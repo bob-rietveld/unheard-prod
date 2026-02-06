@@ -29,6 +29,7 @@
 9. **No Unsolicited Commits**: Only when explicitly requested
 10. **Documentation**: Update relevant `docs/developer/` files for new patterns
 11. **Removing files**: Always use `rm -f`
+12. **Integration-First**: Every feature MUST be wired into the user-facing workflow before it is complete. No orphaned exports, no null placeholders where real data belongs, no components that are built but never rendered. Trace the user path from app launch to the feature. See CLAUDE.md "Integration-First Development" for full details and checklist.
 
 **CRITICAL:** Use Tauri v2 docs only. Always use modern Rust formatting: `format!("{variable}")`
 

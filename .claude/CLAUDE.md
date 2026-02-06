@@ -10,12 +10,12 @@
 
 ## Current Project Status
 
-**Phases 1-2 of 5 are complete.** Phase 3 (Cloud Execution) is next.
+**Phases 1-3 of 5 are complete.** Phase 4 (Results & Viz) is next.
 
 ```
 Phase 1 (Weeks 1-2): Context Upload        ✅ Done (7/7 tasks)
 Phase 2 (Weeks 3-4): Chat + Agent           ✅ Done (7/7 tasks)
-Phase 3 (Weeks 5-6): Cloud Execution        ⬜ Not started
+Phase 3 (Weeks 5-6): Cloud Execution        ✅ Done (Modal + flow wiring)
 Phase 4 (Week 7):    Results & Viz          ⬜ Not started
 Phase 5 (Week 8):    Iteration & Polish     ⬜ Not started
 ```
@@ -24,21 +24,30 @@ Phase 5 (Week 8):    Iteration & Polish     ⬜ Not started
 
 - **Auth**: Clerk sign-in integrated with Convex
 - **Projects**: Create, select, persist selection across sessions
-- **Chat**: Streaming Claude API responses, message history persisted to Convex
+- **Chat**: Streaming Claude API responses with context-aware system prompt, message history persisted to Convex
+- **Auto-Chat**: Chat auto-creates/selects when project is selected (no dead-end screens)
+- **Intent Classification**: Keyword-based detection of decision questions, template suggestions shown inline
 - **Context Upload**: Drag-and-drop CSV/PDF/Excel, Rust parsing, Convex sync
 - **Templates**: 3 seed templates (investor, pricing, roadmap), intent classification
 - **Config Wizard**: Sequential question flow with validation
 - **Decision Logs**: Markdown generation with YAML frontmatter, git auto-commit
-- **Experiment Config**: YAML generation from template + wizard answers (new)
+- **Experiment Config**: YAML generation from template + wizard answers
+- **Experiment Execution**: Modal API integration with NDJSON streaming, real-time progress UI
+- **Experiment Results**: Sentiment breakdown, persona results, execution stats
 - **Error Handling**: Error boundaries, retry logic, offline queue
 - **i18n**: English, French, Arabic with RTL support
 - **Preferences**: Theme (light/dark/system), language, keyboard shortcuts
 
-### Key Integration Flow
+### Key Integration Flow (End-to-End)
 
 ```
-Chat → Intent Classifier → Template Selection → ConfigWizard
+Project Selected → Auto-create Chat → User types decision question
+  → Claude responds (system prompt with templates)
+  → Intent Classifier → Template Suggestion card
+  → User clicks "Start Template" → ConfigWizard
   → Decision Log (.md) + Experiment Config (.yaml) → Git commit → Convex
+  → "Run Experiment" → Modal API → Streaming progress
+  → ExperimentSummary with sentiment breakdown
 ```
 
 ## Implementation Plans
@@ -104,10 +113,57 @@ Most are in Phase 2 code and should be addressed before Phase 3:
 
 ### Architecture Notes
 
-- **ConfigWizard is wired up** but only triggers when `currentTemplateId` is set in the chat store. The template selection flow from chat → wizard needs the agent to set this.
 - **Right sidebar toggle is hidden** until Phase 4 adds content.
-- **Experiment config YAML** is generated but not yet consumed (Phase 3 Modal integration).
 - **3 different Convex data patterns** in services/ (raw hooks, TanStack+useConvex, TanStack+useConvexMutation) - should standardize.
+- **Seed templates required**: Run `npx convex run seed:templates` to populate Convex DB. Without templates, system prompt and intent classifier have nothing to work with.
+
+## Integration-First Development (CRITICAL)
+
+**Every feature MUST be wired into the user-facing workflow before it is considered complete.**
+
+This rule exists because Phase 2 built many components (intent classifier, system prompts, templates, config wizard) that were never connected to the chat flow. The code existed but was unreachable by users. This wasted significant time in later phases to diagnose and fix.
+
+### The Rule
+
+When building a new feature:
+
+1. **Trace the user path**: Before writing code, identify exactly how a user reaches this feature. What do they click? What triggers it? What do they see?
+2. **Wire it in the same PR**: The feature code AND its integration into the existing UI/workflow must ship together. Never merge a feature that can only be triggered from a test or debug console.
+3. **Verify with a walkthrough**: After implementation, manually trace the flow from app launch to the new feature. If any step requires setting state manually or calling a function from devtools, the wiring is incomplete.
+4. **No orphaned exports**: If you build `classifyIntent()`, it must be called somewhere in the app. If you build `buildSystemPrompt()`, it must be passed to the API. If you build a component, it must be rendered in a route or parent component.
+
+### Anti-Patterns to Avoid
+
+```typescript
+// ❌ BAD: Feature exists but is never triggered
+export function classifyIntent(...) { ... }  // Built in Phase 2
+// ... but never called from ChatInterface until Phase 3 fix
+
+// ❌ BAD: Passing null/placeholder where real data should go
+commands.sendChatMessage(content, history, null, channel)  // system_prompt = null
+
+// ❌ BAD: Store action exists but is only called with null
+setTemplate(null)  // setTemplate(templateId) never called with a real ID
+
+// ❌ BAD: Component built but parent never renders it
+export function TemplateSuggestion(...) { ... }  // Exists but never imported
+
+// ✅ GOOD: Feature + integration in the same change
+// 1. Build classifyIntent()
+// 2. Call it in ChatInterface after streaming completes
+// 3. Render TemplateSuggestion when suggestions found
+// 4. Wire "Start Template" to setTemplate(id)
+// All in one PR.
+```
+
+### Checklist for Each Feature
+
+- [ ] User can reach this feature through normal app usage (no devtools)
+- [ ] Data flows from source to destination (no null placeholders)
+- [ ] UI components are rendered in the component tree (not just exported)
+- [ ] Store actions are called with real values (not just null/undefined)
+- [ ] Event handlers are connected (onClick, onComplete, etc.)
+- [ ] Test the flow: launch app → reach feature in < 5 clicks
 
 ## When Working on Implementation
 
@@ -116,3 +172,4 @@ Most are in Phase 2 code and should be addressed before Phase 3:
 3. **Reference specs**: `docs/developer/` has detailed patterns and guides
 4. **Run checks**: `npm run check:all` after significant changes
 5. **Demo regularly**: Each phase has success criteria and demo scripts
+6. **Verify integration**: Trace the user path from app launch to the new feature before marking done
