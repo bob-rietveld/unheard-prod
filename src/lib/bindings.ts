@@ -267,6 +267,25 @@ async createDecisionLog(content: string, filename: string, projectPath: string) 
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Write an experiment config YAML file and commit it to Git.
+ * 
+ * # Arguments
+ * * `project_path` - Path to the project root (Git repository)
+ * * `filename` - Filename (e.g., "2026-02-06-seed-fundraising.yaml")
+ * * `yaml_content` - YAML content to write
+ * 
+ * # Returns
+ * The relative file path on success (e.g., "experiments/2026-02-06-seed-fundraising.yaml")
+ */
+async writeExperimentConfig(projectPath: string, filename: string, yamlContent: string) : Promise<Result<string, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("write_experiment_config", { projectPath, filename, yamlContent }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 

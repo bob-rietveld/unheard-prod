@@ -149,10 +149,15 @@ export function formatConfigAnswers(
 
 /**
  * Generate the full decision log markdown content.
+ *
+ * @param config - Decision configuration from wizard answers
+ * @param template - Optional parsed template for question labels
+ * @param markdownPath - Optional path to the markdown file (used to derive experiment config path)
  */
 export function generateDecisionLog(
   config: DecisionConfig,
-  template?: ParsedTemplate
+  template?: ParsedTemplate,
+  markdownPath?: string
 ): string {
   const id = generateDecisionId(config.title)
   const created = new Date().toISOString()
@@ -195,6 +200,13 @@ export function generateDecisionLog(
     sections.push(`- **Generated from**: ${config.contextFiles.join(', ')}`)
   } else {
     sections.push('- **Generated from**: No context files')
+  }
+  // Derive experiment config path from markdown path
+  if (markdownPath) {
+    const experimentConfigPath = markdownPath
+      .replace(/^decisions\//, 'experiments/')
+      .replace(/\.md$/, '.yaml')
+    sections.push(`- **Experiment config**: ${experimentConfigPath}`)
   }
   sections.push('')
 

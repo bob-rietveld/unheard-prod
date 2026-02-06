@@ -6,6 +6,7 @@
 pub mod chat;
 pub mod context;
 pub mod decisions;
+pub mod experiments;
 pub mod git;
 pub mod notifications;
 pub mod preferences;

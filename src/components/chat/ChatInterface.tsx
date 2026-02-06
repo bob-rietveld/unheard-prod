@@ -2,14 +2,19 @@ import { useEffect, useRef, useState } from 'react'
 import { Channel } from '@tauri-apps/api/core'
 import { commands, type StreamEvent, type ChatError } from '@/lib/bindings'
 import { useChatStore } from '@/store/chat-store'
+import { useProjectStore } from '@/store/project-store'
 import { ChatMessages } from './ChatMessages'
 import { ChatInput } from './ChatInput'
+import { ConfigWizard, type WizardCompletionData } from './ConfigWizard'
+import { DecisionSavingOverlay } from './LoadingStates'
 import { ErrorMessage, OfflineBanner } from './ErrorMessage'
 import type { ChatMessage as FrontendChatMessage } from '@/types/chat'
 import {
   useChatMessages,
   useAddMessage,
 } from '@/services/chats'
+import { useContextFiles } from '@/services/context'
+import { useUpdateDecisionWithLog } from '@/services/decisions'
 import {
   analyzeChatError,
   withRetry,
@@ -21,7 +26,23 @@ import {
   dequeueMessage as removeFromQueue,
   getQueueSize,
 } from '@/lib/retry-queue'
+import {
+  generateDecisionLog,
+  generateFilename,
+  generateDecisionId,
+  type DecisionConfig,
+} from '@/lib/decision-generator'
+import {
+  generateExperimentConfig,
+  generateExperimentFilename,
+  type ContextFileInfo,
+  type ExperimentConfigInput,
+} from '@/lib/experiment-config-generator'
+import { parseTemplateYaml } from '@/lib/template-parser'
+import { load as loadYaml } from 'js-yaml'
+import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
+import type { Id } from '../../../convex/_generated/dataModel'
 
 /**
  * ChatInterface is the main container for the chat UI.
@@ -37,13 +58,23 @@ export function ChatInterface() {
   const messages = useChatStore(state => state.messages)
   const isStreaming = useChatStore(state => state.isStreaming)
   const currentChatId = useChatStore(state => state.currentChatId)
+  const currentTemplateId = useChatStore(state => state.currentTemplateId)
   const [chatError, setChatError] = useState<ChatError | null>(null)
   const [retrying, setRetrying] = useState(false)
   const [queuedCount, setQueuedCount] = useState(0)
+  const [isSavingDecision, setIsSavingDecision] = useState(false)
+
+  // Project context
+  const currentProject = useProjectStore(state => state.currentProject)
+  const projectId = currentProject?._id ?? null
 
   // Convex persistence hooks
   const persistedMessages = useChatMessages(currentChatId)
   const addMessageToConvex = useAddMessage()
+
+  // Context data and decision hooks for wizard completion
+  const contextFiles = useContextFiles(projectId)
+  const updateDecisionWithLog = useUpdateDecisionWithLog()
 
   // Track which chat's history we last loaded to avoid re-loading on every render
   const loadedChatIdRef = useRef<string | null>(null)
@@ -133,6 +164,154 @@ export function ChatInterface() {
       }
     }
   }, [isStreaming])
+
+  /**
+   * Handle wizard completion: generate decision log + experiment config,
+   * write both to disk, and update Convex.
+   */
+  const handleWizardComplete = async (data: WizardCompletionData) => {
+    if (!currentProject) {
+      logger.error('Missing project for wizard completion')
+      toast.error('Cannot save decision: no project selected')
+      return
+    }
+
+    setIsSavingDecision(true)
+
+    try {
+      const projectPath = currentProject.localPath
+      const parsedTemplate = parseTemplateYaml(data.yamlContent)
+
+      if (!parsedTemplate) {
+        throw new Error('Failed to parse template YAML')
+      }
+
+      const { answers } = data
+
+      // Build decision config
+      const decisionTitle =
+        (answers.title as string) ||
+        (answers.decision_title as string) ||
+        data.templateName
+      const decisionId = generateDecisionId(decisionTitle)
+      const decisionFilename = generateFilename(decisionTitle)
+      const markdownPath = `decisions/${decisionFilename}`
+
+      const decisionConfig: DecisionConfig = {
+        templateId: data.templateId,
+        templateSlug: data.templateSlug,
+        category: data.templateCategory,
+        title: decisionTitle,
+        context: (answers.context as string) || undefined,
+        answers,
+        contextFiles: contextFiles?.map(f => f.relativeFilePath),
+      }
+
+      // --- 1. Generate decision log markdown ---
+      const markdownContent = generateDecisionLog(decisionConfig, parsedTemplate, markdownPath)
+
+      // --- 2. Write decision log to disk ---
+      const decisionResult = await commands.createDecisionLog(
+        markdownContent,
+        decisionFilename,
+        projectPath
+      )
+
+      if (decisionResult.status === 'error') {
+        throw new Error(`Failed to write decision log: ${decisionResult.error}`)
+      }
+
+      logger.info('Decision log written', { path: decisionResult.data })
+
+      // --- 3. Generate experiment config YAML (non-blocking) ---
+      try {
+        const templateRaw = loadYaml(data.yamlContent) as Record<string, unknown>
+
+        const contextFileInfos: ContextFileInfo[] = (contextFiles ?? []).map(f => ({
+          path: f.relativeFilePath,
+          originalFilename: f.originalFilename,
+          fileType: f.fileType,
+          detectedType: f.detectedType,
+          rows: f.rows,
+          columns: f.columns,
+          pages: f.pages,
+          sizeBytes: f.sizeBytes,
+        }))
+
+        const configInput: ExperimentConfigInput = {
+          template: parsedTemplate,
+          templateRaw,
+          templateSlug: data.templateSlug,
+          answers,
+          decisionTitle,
+          decisionId,
+          markdownPath,
+          contextFiles: contextFileInfos,
+        }
+
+        const yamlContent = generateExperimentConfig(configInput)
+        const configFilename = generateExperimentFilename(decisionTitle)
+
+        const configResult = await commands.writeExperimentConfig(
+          projectPath,
+          configFilename,
+          yamlContent
+        )
+
+        if (configResult.status === 'error') {
+          logger.error('Failed to write experiment config', { error: configResult.error })
+          toast.error('Experiment config could not be saved', {
+            description: configResult.error,
+          })
+        } else {
+          logger.info('Experiment config written', { path: configResult.data })
+        }
+      } catch (configErr) {
+        // Experiment config failure should NOT block decision log creation
+        logger.error('Failed to generate experiment config', {
+          error: configErr instanceof Error ? configErr.message : String(configErr),
+        })
+        toast.error('Experiment config could not be generated', {
+          description: configErr instanceof Error ? configErr.message : 'Unknown error',
+        })
+      }
+
+      // --- 4. Update Convex with decision metadata ---
+      try {
+        await updateDecisionWithLog.mutateAsync({
+          title: decisionTitle,
+          templateId: data.templateId,
+          configData: answers,
+          markdownFilePath: markdownPath,
+          projectId: currentProject._id,
+        })
+      } catch (convexErr) {
+        logger.error('Failed to update Convex decision', {
+          error: convexErr instanceof Error ? convexErr.message : String(convexErr),
+        })
+      }
+
+      // --- 5. Clear wizard state ---
+      const { setTemplate } = useChatStore.getState()
+      setTemplate(null)
+
+      toast.success('Decision log and experiment config saved')
+    } catch (err) {
+      logger.error('Failed to save decision', {
+        error: err instanceof Error ? err.message : String(err),
+      })
+      toast.error('Failed to save decision', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      })
+    } finally {
+      setIsSavingDecision(false)
+    }
+  }
+
+  const handleWizardCancel = () => {
+    const { setTemplate } = useChatStore.getState()
+    setTemplate(null)
+  }
 
   const handleSendMessage = async (content: string) => {
     const {
@@ -312,6 +491,9 @@ export function ChatInterface() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Decision saving overlay */}
+      <DecisionSavingOverlay visible={isSavingDecision} />
+
       {/* Offline banner */}
       <OfflineBanner queuedCount={queuedCount} />
 
@@ -325,14 +507,27 @@ export function ChatInterface() {
         />
       )}
 
-      {/* Messages area */}
-      <ChatMessages onSendPrompt={handleSendMessage} />
+      {/* Config wizard (shown when a template is selected) */}
+      {currentTemplateId && !isSavingDecision ? (
+        <div className="flex-1 overflow-y-auto px-4 py-6">
+          <ConfigWizard
+            templateId={currentTemplateId as Id<'experimentTemplates'>}
+            onComplete={handleWizardComplete}
+            onCancel={handleWizardCancel}
+          />
+        </div>
+      ) : (
+        <>
+          {/* Messages area */}
+          <ChatMessages onSendPrompt={handleSendMessage} />
 
-      {/* Input area */}
-      <ChatInput
-        onSend={handleSendMessage}
-        onStopStreaming={handleStopStreaming}
-      />
+          {/* Input area */}
+          <ChatInput
+            onSend={handleSendMessage}
+            onStopStreaming={handleStopStreaming}
+          />
+        </>
+      )}
     </div>
   )
 }

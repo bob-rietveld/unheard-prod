@@ -30,9 +30,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import type { Id } from '../../../convex/_generated/dataModel'
 
+/** Data passed to onComplete when the wizard finishes. */
+export interface WizardCompletionData {
+  answers: Record<string, unknown>
+  templateId: Id<'experimentTemplates'>
+  templateName: string
+  templateSlug: string
+  templateCategory: string
+  yamlContent: string
+}
+
 interface ConfigWizardProps {
   templateId: Id<'experimentTemplates'>
-  onComplete: (config: Record<string, unknown>) => void
+  onComplete: (data: WizardCompletionData) => void
   onCancel: () => void
 }
 
@@ -86,8 +96,16 @@ export function ConfigWizard({
   }
 
   const handleConfirm = () => {
-    // Finalize configuration and notify parent
-    onComplete(configAnswers)
+    if (!template) return
+    // Finalize configuration and notify parent with full template context
+    onComplete({
+      answers: configAnswers,
+      templateId,
+      templateName: template.name,
+      templateSlug: template.slug,
+      templateCategory: template.category,
+      yamlContent: template.yamlContent,
+    })
   }
 
   // Loading state
