@@ -2,11 +2,13 @@ use tauri_specta::{collect_commands, Builder};
 
 pub fn generate_bindings() -> Builder<tauri::Wry> {
     use crate::commands::{
-        chat, context, decisions, experiments, git, notifications, preferences, projects,
+        attio, chat, context, decisions, experiments, git, notifications, preferences, projects,
         quick_pane, recovery,
     };
 
     Builder::<tauri::Wry>::new().commands(collect_commands![
+        attio::save_attio_import,
+        attio::batch_save_attio_imports,
         preferences::greet,
         preferences::load_preferences,
         preferences::save_preferences,

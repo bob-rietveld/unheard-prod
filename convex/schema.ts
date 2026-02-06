@@ -142,9 +142,49 @@ export default defineSchema({
     startedAt: v.optional(v.number()),
     completedAt: v.optional(v.number()),
     createdAt: v.number(),
+    cohortId: v.optional(v.id('cohorts')),
   })
     .index('by_user', ['clerkUserId'])
     .index('by_project', ['projectId'])
     .index('by_decision', ['decisionId'])
     .index('by_status', ['status']),
+
+  attioImports: defineTable({
+    clerkUserId: v.string(),
+    projectId: v.id('projects'),
+    attioRecordId: v.string(),
+    attioObjectType: v.union(
+      v.literal('company'),
+      v.literal('person'),
+      v.literal('list_entry')
+    ),
+    name: v.string(),
+    attioWebUrl: v.optional(v.string()),
+    localFilePath: v.string(),
+    attributes: v.optional(v.any()),
+    listSlug: v.optional(v.string()),
+    experimentIds: v.optional(v.array(v.id('experiments'))),
+    importedAt: v.number(),
+    syncStatus: v.union(
+      v.literal('synced'),
+      v.literal('pending'),
+      v.literal('error')
+    ),
+  })
+    .index('by_user', ['clerkUserId'])
+    .index('by_project', ['projectId'])
+    .index('by_object_type', ['projectId', 'attioObjectType']),
+
+  cohorts: defineTable({
+    clerkUserId: v.string(),
+    projectId: v.id('projects'),
+    name: v.string(),
+    description: v.optional(v.string()),
+    memberIds: v.array(v.id('attioImports')),
+    memberCount: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_user', ['clerkUserId'])
+    .index('by_project', ['projectId']),
 })

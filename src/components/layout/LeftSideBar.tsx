@@ -1,6 +1,8 @@
 import { cn } from '@/lib/utils'
 import { ProjectList } from '@/components/projects/ProjectList'
 import { ChatList } from '@/components/chat/ChatList'
+import { CohortList } from '@/components/cohorts/CohortList'
+import { CohortDetail } from '@/components/cohorts/CohortDetail'
 import { useProjectStore } from '@/store/project-store'
 
 interface LeftSideBarProps {
@@ -37,8 +39,14 @@ export function LeftSideBar({ children, className }: LeftSideBarProps) {
               <ChatList />
             </div>
           )}
+
+          {/* Cohorts section - only when project selected */}
+          {currentProject && <CohortList />}
         </>
       )}
+
+      {/* Cohort detail sheet (overlay, outside layout flow) */}
+      <CohortDetail />
     </div>
   )
 }

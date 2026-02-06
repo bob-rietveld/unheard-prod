@@ -14,6 +14,7 @@ export const createExperiment = mutation({
   args: {
     projectId: v.id('projects'),
     decisionId: v.optional(v.id('decisions')),
+    cohortId: v.optional(v.id('cohorts')),
     name: v.string(),
     templateSlug: v.optional(v.string()),
     configYamlPath: v.optional(v.string()),
@@ -36,10 +37,19 @@ export const createExperiment = mutation({
       }
     }
 
+    // If cohortId provided, verify user owns the cohort
+    if (args.cohortId) {
+      const cohort = await ctx.db.get(args.cohortId)
+      if (!cohort || cohort.clerkUserId !== clerkUserId) {
+        throw new Error('Unauthorized: Cohort not found or not owned by user')
+      }
+    }
+
     const id = await ctx.db.insert('experiments', {
       clerkUserId,
       projectId: args.projectId,
       decisionId: args.decisionId,
+      cohortId: args.cohortId,
       name: args.name,
       status: 'pending',
       templateSlug: args.templateSlug,

@@ -16,11 +16,14 @@ export interface ModalExperimentRequest {
   personas: {
     generationType: string
     count: number
-    archetypes: {
+    archetypes?: {
       id: string
       name: string
       count: number
     }[]
+    cohortId?: string
+    cohortName?: string
+    members?: { id: string; name: string; type: string; attributes: Record<string, unknown> }[]
   }
   stimulus: {
     template: string

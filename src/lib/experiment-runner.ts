@@ -51,11 +51,14 @@ interface ExperimentConfigYaml {
   personas: {
     generationType: string
     count: number
-    archetypes: {
+    archetypes?: {
       id: string
       name: string
       count: number
     }[]
+    cohortId?: string
+    cohortName?: string
+    members?: { id: string; name: string; type: string; attributes: Record<string, unknown> }[]
   }
   stimulus: {
     template: string
@@ -88,6 +91,8 @@ export interface ExecuteExperimentOptions {
   projectId: Id<'projects'>
   /** Optional Convex decision ID to link */
   decisionId?: Id<'decisions'>
+  /** Optional cohort ID to link */
+  cohortId?: Id<'cohorts'>
   /** Convex client for mutations */
   convex: ConvexReactClient
 }
@@ -109,7 +114,7 @@ export interface ExecuteExperimentOptions {
 export async function executeExperiment(
   options: ExecuteExperimentOptions
 ): Promise<void> {
-  const { yamlFilename, projectPath, projectId, decisionId, convex } = options
+  const { yamlFilename, projectPath, projectId, decisionId, cohortId, convex } = options
 
   const { startExperiment } = useExperimentStore.getState()
 
@@ -129,6 +134,7 @@ export async function executeExperiment(
     experimentId = await convex.mutation(api.experiments.createExperiment, {
       projectId,
       decisionId,
+      cohortId,
       name: config.metadata.decision.title,
       templateSlug: config.metadata.template.slug,
       configYamlPath: `experiments/${yamlFilename}`,
