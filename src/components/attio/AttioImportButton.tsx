@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, Users } from 'lucide-react'
 import { toast } from 'sonner'
@@ -30,6 +31,8 @@ export function AttioImportButton({ records, objectType }: AttioImportButtonProp
   const selectedRecordIds = useAttioStore(state => state.selectedRecordIds)
   const currentProject = useProjectStore(state => state.currentProject)
   const createImport = useCreateAttioImport()
+
+  const [lastImportedIds, setLastImportedIds] = useState<string[]>([])
 
   const selectedCount = selectedRecordIds.length
   const isImporting = importStatus === 'importing'
@@ -94,6 +97,7 @@ export function AttioImportButton({ records, objectType }: AttioImportButtonProp
         useAttioStore.getState().updateImportProgress(i + 1)
       }
 
+      setLastImportedIds(importedConvexIds)
       useAttioStore.getState().completeImport()
       toast.success(t('attio.importComplete'))
     } catch (err) {
@@ -104,10 +108,7 @@ export function AttioImportButton({ records, objectType }: AttioImportButtonProp
   }
 
   const handleSaveAsCohort = () => {
-    // The recently imported record IDs are the selected ones before import cleared them
-    // We use the records currently visible + their Convex IDs
-    // For now, open the create dialog -- caller can pass IDs from the import
-    useCohortStore.getState().openCreateDialog()
+    useCohortStore.getState().openCreateDialog(lastImportedIds)
   }
 
   return (
