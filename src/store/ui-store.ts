@@ -6,6 +6,7 @@ interface UIState {
   rightSidebarVisible: boolean
   commandPaletteOpen: boolean
   preferencesOpen: boolean
+  attioBrowserOpen: boolean
   lastQuickPaneEntry: string | null
 
   toggleLeftSidebar: () => void
@@ -16,6 +17,7 @@ interface UIState {
   setCommandPaletteOpen: (open: boolean) => void
   togglePreferences: () => void
   setPreferencesOpen: (open: boolean) => void
+  setAttioBrowserOpen: (open: boolean) => void
   setLastQuickPaneEntry: (text: string) => void
 }
 
@@ -26,6 +28,7 @@ export const useUIStore = create<UIState>()(
       rightSidebarVisible: false,
       commandPaletteOpen: false,
       preferencesOpen: false,
+      attioBrowserOpen: false,
       lastQuickPaneEntry: null,
 
       toggleLeftSidebar: () =>
@@ -75,6 +78,9 @@ export const useUIStore = create<UIState>()(
 
       setPreferencesOpen: open =>
         set({ preferencesOpen: open }, undefined, 'setPreferencesOpen'),
+
+      setAttioBrowserOpen: open =>
+        set({ attioBrowserOpen: open }, undefined, 'setAttioBrowserOpen'),
 
       setLastQuickPaneEntry: text =>
         set({ lastQuickPaneEntry: text }, undefined, 'setLastQuickPaneEntry'),

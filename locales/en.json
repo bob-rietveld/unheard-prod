@@ -272,6 +272,7 @@
   "cohorts.syntheticPersonas": "Use synthetic personas (default)",
   "cohorts.cohortWillBeUsed": "Cohort members will be used as real persona data sources for this experiment.",
   "cohorts.experimentLinked": "Cohort assigned to experiment",
+  "cohorts.importFromAttio": "Import from Attio",
 
   "experiment.runExperiment": "Run Experiment",
   "experiment.running": "Running Experiment",
