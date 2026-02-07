@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { Plus } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
@@ -10,6 +11,7 @@ import {
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { useCohortStore } from '@/store/cohort-store'
+import { useUIStore } from '@/store/ui-store'
 import { useCohort, useCohortMembers, useRemoveCohortMembers, useDeleteCohort } from '@/services/cohorts'
 import { CohortMemberRow } from './CohortMemberRow'
 import type { Id } from '../../../convex/_generated/dataModel'
@@ -79,6 +81,14 @@ export function CohortDetail() {
         </div>
 
         <SheetFooter className="gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => useUIStore.getState().setAttioBrowserOpen(true)}
+          >
+            <Plus className="size-3.5" />
+            {t('cohorts.addMembers')}
+          </Button>
           <Button
             variant="destructive"
             size="sm"

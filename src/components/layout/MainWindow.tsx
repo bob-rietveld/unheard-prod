@@ -9,10 +9,12 @@ import { RightSideBar } from './RightSideBar'
 import { MainWindowContent } from './MainWindowContent'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
 import { PreferencesDialog } from '@/components/preferences/PreferencesDialog'
+import { AttioBrowser } from '@/components/attio/AttioBrowser'
 import { Toaster } from 'sonner'
 import { useTheme } from '@/hooks/use-theme'
 import { useUIStore } from '@/store/ui-store'
 import { useMainWindowEventListeners } from '@/hooks/useMainWindowEventListeners'
+import { useAttioAutoConnect } from '@/hooks/useAttioAutoConnect'
 import { cn } from '@/lib/utils'
 
 /**
@@ -34,9 +36,13 @@ export function MainWindow() {
   const { theme } = useTheme()
   const leftSidebarVisible = useUIStore(state => state.leftSidebarVisible)
   const rightSidebarVisible = useUIStore(state => state.rightSidebarVisible)
+  const attioBrowserOpen = useUIStore(state => state.attioBrowserOpen)
 
   // Set up global event listeners (keyboard shortcuts, etc.)
   useMainWindowEventListeners()
+
+  // Auto-connect to Attio if API key exists in preferences
+  useAttioAutoConnect()
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden rounded-xl bg-background">
@@ -78,6 +84,10 @@ export function MainWindow() {
       {/* Global UI Components (hidden until triggered) */}
       <CommandPalette />
       <PreferencesDialog />
+      <AttioBrowser
+        open={attioBrowserOpen}
+        onOpenChange={(open) => useUIStore.getState().setAttioBrowserOpen(open)}
+      />
       <Toaster
         position="bottom-right"
         theme={

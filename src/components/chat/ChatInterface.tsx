@@ -13,6 +13,7 @@ import { ErrorMessage, OfflineBanner } from './ErrorMessage'
 import { RunExperimentButton } from '@/components/experiments/RunExperimentButton'
 import { ExperimentProgress } from '@/components/experiments/ExperimentProgress'
 import { ExperimentSummary } from '@/components/experiments/ExperimentSummary'
+import { CohortSelector } from '@/components/cohorts/CohortSelector'
 import { useExperimentEvents } from '@/hooks/useExperimentEvents'
 import { useRunExperiment } from '@/services/experiments'
 import { useTemplates } from '@/services/templates'
@@ -83,6 +84,7 @@ export function ChatInterface() {
     templateName: string
     decisionId?: Id<'decisions'>
   } | null>(null)
+  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null)
 
   // Last experiment run params - kept for retry after failure
   const lastRunParamsRef = useRef<{
@@ -90,6 +92,7 @@ export function ChatInterface() {
     projectPath: string
     projectId: Id<'projects'>
     decisionId?: Id<'decisions'>
+    cohortId?: Id<'cohorts'>
   } | null>(null)
 
   // Template suggestion shown after intent classification
@@ -388,16 +391,22 @@ export function ChatInterface() {
   const handleRunExperiment = () => {
     if (!pendingExperiment || !currentProject || !projectId) return
 
+    const cohortId = selectedCohortId && selectedCohortId !== 'synthetic'
+      ? selectedCohortId as Id<'cohorts'>
+      : undefined
+
     const params = {
       yamlFilename: pendingExperiment.yamlFilename,
       projectPath: currentProject.localPath,
       projectId,
       decisionId: pendingExperiment.decisionId,
+      cohortId,
     }
     lastRunParamsRef.current = params
     runExperiment.mutate(params)
     // Clear pending state - progress is now driven by experiment store
     setPendingExperiment(null)
+    setSelectedCohortId(null)
   }
 
   const handleRetryExperiment = () => {
@@ -638,8 +647,17 @@ export function ChatInterface() {
           />
         </div>
       ) : pendingExperiment ? (
-        /* Experiment ready to run - show config summary and run button */
-        <div className="flex-1 overflow-y-auto px-4 py-6 flex items-center justify-center">
+        /* Experiment ready to run - show config summary, cohort selector, and run button */
+        <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col items-center justify-center gap-4">
+          {projectId && (
+            <div className="w-full max-w-sm">
+              <CohortSelector
+                projectId={projectId}
+                selectedCohortId={selectedCohortId}
+                onSelect={setSelectedCohortId}
+              />
+            </div>
+          )}
           <RunExperimentButton
             config={{
               personaCount: pendingExperiment.personaCount,

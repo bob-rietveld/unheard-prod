@@ -17,6 +17,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useAttioStore } from '@/store/attio-store'
 import { useUIStore } from '@/store/ui-store'
 import { useProjectStore } from '@/store/project-store'
+import { useCohortStore } from '@/store/cohort-store'
 import type { AttioTab } from '@/store/attio-store'
 import {
   fetchCompanies,
@@ -231,6 +232,7 @@ export function AttioBrowser({ open, onOpenChange }: AttioBrowserProps) {
         useAttioStore.getState().updateImportProgress(i + 1)
       }
 
+      useCohortStore.getState().setPendingMemberIds(importedConvexIds)
       useAttioStore.getState().completeImport()
       toast.success(t('attio.importComplete'))
     } catch (err) {
