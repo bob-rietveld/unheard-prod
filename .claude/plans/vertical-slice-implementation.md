@@ -981,12 +981,15 @@ async fn push_to_github(experiment_id: String) -> Result<(), String> {
 
 #### **Implementation Checklist**
 
-**Week 7**:
+**Week 7** (Status: In Progress):
 
-- [ ] Results dashboard UI
-- [ ] Sentiment analysis visualization
-- [ ] AI insight extraction
-- [ ] Response table with filtering
+- [x] Results dashboard UI (ResultsDashboard.tsx in right sidebar)
+- [x] Sentiment analysis visualization (SentimentOverview.tsx)
+- [x] AI insight extraction (insight_extractor.py on Modal, Claude Haiku)
+- [x] Response table with filtering (ResponseTable.tsx with archetype filter)
+- [x] Van Westendorp Price Sensitivity chart (VanWestendorpChart.tsx, SVG-based)
+- [x] Template list in left sidebar (TemplateList.tsx, direct template selection)
+- [x] Markdown export + clipboard (ExportButton.tsx)
 - [ ] PDF export
 - [ ] GitHub push integration
 - [ ] E2E test: Results → Insights → Export → GitHub
@@ -1253,10 +1256,12 @@ function CollaborationView({ experimentId }: { experimentId: string }) {
 
 ### **Phase 4 Complete When**:
 
-- [ ] Results visualized clearly
-- [ ] Sentiment analysis works
-- [ ] Insights extracted
-- [ ] Export to PDF/GitHub
+- [x] Results visualized clearly (ResultsDashboard + VanWestendorpChart)
+- [x] Sentiment analysis works (SentimentOverview + archetype breakdown)
+- [x] Insights extracted (AI via Claude on Modal + Van Westendorp analysis)
+- [x] Markdown export + clipboard
+- [ ] PDF export
+- [ ] GitHub push integration
 - [ ] **Demo: Results → Charts → Export** ✓
 
 ### **Phase 5 Complete When**:

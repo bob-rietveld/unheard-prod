@@ -160,6 +160,8 @@
   "attio.fetchingRecords": "Récupération des enregistrements...",
   "attio.resultsCount": "{{count}} résultats",
 
+  "templates.sidebar.title": "Expériences",
+
   "cohorts.title": "Cohortes",
   "cohorts.members": "membres",
   "cohorts.noDescription": "Aucune description",
@@ -194,5 +196,39 @@
   "experiment.askFollowUp": "Poser une question",
   "experiment.retryExperiment": "R\u00e9essayer",
   "experiment.executionTime": "Termin\u00e9 en {{seconds}}s",
-  "experiment.sentimentBreakdown": "R\u00e9partition des sentiments"
+  "experiment.sentimentBreakdown": "R\u00e9partition des sentiments",
+
+  "results.dashboard.title": "R\u00e9sultats",
+  "results.dashboard.empty": "Lancez une exp\u00e9rience pour voir les r\u00e9sultats ici.",
+  "results.dashboard.respondents": "r\u00e9pondants",
+
+  "results.sentiment.title": "Aper\u00e7u des sentiments",
+  "results.sentiment.average": "Sentiment moyen",
+  "results.sentiment.byArchetype": "Par arch\u00e9type",
+
+  "results.vanWestendorp.title": "Sensibilit\u00e9 au prix Van Westendorp",
+  "results.vanWestendorp.optimalPrice": "Prix optimal",
+  "results.vanWestendorp.indifferencePrice": "Prix d'indiff\u00e9rence",
+  "results.vanWestendorp.acceptableRange": "Plage acceptable",
+  "results.vanWestendorp.tooCheap": "Trop bon march\u00e9",
+  "results.vanWestendorp.bargain": "Bonne affaire",
+  "results.vanWestendorp.expensive": "Cher",
+  "results.vanWestendorp.tooExpensive": "Trop cher",
+  "results.vanWestendorp.byArchetype": "Par arch\u00e9type",
+
+  "results.insights.themes": "Th\u00e8mes cl\u00e9s",
+  "results.insights.recommendations": "Recommandations",
+  "results.insights.concerns": "Pr\u00e9occupations",
+  "results.insights.archetypePatterns": "Mod\u00e8les par arch\u00e9type",
+
+  "results.responses.title": "R\u00e9ponses individuelles",
+  "results.responses.all": "Tout",
+  "results.responses.sort.sentiment": "Sentiment",
+  "results.responses.sort.name": "Nom",
+  "results.responses.sort.archetype": "Arch\u00e9type",
+
+  "results.export.title": "Exporter",
+  "results.export.clipboard": "Copier dans le presse-papiers",
+  "results.export.copied": "Copi\u00e9 dans le presse-papiers",
+  "results.export.copyFailed": "\u00c9chec de la copie"
 }

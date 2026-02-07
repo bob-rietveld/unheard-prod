@@ -8,6 +8,7 @@ import { load } from 'js-yaml'
 import { commands, unwrapResult } from '@/lib/tauri-bindings'
 import {
   runExperiment as callModal,
+  type ExperimentInsights,
   type ModalExperimentRequest,
   type ModalStreamEvent,
 } from '@/lib/modal-client'
@@ -173,6 +174,7 @@ export async function executeExperiment(
       stimulus: config.stimulus,
       execution: config.execution,
       context: config.context,
+      analysis: config.analysis,
     }
 
     let completedCount = 0
@@ -184,6 +186,7 @@ export async function executeExperiment(
       sentiment: number
     }[] = []
     let finalMetrics: Record<string, unknown> = {}
+    let extractedInsights: ExperimentInsights | null = null
 
     await callModal(modalRequest, async (event: ModalStreamEvent) => {
       switch (event.type) {
@@ -261,6 +264,14 @@ export async function executeExperiment(
           )
           finalMetrics = event.metrics
           break
+
+        case 'insights_extracted':
+          extractedInsights = event.insights
+          await emit('experiment:insights', {
+            experimentId,
+            insights: event.insights,
+          })
+          break
       }
     })
 
@@ -274,6 +285,7 @@ export async function executeExperiment(
       executionTimeMs: Date.now() - startTime,
       results: allResults,
       metrics: finalMetrics,
+      insights: extractedInsights,
     }
 
     // Write results file via Tauri FS plugin (JSON, not YAML)
@@ -307,7 +319,7 @@ export async function executeExperiment(
       await convex.mutation(api.experiments.completeExperiment, {
         id: experimentId,
         results: allResults,
-        insights: finalMetrics,
+        insights: extractedInsights ?? finalMetrics,
         resultsJsonPath: resultsPath,
         executionTimeMs: Date.now() - startTime,
       })

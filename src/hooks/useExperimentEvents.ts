@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { listen } from '@tauri-apps/api/event'
 import { useExperimentStore, type PersonaResult } from '@/store/experiment-store'
+import type { ExperimentInsights } from '@/lib/modal-client'
 import { logger } from '@/lib/logger'
 
 interface ExperimentStatusPayload {
@@ -22,6 +23,11 @@ interface ExperimentCompletePayload {
   experimentId: string
 }
 
+interface ExperimentInsightsPayload {
+  experimentId: string
+  insights: ExperimentInsights
+}
+
 interface ExperimentErrorPayload {
   experimentId: string
   error: string
@@ -33,6 +39,7 @@ interface ExperimentErrorPayload {
  * Listens to:
  * - `experiment:status` - Status phase changes
  * - `experiment:persona-complete` - Individual persona result
+ * - `experiment:insights` - AI-extracted insights
  * - `experiment:complete` - Experiment finished
  * - `experiment:error` - Experiment failed
  */
@@ -84,6 +91,21 @@ export function useExperimentEvents() {
         }
       )
       unlisteners.push(unlistenPersona)
+
+      const unlistenInsights = await listen<ExperimentInsightsPayload>(
+        'experiment:insights',
+        event => {
+          if (!isMounted) return
+          const { setInsights } = useExperimentStore.getState()
+
+          logger.info('Experiment insights received', {
+            experimentId: event.payload.experimentId,
+            themeCount: event.payload.insights.themes.length,
+          })
+          setInsights(event.payload.insights)
+        }
+      )
+      unlisteners.push(unlistenInsights)
 
       const unlistenComplete = await listen<ExperimentCompletePayload>(
         'experiment:complete',

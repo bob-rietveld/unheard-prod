@@ -48,6 +48,20 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
     'payment',
     'pay',
   ],
+  'van-westendorp': [
+    'van westendorp',
+    'price sensitiv',
+    'price increase',
+    'price change',
+    'willingness to pay',
+    'too expensive',
+    'too cheap',
+    'price point',
+    'price test',
+    'increas',
+    'sensiti',
+    'westendorp',
+  ],
   roadmap: [
     'feature',
     'roadmap',
@@ -76,10 +90,14 @@ function normalizeText(text: string): string[] {
 }
 
 /**
- * Check if a keyword pattern matches any token in the text.
- * Uses prefix matching (e.g., "pric" matches "price", "pricing", "priced").
+ * Check if a keyword pattern matches within the text.
+ * - Single-word keywords: prefix matching on tokens (e.g., "pric" matches "price", "pricing")
+ * - Multi-word keywords: substring matching on the full text (e.g., "price sensitiv" matches "price sensitivity")
  */
-function matchesKeyword(tokens: string[], keyword: string): boolean {
+function matchesKeyword(tokens: string[], keyword: string, fullText?: string): boolean {
+  if (keyword.includes(' ')) {
+    return fullText ? fullText.includes(keyword) : false
+  }
   return tokens.some(token => token.startsWith(keyword))
 }
 
@@ -113,6 +131,7 @@ export function classifyIntent(
   templates: Doc<'experimentTemplates'>[]
 ): IntentClassification {
   const tokens = normalizeText(message)
+  const fullText = message.toLowerCase().replace(/[^\w\s]/g, ' ')
   const suggestions: TemplateSuggestion[] = []
 
   // Score each template category
@@ -123,7 +142,7 @@ export function classifyIntent(
 
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     const matchedKeywords = keywords.filter(keyword =>
-      matchesKeyword(tokens, keyword)
+      matchesKeyword(tokens, keyword, fullText)
     )
 
     if (matchedKeywords.length > 0) {
@@ -171,10 +190,12 @@ export function classifyIntent(
 
 /**
  * Check if a message likely requires template suggestion.
- * Returns true if message contains decision/question indicators.
+ * Returns true if message contains decision/question indicators
+ * or action-oriented pricing/experiment language.
  */
 export function requiresTemplateHelp(message: string): boolean {
-  const questionIndicators = [
+  const indicators = [
+    // Questions
     'should',
     'how',
     'what',
@@ -182,8 +203,19 @@ export function requiresTemplateHelp(message: string): boolean {
     'decide',
     'decision',
     '?',
+    // Action-oriented statements
+    'thinking about',
+    'considering',
+    'i want to',
+    'want to test',
+    'run an experiment',
+    'increase',
+    'decrease',
+    'change the price',
+    'evaluate',
+    'test',
   ]
   const normalized = message.toLowerCase()
 
-  return questionIndicators.some(indicator => normalized.includes(indicator))
+  return indicators.some(indicator => normalized.includes(indicator))
 }

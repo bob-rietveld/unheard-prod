@@ -1078,11 +1078,14 @@ export async function exportResults(experimentId: string) {
 
 ### Phase 4 Success Criteria
 
-- [ ] Results visualized clearly (gauge, charts, word cloud)
-- [ ] Sentiment analysis accurate
-- [ ] Insights extracted automatically
+- [x] Results visualized clearly (ResultsDashboard, VanWestendorpChart SVG, SentimentOverview)
+- [x] Sentiment analysis accurate (per-archetype breakdown, overall average)
+- [x] Insights extracted automatically (Claude Haiku on Modal: themes, recommendations, concerns)
+- [x] Van Westendorp Price Sensitivity Meter (OPP/IPP/PMC/PME, cumulative curves, per-archetype)
+- [x] Templates shown directly in left sidebar (TemplateList.tsx)
+- [x] Markdown export + clipboard copy
 - [ ] Export to PDF works
-- [ ] Results auto-committed to Git
+- [ ] Results auto-committed to Git (GitHub push integration)
 
 ### Phase 4 Demo Script
 

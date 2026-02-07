@@ -4,6 +4,7 @@ import { commands, type StreamEvent, type ChatError } from '@/lib/bindings'
 import { useChatStore } from '@/store/chat-store'
 import { useProjectStore } from '@/store/project-store'
 import { useExperimentStore } from '@/store/experiment-store'
+import { useUIStore } from '@/store/ui-store'
 import { ChatMessages } from './ChatMessages'
 import { ChatInput } from './ChatInput'
 import { ConfigWizard, type WizardCompletionData } from './ConfigWizard'
@@ -407,6 +408,11 @@ export function ChatInterface() {
     runExperiment.mutate(params)
   }
 
+  const handleViewResults = () => {
+    const { setRightSidebarVisible } = useUIStore.getState()
+    setRightSidebarVisible(true)
+  }
+
   const handleDismissExperiment = () => {
     setPendingExperiment(null)
     lastRunParamsRef.current = null
@@ -654,6 +660,7 @@ export function ChatInterface() {
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
           {experimentStatus === 'complete' ? (
             <ExperimentSummary
+              onViewResults={handleViewResults}
               onAskFollowUp={handleDismissExperiment}
             />
           ) : (

@@ -20,6 +20,12 @@
     "clipboard-manager:default",
     "dialog:default",
     "fs:default",
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [
+        { "path": "$HOME/**" }
+      ]
+    },
     "log:default",
     "notification:default",
     "process:default",

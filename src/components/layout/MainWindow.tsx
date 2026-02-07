@@ -6,6 +6,7 @@ import {
 import { TitleBar } from '@/components/titlebar/TitleBar'
 import { LeftSideBar } from './LeftSideBar'
 import { RightSideBar } from './RightSideBar'
+import { ResultsDashboard } from '@/components/results/ResultsDashboard'
 import { MainWindowContent } from './MainWindowContent'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
 import { PreferencesDialog } from '@/components/preferences/PreferencesDialog'
@@ -70,7 +71,9 @@ export function MainWindow() {
             maxSize={LAYOUT.rightSidebar.max}
             className={cn(!rightSidebarVisible && 'hidden')}
           >
-            <RightSideBar />
+            <RightSideBar>
+              <ResultsDashboard />
+            </RightSideBar>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import type { ExperimentInsights } from '@/lib/modal-client'
 
 /**
  * Experiment execution status phases.
@@ -45,6 +46,7 @@ export interface ExperimentState {
   totalPersonas: number
   completedPersonas: number
   personaResults: PersonaResult[]
+  insights: ExperimentInsights | null
   error: string | null
   startedAt: number | null
   completedAt: number | null
@@ -54,6 +56,7 @@ export interface ExperimentState {
   setStatus: (status: ExperimentStatus) => void
   updateProgress: (completed: number, total: number) => void
   addPersonaResult: (result: PersonaResult) => void
+  setInsights: (insights: ExperimentInsights) => void
   completeExperiment: () => void
   failExperiment: (error: string) => void
   reset: () => void
@@ -65,6 +68,7 @@ const initialState = {
   totalPersonas: 0,
   completedPersonas: 0,
   personaResults: [],
+  insights: null as ExperimentInsights | null,
   error: null,
   startedAt: null,
   completedAt: null,
@@ -85,6 +89,7 @@ export const useExperimentStore = create<ExperimentState>()(
             totalPersonas,
             completedPersonas: 0,
             personaResults: [],
+            insights: null,
             error: null,
             startedAt: Date.now(),
             completedAt: null,
@@ -111,6 +116,9 @@ export const useExperimentStore = create<ExperimentState>()(
           undefined,
           'addPersonaResult'
         ),
+
+      setInsights: insights =>
+        set({ insights }, undefined, 'setInsights'),
 
       completeExperiment: () =>
         set(

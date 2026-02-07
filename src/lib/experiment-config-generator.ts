@@ -194,6 +194,38 @@ const DEFAULT_METRICS: Record<string, AnalysisMetric[]> = {
       calculation: 'COUNT(rank <= 2) / TOTAL GROUP BY feature',
     },
   ],
+  'van-westendorp': [
+    {
+      id: 'optimal_price_point',
+      name: 'Optimal Price Point',
+      description: 'Intersection of Too Cheap and Too Expensive curves',
+      calculation: 'INTERSECT(too_cheap_cumulative, too_expensive_cumulative)',
+    },
+    {
+      id: 'indifference_price_point',
+      name: 'Indifference Price Point',
+      description: 'Intersection of Expensive and Bargain curves',
+      calculation: 'INTERSECT(expensive_cumulative, bargain_cumulative)',
+    },
+    {
+      id: 'acceptable_price_range',
+      name: 'Acceptable Price Range',
+      description: 'Range between Point of Marginal Cheapness and Point of Marginal Expensiveness',
+      calculation: 'RANGE(point_marginal_cheapness, point_marginal_expensiveness)',
+    },
+    {
+      id: 'point_of_marginal_cheapness',
+      name: 'Point of Marginal Cheapness',
+      description: 'Intersection of Too Cheap and Expensive curves',
+      calculation: 'INTERSECT(too_cheap_cumulative, expensive_cumulative)',
+    },
+    {
+      id: 'point_of_marginal_expensiveness',
+      name: 'Point of Marginal Expensiveness',
+      description: 'Intersection of Too Expensive and Bargain curves',
+      calculation: 'INTERSECT(too_expensive_cumulative, bargain_cumulative)',
+    },
+  ],
 }
 
 /** Category-specific default insights. */
@@ -246,6 +278,28 @@ const DEFAULT_INSIGHTS: Record<string, AnalysisInsight[]> = {
       id: 'upgrade_drivers',
       name: 'Upgrade Drivers',
       description: 'Features most likely to drive upgrades',
+      extraction: 'keyword_extraction',
+      limit: 5,
+    },
+  ],
+  'van-westendorp': [
+    {
+      id: 'segment_price_sensitivity',
+      name: 'Price Sensitivity by Segment',
+      description: 'How price sensitivity varies across buyer archetypes',
+      groupBy: 'archetype',
+    },
+    {
+      id: 'price_resistance_factors',
+      name: 'Price Resistance Factors',
+      description: 'Key reasons personas cite for price resistance',
+      extraction: 'keyword_extraction',
+      limit: 5,
+    },
+    {
+      id: 'value_perception_drivers',
+      name: 'Value Perception Drivers',
+      description: 'Factors that influence how personas perceive value relative to price',
       extraction: 'keyword_extraction',
       limit: 5,
     },
@@ -341,6 +395,8 @@ export function buildDefaultStimulus(
       'You are evaluating a startup for investment.',
     pricing:
       'You are evaluating a product and its pricing.',
+    'van-westendorp':
+      'You are evaluating a product and providing price sensitivity feedback using the Van Westendorp method.',
     roadmap:
       'You are a user providing feedback on product feature priorities.',
   }
@@ -380,6 +436,19 @@ export function buildDefaultStimulus(
       '2. What price point feels right for your use case',
       '3. What would make you upgrade to a higher tier',
       '4. What would cause you to churn',
+    ].join('\n'),
+    'van-westendorp': [
+      'Based on your role and budget, answer these four price sensitivity questions:',
+      '1. TOO EXPENSIVE: At what price would you NOT consider buying it?',
+      '2. BARGAIN: At what price would you buy it immediately?',
+      '3. EXPENSIVE: At what price does it start to feel expensive but still possible?',
+      '4. TOO CHEAP: At what price would you question its quality?',
+      '',
+      'Provide your answers in this exact format:',
+      'TOO_EXPENSIVE: $XX',
+      'TOO_CHEAP: $XX',
+      'EXPENSIVE: $XX',
+      'BARGAIN: $XX',
     ].join('\n'),
     roadmap: [
       'For each feature listed, provide:',
@@ -539,9 +608,9 @@ export function generateExperimentConfig(input: ExperimentConfigInput): string {
   // --- Execution defaults ---
   const execution = {
     provider: 'modal',
-    model: 'qwen2.5:32b',
+    model: 'claude-haiku-4-5-20251001',
     temperature: 0.7,
-    maxTokens: 500,
+    maxTokens: 1024,
     timeout: 60,
     parallelization: true,
   }

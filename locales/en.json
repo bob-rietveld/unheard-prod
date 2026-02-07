@@ -250,6 +250,8 @@
   "attio.fetchingRecords": "Fetching records...",
   "attio.resultsCount": "{{count}} results",
 
+  "templates.sidebar.title": "Experiments",
+
   "cohorts.title": "Cohorts",
   "cohorts.members": "members",
   "cohorts.noDescription": "No description",
@@ -284,5 +286,39 @@
   "experiment.askFollowUp": "Ask Follow-up",
   "experiment.retryExperiment": "Retry",
   "experiment.executionTime": "Completed in {{seconds}}s",
-  "experiment.sentimentBreakdown": "Sentiment Breakdown"
+  "experiment.sentimentBreakdown": "Sentiment Breakdown",
+
+  "results.dashboard.title": "Results",
+  "results.dashboard.empty": "Run an experiment to see results here.",
+  "results.dashboard.respondents": "respondents",
+
+  "results.sentiment.title": "Sentiment Overview",
+  "results.sentiment.average": "Average Sentiment",
+  "results.sentiment.byArchetype": "By Archetype",
+
+  "results.vanWestendorp.title": "Van Westendorp Price Sensitivity",
+  "results.vanWestendorp.optimalPrice": "Optimal Price Point",
+  "results.vanWestendorp.indifferencePrice": "Indifference Price",
+  "results.vanWestendorp.acceptableRange": "Acceptable Range",
+  "results.vanWestendorp.tooCheap": "Too Cheap",
+  "results.vanWestendorp.bargain": "Bargain",
+  "results.vanWestendorp.expensive": "Expensive",
+  "results.vanWestendorp.tooExpensive": "Too Expensive",
+  "results.vanWestendorp.byArchetype": "By Archetype",
+
+  "results.insights.themes": "Key Themes",
+  "results.insights.recommendations": "Recommendations",
+  "results.insights.concerns": "Concerns",
+  "results.insights.archetypePatterns": "Archetype Patterns",
+
+  "results.responses.title": "Individual Responses",
+  "results.responses.all": "All",
+  "results.responses.sort.sentiment": "Sentiment",
+  "results.responses.sort.name": "Name",
+  "results.responses.sort.archetype": "Archetype",
+
+  "results.export.title": "Export",
+  "results.export.clipboard": "Copy to Clipboard",
+  "results.export.copied": "Copied to clipboard",
+  "results.export.copyFailed": "Failed to copy to clipboard"
 }

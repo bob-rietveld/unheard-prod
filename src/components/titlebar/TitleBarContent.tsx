@@ -5,6 +5,8 @@ import { executeCommand, useCommandContext } from '@/lib/commands'
 import {
   PanelLeft,
   PanelLeftClose,
+  PanelRight,
+  PanelRightClose,
   Settings,
 } from 'lucide-react'
 
@@ -47,6 +49,8 @@ export function TitleBarLeftActions() {
 export function TitleBarRightActions() {
   const { t } = useTranslation()
   const commandContext = useCommandContext()
+  const rightSidebarVisible = useUIStore(state => state.rightSidebarVisible)
+  const toggleRightSidebar = useUIStore(state => state.toggleRightSidebar)
 
   const handleOpenPreferences = async () => {
     const result = await executeCommand('open-preferences', commandContext)
@@ -67,7 +71,23 @@ export function TitleBarRightActions() {
         <Settings className="h-3 w-3" />
       </Button>
 
-      {/* TODO: Re-enable when right sidebar has content (Phase 4) */}
+      <Button
+        onClick={toggleRightSidebar}
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 text-foreground/70 hover:text-foreground"
+        title={t(
+          rightSidebarVisible
+            ? 'titlebar.hideRightSidebar'
+            : 'titlebar.showRightSidebar'
+        )}
+      >
+        {rightSidebarVisible ? (
+          <PanelRightClose className="h-3 w-3" />
+        ) : (
+          <PanelRight className="h-3 w-3" />
+        )}
+      </Button>
     </div>
   )
 }

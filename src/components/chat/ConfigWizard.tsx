@@ -232,6 +232,7 @@ export function ConfigWizard({
       </CardHeader>
       <CardContent className="space-y-6">
         <ConfigQuestion
+          key={currentQuestion.id}
           question={currentQuestion}
           value={configAnswers[currentQuestion.id]}
           onChange={value => updateConfigAnswer(currentQuestion.id, value)}

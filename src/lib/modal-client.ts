@@ -44,6 +44,42 @@ export interface ModalExperimentRequest {
       sizeBytes: number
     }[]
   }
+  analysis?: {
+    metrics: Record<string, unknown>[]
+    insights: Record<string, unknown>[]
+  }
+}
+
+/** Van Westendorp Price Sensitivity analysis results. */
+export interface VanWestendorpResults {
+  optimal_price_point: number | null
+  indifference_price_point: number | null
+  point_of_marginal_cheapness: number | null
+  point_of_marginal_expensiveness: number | null
+  acceptable_price_range: { low: number | null; high: number | null }
+  cumulative_data: {
+    price: number
+    too_cheap: number
+    too_expensive: number
+    expensive: number
+    bargain: number
+  }[]
+  by_archetype: Record<
+    string,
+    { opp: number | null; ipp: number | null; pmc: number | null; pme: number | null }
+  >
+}
+
+/** Structured insights extracted from experiment results. */
+export interface ExperimentInsights {
+  themes: { theme: string; count: number; examples: string[] }[]
+  recommendations: string[]
+  concerns: { concern: string; frequency: number }[]
+  archetype_patterns: Record<
+    string,
+    { avg_sentiment: number; key_themes: string[] }
+  >
+  van_westendorp?: VanWestendorpResults
 }
 
 /** Streaming event types from Modal. */
@@ -82,6 +118,11 @@ export type ModalStreamEvent =
       }[]
       metrics: Record<string, unknown>
     }
+  | {
+      type: 'insights_extracted'
+      experiment_id: string
+      insights: ExperimentInsights
+    }
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -111,7 +152,7 @@ export async function runExperiment(
   request: ModalExperimentRequest,
   onEvent: (event: ModalStreamEvent) => void
 ): Promise<void> {
-  const url = `${getModalEndpointUrl()}/run-experiment`
+  const url = getModalEndpointUrl()
 
   logger.info('Starting Modal experiment', {
     experimentId: request.experiment_id,

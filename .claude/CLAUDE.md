@@ -10,13 +10,13 @@
 
 ## Current Project Status
 
-**Phases 1-3 of 5 are complete.** Phase 4 (Results & Viz) is next.
+**Phases 1-3 complete. Phase 4 (Results & Viz) in progress.**
 
 ```
 Phase 1 (Weeks 1-2): Context Upload        ✅ Done (7/7 tasks)
 Phase 2 (Weeks 3-4): Chat + Agent           ✅ Done (7/7 tasks)
 Phase 3 (Weeks 5-6): Cloud Execution        ✅ Done (Modal + flow wiring)
-Phase 4 (Week 7):    Results & Viz          ⬜ Not started
+Phase 4 (Week 7):    Results & Viz          🔧 In progress (dashboard, VW chart, insights done)
 Phase 5 (Week 8):    Iteration & Polish     ⬜ Not started
 ```
 
@@ -28,12 +28,15 @@ Phase 5 (Week 8):    Iteration & Polish     ⬜ Not started
 - **Auto-Chat**: Chat auto-creates/selects when project is selected (no dead-end screens)
 - **Intent Classification**: Keyword-based detection of decision questions, template suggestions shown inline
 - **Context Upload**: Drag-and-drop CSV/PDF/Excel, Rust parsing, Convex sync
-- **Templates**: 3 seed templates (investor, pricing, roadmap), intent classification
-- **Config Wizard**: Sequential question flow with validation
+- **Templates**: 4 seed templates (investor, pricing, roadmap, Van Westendorp), shown directly in left sidebar
+- **Config Wizard**: Sequential question flow with validation, key-based remount between questions
 - **Decision Logs**: Markdown generation with YAML frontmatter, git auto-commit
 - **Experiment Config**: YAML generation from template + wizard answers
 - **Experiment Execution**: Modal API integration with NDJSON streaming, real-time progress UI
 - **Experiment Results**: Sentiment breakdown, persona results, execution stats
+- **Results Dashboard** (Phase 4): Right sidebar with sentiment overview, Van Westendorp chart, AI insights, response table, export
+- **Insight Extraction** (Phase 4): AI-powered themes/recommendations/concerns via Claude on Modal
+- **Van Westendorp Analysis** (Phase 4): Price sensitivity meter with cumulative curves, intersection points (OPP/IPP/PMC/PME), per-archetype breakdowns
 - **Error Handling**: Error boundaries, retry logic, offline queue
 - **i18n**: English, French, Arabic with RTL support
 - **Preferences**: Theme (light/dark/system), language, keyboard shortcuts
@@ -41,13 +44,18 @@ Phase 5 (Week 8):    Iteration & Polish     ⬜ Not started
 ### Key Integration Flow (End-to-End)
 
 ```
-Project Selected → Auto-create Chat → User types decision question
-  → Claude responds (system prompt with templates)
-  → Intent Classifier → Template Suggestion card
-  → User clicks "Start Template" → ConfigWizard
+Project Selected → Auto-create Chat → Templates shown in left sidebar
+  → User selects template → ConfigWizard opens in chat area
   → Decision Log (.md) + Experiment Config (.yaml) → Git commit → Convex
   → "Run Experiment" → Modal API → Streaming progress
-  → ExperimentSummary with sentiment breakdown
+  → ExperimentSummary → "View Results" → Right sidebar ResultsDashboard
+  → Sentiment overview + Van Westendorp chart + AI Insights + Export
+```
+
+Alternative flow via chat:
+```
+User types decision question → Claude responds (context-aware system prompt)
+  → Intent Classifier → Template Suggestion card → "Start Template" → ConfigWizard
 ```
 
 ## Implementation Plans
@@ -113,9 +121,21 @@ Most are in Phase 2 code and should be addressed before Phase 3:
 
 ### Architecture Notes
 
-- **Right sidebar toggle is hidden** until Phase 4 adds content.
+- **Right sidebar** now shows ResultsDashboard (Phase 4). Toggle re-enabled in TitleBar.
 - **3 different Convex data patterns** in services/ (raw hooks, TanStack+useConvex, TanStack+useConvexMutation) - should standardize.
-- **Seed templates required**: Run `npx convex run seed:templates` to populate Convex DB. Without templates, system prompt and intent classifier have nothing to work with.
+- **Seed templates required**: Run `npx convex run seed_templates:default` to populate Convex DB. Without templates, system prompt, intent classifier, and sidebar template list have nothing to work with.
+- **Modal deploy**: `MODAL_TOKEN_ID=... MODAL_TOKEN_SECRET=... python3 -m modal deploy modal_functions/app.py` (tokens from `.env.local`)
+- **Tauri FS permissions**: Frontend `writeTextFile` requires scoped permission in `src-tauri/capabilities/default.json`. Rust `std::fs::write` bypasses this.
+
+### Gotchas (Lessons Learned)
+
+- **YAML `version: 1.0`** parses as number `1`, not string `"1.0"`. Always quote: `version: '1.0'`. Parser now tolerates both.
+- **React `useState(prop)` doesn't reset** when props change on the same component instance. Use `key={uniqueId}` to force remount (see ConfigWizard → ConfigQuestion).
+- **Modal endpoint URL** in `VITE_MODAL_ENDPOINT_URL` is the FULL endpoint (includes function name in hostname). Do NOT append `/run-experiment` path.
+- **Modal `maxTokens: 500`** is too low for Van Westendorp - personas write reasoning before structured output. Use `1024+`.
+- **Modal detection conditions** must match actual stimulus content (check for "van westendorp", "too expensive", "bargain" - not just "pricing").
+- **Python `dict | None` syntax** requires Python 3.10+. Modal uses 3.11 but local may be 3.9. Add `from __future__ import annotations` for compatibility.
+- **Tauri v2 FS scopes**: Even `fs:write-all` needs path scope. Use `{ "identifier": "fs:allow-write-text-file", "allow": [{ "path": "$HOME/**" }] }` for user project paths.
 
 ## Integration-First Development (CRITICAL)
 

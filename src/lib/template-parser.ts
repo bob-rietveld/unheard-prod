@@ -24,15 +24,17 @@ export function parseTemplateYaml(yamlContent: string): ParsedTemplate | null {
 
     // Validate required top-level fields
     // Note: description and category are optional
+    // Version can be a number (YAML parses `1.0` as `1`) - coerce to string
     if (
       typeof parsed.id !== 'string' ||
       typeof parsed.name !== 'string' ||
-      typeof parsed.version !== 'string' ||
+      (typeof parsed.version !== 'string' && typeof parsed.version !== 'number') ||
       !Array.isArray(parsed.configurationFlow)
     ) {
       logger.error('Invalid template YAML: missing required fields', { parsed })
       return null
     }
+    const version = String(parsed.version)
 
     // Return early if no questions
     if (parsed.configurationFlow.length === 0) {
@@ -121,7 +123,7 @@ export function parseTemplateYaml(yamlContent: string): ParsedTemplate | null {
 
     return {
       id: parsed.id,
-      version: parsed.version,
+      version,
       name: parsed.name,
       description:
         typeof parsed.description === 'string' ? parsed.description : '',

@@ -26,7 +26,7 @@ export default internalMutation({
           'Test investor interest in your pitch with 10 realistic VC/angel personas',
         yamlContent: `# Template Metadata
 id: investor-pitch-evaluation
-version: 1.0
+version: '1.0'
 name: 'Investor Pitch Evaluation'
 description: 'Test investor interest in your pitch with 10 realistic VC/angel personas'
 category: investors
@@ -120,7 +120,7 @@ personaGeneration:
           'Test different pricing models with target customer personas to find optimal pricing',
         yamlContent: `# Template Metadata
 id: pricing-strategy-evaluation
-version: 1.0
+version: '1.0'
 name: 'Pricing Strategy Evaluation'
 description: 'Test different pricing models with target customer personas'
 category: pricing
@@ -211,7 +211,7 @@ personaGeneration:
           'Get feedback from customer personas on which features to prioritize',
         yamlContent: `# Template Metadata
 id: product-roadmap-prioritization
-version: 1.0
+version: '1.0'
 name: 'Product Roadmap Prioritization'
 description: 'Get feedback from customer personas on feature priorities'
 category: roadmap
@@ -284,12 +284,129 @@ personaGeneration:
       console.log(`Template already exists: ${roadmapSlug}`)
     }
 
+    // Template 4: Van Westendorp Price Sensitivity
+    const vanWestendorpSlug = 'van-westendorp-pricing'
+    const existingVanWestendorp = await ctx.db
+      .query('experimentTemplates')
+      .filter(q => q.eq(q.field('slug'), vanWestendorpSlug))
+      .first()
+
+    if (!existingVanWestendorp) {
+      const vanWestendorpId = await ctx.db.insert('experimentTemplates', {
+        name: 'Van Westendorp Price Sensitivity',
+        slug: vanWestendorpSlug,
+        category: 'van-westendorp',
+        description:
+          'Test price sensitivity using the Van Westendorp Price Sensitivity Meter with realistic buyer personas',
+        yamlContent: `# Template Metadata
+id: van-westendorp-price-sensitivity
+version: '1.0'
+name: 'Van Westendorp Price Sensitivity'
+description: 'Test price sensitivity using the Van Westendorp Price Sensitivity Meter with realistic buyer personas'
+category: van-westendorp
+author: unheard-official
+tags: [pricing, van-westendorp, price-sensitivity, willingness-to-pay]
+
+# Configuration Flow
+configurationFlow:
+  - id: product_name
+    question: 'What product are you testing pricing for?'
+    type: text
+    required: true
+    placeholder: 'e.g., TechLeap Connect'
+
+  - id: product_description
+    question: 'Describe the product briefly'
+    type: textarea
+    required: true
+    placeholder: 'What does it do? Who is it for?'
+    maxLength: 500
+
+  - id: current_price
+    question: 'What is the current price?'
+    type: number
+    required: true
+    unit: USD
+    min: 0
+
+  - id: proposed_change
+    question: 'What price change are you considering?'
+    type: text
+    required: true
+    placeholder: 'e.g., +$10/month, -15%, new tier at $49'
+
+  - id: target_segments
+    question: 'Which groups do you want to test?'
+    type: multiselect
+    required: true
+    options:
+      - value: founders
+        label: 'Founders'
+      - value: leaders
+        label: 'Leaders'
+      - value: executives
+        label: 'Executives'
+      - value: developers
+        label: 'Developers'
+      - value: product_managers
+        label: 'Product Managers'
+
+# Stimulus Template
+stimulusTemplate: |
+  You are evaluating {{product_name}}, which is described as: {{product_description}}.
+
+  The current price is {{current_price}} USD. The company is considering the following change: {{proposed_change}}.
+
+  Based on your role, experience, budget constraints, and how you perceive the value of this product, answer the following four Van Westendorp price sensitivity questions. Think carefully about each one from your specific perspective.
+
+  1. TOO EXPENSIVE: At what price would you consider {{product_name}} so expensive that you would NOT consider buying it, regardless of its quality?
+  2. BARGAIN: At what price would you consider {{product_name}} such a good deal that you would buy it immediately?
+  3. EXPENSIVE (High Side): At what price does {{product_name}} start to feel expensive, but you might still consider it?
+  4. TOO CHEAP: At what price would you consider {{product_name}} priced so low that you would question its quality and not trust it?
+
+  IMPORTANT: After your reasoning, you MUST provide your four price points in EXACTLY this format on separate lines:
+
+  TOO_EXPENSIVE: $XX
+  TOO_CHEAP: $XX
+  EXPENSIVE: $XX
+  BARGAIN: $XX
+
+  Replace $XX with dollar amounts (e.g., $75, $120). Provide only one number per line.
+
+# Persona Generation Config
+personaGeneration:
+  type: standard
+  count: 10
+  archetypes:
+    - id: startup_founder
+      name: 'Startup Founder'
+      count: 4
+      description: 'Early-stage company builders making purchasing decisions'
+    - id: scaleup_leader
+      name: 'Scaleup Leader'
+      count: 4
+      description: 'Leaders at growing companies evaluating tools and platforms'
+    - id: enterprise_buyer
+      name: 'Enterprise Decision Maker'
+      count: 2
+      description: 'Procurement-aware buyers at larger organizations'`,
+        version: '1.0',
+        isPublished: true,
+        createdAt: now,
+        updatedAt: now,
+      })
+      console.log(`Seeded template: ${vanWestendorpSlug} (ID: ${vanWestendorpId})`)
+    } else {
+      console.log(`Template already exists: ${vanWestendorpSlug}`)
+    }
+
     return {
       message: 'Template seeding complete',
       seeded: [
         existingInvestor ? null : investorSlug,
         existingPricing ? null : pricingSlug,
         existingRoadmap ? null : roadmapSlug,
+        existingVanWestendorp ? null : vanWestendorpSlug,
       ].filter(Boolean),
     }
   },

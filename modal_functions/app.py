@@ -86,11 +86,14 @@ def run_experiment(body: dict):
         persona_generated - Individual persona created
         response_complete - Individual persona response finished
         experiment_complete - All results with aggregate metrics
+        insights_extracted - AI-extracted themes, recommendations, concerns
     """
     from anthropic import Anthropic
     from starlette.responses import StreamingResponse
 
+    from modal_functions.insight_extractor import extract_insights
     from modal_functions.persona_generator import generate_personas
+    from modal_functions.van_westendorp import calculate_van_westendorp
 
     experiment_id = body.get("experiment_id", "unknown")
     personas_config = body.get("personas", {})
@@ -217,6 +220,42 @@ def run_experiment(body: dict):
                 "total_tokens": total_tokens,
                 "elapsed_seconds": elapsed,
             },
+        })
+
+        # Phase 4: Insight extraction
+        yield _ndjson_line({
+            "type": "status",
+            "message": "Analyzing results...",
+            "experiment_id": experiment_id,
+        })
+
+        # Generic insights (all experiments)
+        insights = extract_insights(client, results, body)
+
+        # Category-specific analysis: Van Westendorp for pricing experiments
+        # Detect by: analysis config, stimulus keywords, or structured price output markers
+        analysis_config = body.get("analysis", {})
+        analysis_str = json.dumps(analysis_config, default=str).lower()
+        stimulus_lower = stimulus_config.get("template", "").lower()
+        has_vw_signals = (
+            "van_westendorp" in analysis_str
+            or "van westendorp" in stimulus_lower
+            or "too_expensive" in stimulus_lower
+            or ("too expensive" in stimulus_lower and "bargain" in stimulus_lower)
+        )
+        if has_vw_signals:
+            yield _ndjson_line({
+                "type": "status",
+                "message": "Running Van Westendorp analysis...",
+                "experiment_id": experiment_id,
+            })
+            vw_results = calculate_van_westendorp(results)
+            insights["van_westendorp"] = vw_results
+
+        yield _ndjson_line({
+            "type": "insights_extracted",
+            "experiment_id": experiment_id,
+            "insights": insights,
         })
 
     return StreamingResponse(
