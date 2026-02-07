@@ -33,7 +33,6 @@ import { useAttioImports, useCreateAttioImport } from '@/services/attio'
 import { commands } from '@/lib/bindings'
 import { AttioRecordTable } from './AttioRecordTable'
 import { AttioImportButton } from './AttioImportButton'
-import { CohortCreateDialog } from '../cohorts/CohortCreateDialog'
 
 const PAGE_SIZE = 50
 
@@ -377,7 +376,6 @@ export function AttioBrowser({ open, onOpenChange }: AttioBrowserProps) {
           )}
         </SheetContent>
       </Sheet>
-      <CohortCreateDialog />
     </>
   )
 }

@@ -11,6 +11,8 @@ import { MainWindowContent } from './MainWindowContent'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
 import { PreferencesDialog } from '@/components/preferences/PreferencesDialog'
 import { AttioBrowser } from '@/components/attio/AttioBrowser'
+import { CohortDetail } from '@/components/cohorts/CohortDetail'
+import { CohortCreateDialog } from '@/components/cohorts/CohortCreateDialog'
 import { Toaster } from 'sonner'
 import { useTheme } from '@/hooks/use-theme'
 import { useUIStore } from '@/store/ui-store'
@@ -91,6 +93,8 @@ export function MainWindow() {
         open={attioBrowserOpen}
         onOpenChange={(open) => useUIStore.getState().setAttioBrowserOpen(open)}
       />
+      <CohortDetail />
+      <CohortCreateDialog />
       <Toaster
         position="bottom-right"
         theme={

@@ -1,19 +1,29 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { Loader2, CheckCircle, XCircle, Users, Plus, Cloud } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import { SettingsField, SettingsSection } from '../shared/SettingsComponents'
 import { useAttioStore } from '@/store/attio-store'
+import { useUIStore } from '@/store/ui-store'
+import { useCohortStore } from '@/store/cohort-store'
+import { useProjectStore } from '@/store/project-store'
 import { usePreferences, useSavePreferences } from '@/services/preferences'
+import { useProjectCohorts } from '@/services/cohorts'
 import { testConnection } from '@/lib/attio-client'
 import { logger } from '@/lib/logger'
+import type { Id } from '../../../../convex/_generated/dataModel'
 
 export function IntegrationsPane() {
   const { t } = useTranslation()
   const isConnected = useAttioStore(state => state.isConnected)
+  const currentProject = useProjectStore(state => state.currentProject)
   const { data: preferences } = usePreferences()
   const savePreferences = useSavePreferences()
+  const { data: cohorts } = useProjectCohorts(
+    (currentProject?._id as Id<'projects'>) ?? null
+  )
   const [apiKey, setApiKey] = useState('')
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<'success' | 'error' | null>(null)
@@ -180,6 +190,58 @@ export function IntegrationsPane() {
           </SettingsField>
         )}
       </SettingsSection>
+
+      {/* Cohorts section - only when connected and project selected */}
+      {isConnected && currentProject && (
+        <SettingsSection title={t('cohorts.title')}>
+          <SettingsField
+            label={t('cohorts.importFromAttio')}
+            description={t('cohorts.emptyHint')}
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => useUIStore.getState().setAttioBrowserOpen(true)}
+            >
+              <Cloud className="size-4" />
+              {t('cohorts.importFromAttio')}
+            </Button>
+          </SettingsField>
+
+          {cohorts && cohorts.length > 0 && (
+            <SettingsField label={t('cohorts.title')}>
+              <div className="space-y-1">
+                {cohorts.map(cohort => (
+                  <button
+                    key={cohort._id}
+                    onClick={() => useCohortStore.getState().openDetail(cohort._id)}
+                    className="flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Users className="size-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{cohort.name}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-[10px] shrink-0">
+                      {cohort.memberCount}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            </SettingsField>
+          )}
+
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => useCohortStore.getState().openCreateDialog()}
+            >
+              <Plus className="size-4" />
+              {t('cohorts.create')}
+            </Button>
+          </div>
+        </SettingsSection>
+      )}
     </div>
   )
 }
